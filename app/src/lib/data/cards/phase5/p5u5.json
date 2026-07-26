@@ -1,0 +1,126 @@
+{
+  "unitId": "p5u5",
+  "title": "POST, PUT & DELETE",
+  "phase": 5,
+  "unit": 5,
+  "teaches": [
+    "restassured.post",
+    "restassured.put",
+    "restassured.delete",
+    "restassured.request_body"
+  ],
+  "requires": [
+    "restassured.given_when_then",
+    "restassured.body_matchers"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p5u5_c1",
+      "type": "hook",
+      "content": {
+        "question": "GET reads data. But how do you CREATE, UPDATE, and DELETE via tests?",
+        "code": "given().body(\"{\\\"name\\\":\\\"Subham\\\"}\").when().post(\"/users\").then().statusCode(201);"
+      }
+    },
+    {
+      "id": "p5u5_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "This POST request returns 415 instead of 201. Fix it.",
+        "starterCode": "given()\n    .body(\"{\\\"name\\\": \\\"Subham\\\", \\\"job\\\": \\\"SDET\\\"}\")\n.when()\n    .post(\"/users\")\n.then()\n    .statusCode(201);",
+        "hint": "The server doesn't know the body format — what header is missing?",
+        "expectedOutput": "Add .contentType(ContentType.JSON) before .body(). Without Content-Type, the server can't parse JSON.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p5u5_c3",
+      "type": "analogy",
+      "content": {
+        "text": "POST is mailing a package (you send something, get a tracking number back). PUT is returning a defective item with a replacement (same address, new contents). DELETE is a cancellation — you reference the order ID and it's gone. In all cases, you need to tell the post office WHAT FORMAT your package is in (Content-Type).",
+        "visual": null
+      }
+    },
+    {
+      "id": "p5u5_c4",
+      "type": "code",
+      "content": {
+        "code": "Map<String, String> user = Map.of(\"name\", \"Subham\", \"job\", \"SDET\");\n\ngiven()\n    .contentType(ContentType.JSON)\n    .body(user)\n.when()\n    .post(\"/users\")\n.then()\n    .statusCode(201)\n    .body(\"name\", equalTo(\"Subham\"));",
+        "highlight": [
+          "1",
+          "4",
+          "5",
+          "9"
+        ],
+        "annotation": "REST Assured auto-serializes Maps and POJOs to JSON when contentType(ContentType.JSON) is set — no manual JSON string building needed. The Map (line 1) is your package contents, contentType (line 4) is the format label on the package, .body(user) (line 5) is handing the package to the post office. The response .body() (line 9) confirms what was created. DELETE returns 204 No Content on success, or 404 Not Found if the resource doesn't exist."
+      }
+    },
+    {
+      "id": "p5u5_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "given().contentType(ContentType.JSON)\n    .body(Map.of(\"name\", \"Subham\"))\n.when().put(\"/users/1\")\n.then().statusCode(200);",
+        "modification": "Change PUT to PATCH — what's the difference?",
+        "question": "PUT vs PATCH — which replaces the ENTIRE resource?",
+        "options": [
+          "PUT replaces entirely",
+          "PATCH replaces entirely",
+          "Both are the same"
+        ],
+        "correct": 0,
+        "explanation": "PUT replaces the FULL resource — like sending a full replacement item to the same address. If you omit a field, it's deleted. PATCH modifies only the fields you send — partial update. Sending {\"name\":\"Subham\"} via PUT could erase the \"job\" field. PATCH would keep existing fields intact."
+      }
+    },
+    {
+      "id": "p5u5_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Request body as String vs Map vs POJO:",
+        "codeA": "// String — fragile, no type safety\ngiven().contentType(ContentType.JSON)\n    .body(\"{\\\"name\\\": \\\"Subham\\\"}\")\n.when().post(\"/users\");",
+        "codeB": "// POJO — type-safe, reusable\nUser user = new User(\"Subham\", \"SDET\");\ngiven().contentType(ContentType.JSON)\n    .body(user)\n.when().post(\"/users\");",
+        "question": "Why are POJOs preferred over JSON strings in test frameworks?",
+        "options": [
+          "Better performance",
+          "Compile-time safety + IDE autocomplete",
+          "Strings are deprecated",
+          "No difference"
+        ],
+        "correct": 1,
+        "explanation": "Both set contentType(ContentType.JSON) and pass the body to the post office (POST). But POJOs catch typos at compile time and provide IDE autocomplete — the package contents are validated before you even mail them. JSON strings are like handwritten labels — a missing quote or comma only fails when the post office (server) tries to read it at runtime."
+      }
+    },
+    {
+      "id": "p5u5_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Describe the CRUD lifecycle test pattern for a REST resource.",
+        "sentence": "First _____ creates the resource and captures the ID, then _____ verifies it exists, then _____ modifies it, then _____ removes it, and a final GET confirms _____ status.",
+        "blanks": [
+          "POST",
+          "GET",
+          "PUT",
+          "DELETE",
+          "404"
+        ],
+        "distractors": [
+          "PATCH",
+          "OPTIONS",
+          "HEAD",
+          "TRACE",
+          "500"
+        ]
+      }
+    },
+    {
+      "id": "p5u5_c8",
+      "type": "connect",
+      "content": {
+        "text": "Amazon SDET interviews often ask you to write CRUD tests live:",
+        "code": "String id = given().contentType(JSON).body(payload)\n    .post(\"/orders\").jsonPath().getString(\"id\");\ngiven().delete(\"/orders/{id}\", id).then().statusCode(204);\ngiven().get(\"/orders/{id}\", id).then().statusCode(404);",
+        "note": "This \"create-verify-cleanup\" pattern prevents test data pollution. Every test creates its own data and deletes it — tests stay independent and repeatable."
+      }
+    }
+  ]
+}

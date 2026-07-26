@@ -1,0 +1,102 @@
+{
+  "totalUnits": 47,
+  "phases": [
+    {
+      "id": 1,
+      "title": "Java Core",
+      "subtitle": "OOP from zero to framework-ready",
+      "units": [
+        { "id": "p1u1", "title": "Variables, Types & Strings", "cards": 10, "minutes": 20, "teaches": ["basics.types", "basics.strings"] },
+        { "id": "p1u2", "title": "Control Flow & Methods", "cards": 10, "minutes": 20, "teaches": ["basics.controlflow", "basics.methods"] },
+        { "id": "p1u3", "title": "Classes & Objects", "cards": 10, "minutes": 25, "teaches": ["oop.classes", "oop.constructors", "oop.this"] },
+        { "id": "p1u4", "title": "Encapsulation", "cards": 10, "minutes": 20, "teaches": ["oop.encapsulation", "oop.accessmodifiers"] },
+        { "id": "p1u5", "title": "Inheritance", "cards": 10, "minutes": 25, "teaches": ["oop.inheritance", "oop.super", "oop.constructorchain"] },
+        { "id": "p1u6", "title": "Polymorphism", "cards": 10, "minutes": 25, "teaches": ["oop.polymorphism", "oop.overloading", "oop.overriding"] },
+        { "id": "p1u7", "title": "Abstract & Interfaces", "cards": 10, "minutes": 25, "teaches": ["oop.abstract", "oop.interfaces", "oop.defaultmethods"] },
+        { "id": "p1u8", "title": "OOP Integration Challenge", "cards": 12, "minutes": 30, "teaches": ["oop.integration"] }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Collections & Generics",
+      "subtitle": "Data structures that power everything",
+      "units": [
+        { "id": "p2u1", "title": "ArrayList & LinkedList", "cards": 10, "minutes": 20, "teaches": ["collections.list", "collections.arraylist", "collections.linkedlist"] },
+        { "id": "p2u2", "title": "HashMap & HashSet", "cards": 10, "minutes": 25, "teaches": ["collections.hashmap", "collections.hashset", "collections.equals_hashcode"] },
+        { "id": "p2u3", "title": "Iteration & Sorting", "cards": 10, "minutes": 25, "teaches": ["collections.iterator", "collections.comparable", "collections.comparator"] },
+        { "id": "p2u4", "title": "Generics", "cards": 10, "minutes": 25, "teaches": ["collections.generics", "collections.bounded", "collections.wildcards"] },
+        { "id": "p2u5", "title": "Collections Integration", "cards": 12, "minutes": 30, "teaches": ["collections.integration"] }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Exceptions & Java 8+",
+      "subtitle": "Error handling and modern Java",
+      "units": [
+        { "id": "p3u1", "title": "Exception Handling", "cards": 10, "minutes": 25, "teaches": ["exceptions.trycatch", "exceptions.checked", "exceptions.custom"] },
+        { "id": "p3u2", "title": "Lambdas & Functional Interfaces", "cards": 10, "minutes": 25, "teaches": ["java8.lambdas", "java8.functional", "java8.predicate"] },
+        { "id": "p3u3", "title": "Streams — filter, map, collect", "cards": 10, "minutes": 25, "teaches": ["java8.streams.basics", "java8.streams.filter", "java8.streams.collect"] },
+        { "id": "p3u4", "title": "Streams — Advanced", "cards": 10, "minutes": 25, "teaches": ["java8.streams.flatmap", "java8.streams.grouping", "java8.optional"] },
+        { "id": "p3u5", "title": "Java Core Integration", "cards": 12, "minutes": 30, "teaches": ["java8.integration"] }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "DSA Essentials",
+      "subtitle": "Interview-level problem solving",
+      "units": [
+        { "id": "p4u1", "title": "Array Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.arrays", "dsa.twopointers", "dsa.slidingwindow"] },
+        { "id": "p4u2", "title": "String Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.strings", "dsa.palindrome", "dsa.anagram"] },
+        { "id": "p4u3", "title": "HashMap Pattern Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.hashmap_patterns", "dsa.frequency", "dsa.grouping"] },
+        { "id": "p4u4", "title": "Sorting & Searching", "cards": 10, "minutes": 25, "teaches": ["dsa.sorting", "dsa.binarysearch", "dsa.customsort"] },
+        { "id": "p4u5", "title": "Stack & Queue Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.stack", "dsa.queue", "dsa.bfs_basics"] },
+        { "id": "p4u6", "title": "DSA Integration", "cards": 12, "minutes": 30, "teaches": ["dsa.integration"] }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "REST Assured",
+      "subtitle": "API testing mastery",
+      "units": [
+        { "id": "p5u1", "title": "HTTP & REST Concepts", "cards": 10, "minutes": 20, "teaches": ["http.methods", "http.statuscodes", "http.headers", "rest.principles"] },
+        { "id": "p5u2", "title": "First REST Assured Test", "cards": 10, "minutes": 25, "teaches": ["restassured.givenwhen", "restassured.statuscode"] },
+        { "id": "p5u3", "title": "Request Building", "cards": 10, "minutes": 25, "teaches": ["restassured.headers", "restassured.params", "restassured.body"] },
+        { "id": "p5u4", "title": "Response Validation", "cards": 10, "minutes": 25, "teaches": ["restassured.hamcrest", "restassured.jsonpath", "restassured.gpath"] },
+        { "id": "p5u5", "title": "POJOs as Request/Response", "cards": 10, "minutes": 25, "teaches": ["restassured.pojo", "restassured.serialization"] },
+        { "id": "p5u6", "title": "Auth & Specs", "cards": 10, "minutes": 25, "teaches": ["restassured.auth", "restassured.requestspec", "restassured.responsespec"] },
+        { "id": "p5u7", "title": "Data-Driven API Tests", "cards": 10, "minutes": 25, "teaches": ["restassured.dataprovider", "restassured.parameterized"] },
+        { "id": "p5u8", "title": "Chaining & Extraction", "cards": 10, "minutes": 25, "teaches": ["restassured.extract", "restassured.chaining"] },
+        { "id": "p5u9", "title": "Error Handling & Logging", "cards": 10, "minutes": 25, "teaches": ["restassured.logging", "restassured.filters", "restassured.retry"] },
+        { "id": "p5u10", "title": "API Framework Mini-Project", "cards": 12, "minutes": 35, "teaches": ["restassured.framework"] }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "API Testing Strategy",
+      "subtitle": "Think like a test architect",
+      "units": [
+        { "id": "p6u1", "title": "Positive & Negative Testing", "cards": 10, "minutes": 25, "teaches": ["apistrategy.positive", "apistrategy.negative", "apistrategy.boundary"] },
+        { "id": "p6u2", "title": "Schema Validation", "cards": 10, "minutes": 25, "teaches": ["apistrategy.schema", "apistrategy.contract"] },
+        { "id": "p6u3", "title": "E2E API Flows", "cards": 10, "minutes": 30, "teaches": ["apistrategy.e2e", "apistrategy.lifecycle"] },
+        { "id": "p6u4", "title": "Edge Cases & Idempotency", "cards": 10, "minutes": 25, "teaches": ["apistrategy.idempotency", "apistrategy.race", "apistrategy.timeout"] },
+        { "id": "p6u5", "title": "Test Strategy Design", "cards": 10, "minutes": 25, "teaches": ["apistrategy.design", "apistrategy.coverage"] }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Selenium WebDriver",
+      "subtitle": "Framework architecture from scratch",
+      "units": [
+        { "id": "p7u1", "title": "Architecture & Setup", "cards": 10, "minutes": 20, "teaches": ["selenium.architecture", "selenium.webdriver_protocol"] },
+        { "id": "p7u2", "title": "Locators — CSS & XPath", "cards": 10, "minutes": 25, "teaches": ["selenium.css", "selenium.xpath", "selenium.locators"] },
+        { "id": "p7u3", "title": "Waits", "cards": 10, "minutes": 25, "teaches": ["selenium.implicit_wait", "selenium.explicit_wait", "selenium.fluent_wait"] },
+        { "id": "p7u4", "title": "Page Object Model", "cards": 12, "minutes": 30, "teaches": ["selenium.pom", "selenium.basepage", "selenium.pagefactory"] },
+        { "id": "p7u5", "title": "Complex Elements", "cards": 10, "minutes": 25, "teaches": ["selenium.dropdowns", "selenium.alerts", "selenium.frames", "selenium.actions"] },
+        { "id": "p7u6", "title": "TestNG Integration", "cards": 10, "minutes": 25, "teaches": ["selenium.testng", "selenium.annotations", "selenium.dataprovider"] },
+        { "id": "p7u7", "title": "Framework: Config & Reporting", "cards": 10, "minutes": 25, "teaches": ["selenium.config", "selenium.reporting", "selenium.screenshots"] },
+        { "id": "p7u8", "title": "Framework: Parallel & CI", "cards": 10, "minutes": 25, "teaches": ["selenium.threadlocal", "selenium.parallel", "selenium.cicd"] },
+        { "id": "p7u9", "title": "Selenium Framework Project", "cards": 12, "minutes": 40, "teaches": ["selenium.framework_project"] }
+      ]
+    }
+  ]
+}

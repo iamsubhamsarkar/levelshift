@@ -1,0 +1,145 @@
+{
+  "unitId": "p1u5",
+  "title": "Inheritance",
+  "phase": 1,
+  "unit": 5,
+  "teaches": [
+    "oop.inheritance",
+    "oop.super",
+    "oop.constructorchain"
+  ],
+  "requires": [
+    "oop.encapsulation",
+    "oop.constructors"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u5_c1",
+      "type": "hook",
+      "content": {
+        "question": "Dog has NO speak() method defined. So why does this work?",
+        "code": "class Animal { void speak() { System.out.println(\"...\"); } }\nclass Dog extends Animal { }\n\nnew Dog().speak(); // prints \"...\"  ← HOW?"
+      }
+    },
+    {
+      "id": "p1u5_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create a class ElectricCar that extends Car and adds a batteryLevel field. The constructor should call super() for brand.",
+        "starterCode": "class Car {\n    String brand;\n    Car(String brand) { this.brand = brand; }\n}\n\nclass ElectricCar {\n    // extends Car, adds int batteryLevel\n    // constructor takes brand + batteryLevel\n}",
+        "hint": "Use \"extends Car\" and call super(brand) as the first line of the constructor.",
+        "expectedOutput": "Tesla",
+        "solutionCode": "class Car {\n    String brand;\n    Car(String brand) { this.brand = brand; }\n}\n\nclass ElectricCar extends Car {\n    int batteryLevel;\n    ElectricCar(String brand, int batteryLevel) {\n        super(brand);\n        this.batteryLevel = batteryLevel;\n    }\n}\n// Test: new ElectricCar(\"Tesla\", 100).brand → \"Tesla\""
+      }
+    },
+    {
+      "id": "p1u5_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Inheritance is like a family tree. A child inherits traits from parents (eye color, height) but can also have their own unique traits. In Java, a subclass inherits ALL fields and methods from the parent — for free. Then it can add new ones or change existing ones.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u5_c4",
+      "type": "code",
+      "content": {
+        "code": "class Animal {\n    String name;\n    \n    Animal(String name) {\n        this.name = name;\n    }\n    \n    void eat() {\n        System.out.println(name + \" eats\");\n    }\n}\n\nclass Dog extends Animal {          // ← inherits name + eat()\n    String breed;\n    \n    Dog(String name, String breed) {\n        super(name);                // ← calls Animal's constructor\n        this.breed = breed;         // ← Dog's own field\n    }\n    \n    void fetch() {                  // ← Dog's own method\n        System.out.println(name + \" fetches!\");\n    }\n}\n\nDog d = new Dog(\"Rex\", \"Lab\");\nd.eat();    // inherited from Animal\nd.fetch();  // Dog's own",
+        "highlight": [
+          "13",
+          "17"
+        ],
+        "annotation": "\"extends\" = inherits everything. \"super()\" = calls parent's constructor (MUST be first line). Dog gets eat() for free without rewriting it. Dog adds fetch() as its own."
+      }
+    },
+    {
+      "id": "p1u5_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "class Vehicle {\n    Vehicle(String type) {\n        System.out.println(\"Vehicle: \" + type);\n    }\n}\n\nclass Car extends Vehicle {\n    Car() {\n        System.out.println(\"Car ready\");\n    }\n}\nnew Car();",
+        "modification": "Car's constructor doesn't call super(). What happens?",
+        "question": "What's the result?",
+        "options": [
+          "Prints both messages",
+          "Compile error — must call super(type)",
+          "Only prints \"Car ready"
+        ],
+        "correct": 1,
+        "explanation": "If parent has NO default (no-arg) constructor, the child MUST explicitly call super(args). Java can't auto-call super() because Vehicle requires a String parameter. This is \"constructor chaining\" — every child must satisfy parent's constructor."
+      }
+    },
+    {
+      "id": "p1u5_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Inheritance vs just copying code:",
+        "codeA": "class Dog {\n    String name;\n    void eat() { /*...*/ }\n    void sleep() { /*...*/ }\n    void bark() { /*...*/ }\n}\nclass Cat {\n    String name;\n    void eat() { /*...*/ }   // duplicated!\n    void sleep() { /*...*/ } // duplicated!\n    void meow() { /*...*/ }\n}",
+        "codeB": "class Animal {\n    String name;\n    void eat() { /*...*/ }\n    void sleep() { /*...*/ }\n}\nclass Dog extends Animal { void bark() {} }\nclass Cat extends Animal { void meow() {} }",
+        "question": "Why is Code B better?",
+        "options": [
+          "Less code duplication — fix eat() once fixes all animals",
+          "Code B runs faster",
+          "No real difference",
+          "Code A is more readable"
+        ],
+        "correct": 0,
+        "explanation": "DRY principle (Don't Repeat Yourself). If eat() has a bug, Code A requires fixing it in EVERY class. Code B — fix it once in Animal, all children get the fix automatically."
+      }
+    },
+    {
+      "id": "p1u5_c7",
+      "type": "code",
+      "content": {
+        "code": "// Constructor chaining: what runs when?\nclass A {\n    A() { System.out.println(\"A created\"); }\n}\nclass B extends A {\n    B() { \n        super();  // ← Java adds this automatically if not written\n        System.out.println(\"B created\"); \n    }\n}\nclass C extends B {\n    C() { \n        super();\n        System.out.println(\"C created\"); \n    }\n}\n\nnew C();\n// Output:\n// A created    ← grandparent first\n// B created    ← parent second\n// C created    ← child last",
+        "highlight": [
+          "7",
+          "19",
+          "20",
+          "21"
+        ],
+        "annotation": "Constructors chain UP the hierarchy. Parent is ALWAYS created before child. This guarantees parent fields are initialized before child tries to use them. When classes have a \"has-a\" relationship (Car HAS an Engine), use composition (fields) instead of inheritance. Inheritance is only for \"is-a\" (Dog IS an Animal)."
+      }
+    },
+    {
+      "id": "p1u5_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "class Shape {\n    double area() { return 0; }\n}\nclass Circle extends Shape {\n    double radius;\n    Circle(double r) { this.radius = r; }\n    double area() { return 3.14 * radius * radius; }\n}\n\nShape s = new Circle(5);\nSystem.out.println(s.area());",
+        "modification": "s is declared as Shape but created as Circle. Which area() runs?",
+        "question": "What does s.area() return?",
+        "options": [
+          "0 (Shape's version)",
+          "78.5 (Circle's version)",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "The OBJECT is a Circle, so Circle's area() runs — even though the variable type says Shape. This is polymorphism (next unit!). Java calls the method based on the ACTUAL object type, not the declared variable type."
+      }
+    },
+    {
+      "id": "p1u5_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "When should you NOT use inheritance?",
+        "options": [
+          "When classes have a has-a relationship — use composition instead",
+          "When the child has more methods than the parent",
+          "When you need polymorphism in your code",
+          "When the parent class is in a different package"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p1u5_c10",
+      "type": "connect",
+      "content": {
+        "text": "In Selenium (Phase 7), inheritance powers your entire framework:",
+        "code": "class BasePage {\n    protected WebDriver driver;\n    \n    BasePage(WebDriver driver) {\n        this.driver = driver;\n    }\n    \n    protected void click(By locator) { /*...*/ }\n    protected void type(By locator, String text) { /*...*/ }\n}\n\nclass LoginPage extends BasePage {\n    LoginPage(WebDriver driver) { super(driver); }\n    \n    public void login(String user, String pass) {\n        type(By.id(\"user\"), user);  // inherited from BasePage!\n        click(By.id(\"submit\"));     // inherited from BasePage!\n    }\n}",
+        "note": "Every page extends BasePage, gets click/type/wait methods for free. Write utility methods once, use everywhere. That's inheritance in a real framework."
+      }
+    }
+  ]
+}

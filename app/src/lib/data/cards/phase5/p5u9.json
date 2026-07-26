@@ -1,0 +1,130 @@
+{
+  "unitId": "p5u9",
+  "title": "Response Extraction",
+  "phase": 5,
+  "unit": 9,
+  "teaches": [
+    "restassured.extract_path",
+    "restassured.extract_pojo",
+    "restassured.response_logging"
+  ],
+  "requires": [
+    "restassured.body_matchers",
+    "restassured.jsonpath",
+    "restassured.post"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p5u9_c1",
+      "type": "hook",
+      "content": {
+        "question": "You POST a user and get an ID back. How do you use that ID in the NEXT request?",
+        "code": "String id = given().body(user).post(\"/users\").jsonPath().getString(\"id\");\ngiven().get(\"/users/{id}\", id).then().statusCode(200);"
+      }
+    },
+    {
+      "id": "p5u9_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "This extraction returns null. The response clearly has data. Why?",
+        "starterCode": "String name = given()\n.when()\n    .get(\"/users/1\")\n.then()\n    .statusCode(200)\n    .extract().path(\"first_name\");",
+        "hint": "Look at the actual JSON structure — is first_name at the root level?",
+        "expectedOutput": "The JSON is {\"data\": {\"first_name\": \"George\"}}. The correct path is \"data.first_name\". Missing the nested structure causes null return.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p5u9_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Extraction is like mining. The response is a mountain of JSON ore. extract().path() is a precision drill — you specify exact coordinates (\"data.id\") and pull out one gem. extract().as(POJO.class) is a smelter — it melts the entire response into a structured object you can work with programmatically. Choose based on whether you need one value or the whole thing.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p5u9_c4",
+      "type": "code",
+      "content": {
+        "code": "// Precision drill — extract a single value\nString email = given().get(\"/users/1\")\n    .jsonPath().getString(\"data.email\");\n\n// Smelter — extract as POJO (full deserialization)\nUser user = given().get(\"/users/1\")\n    .then().extract().as(User.class);\n\n// Validate-then-drill — assert THEN extract in one chain\nString id = given().body(payload).post(\"/users\")\n    .then()\n        .statusCode(201)\n    .extract()\n        .path(\"id\");",
+        "highlight": [
+          "2",
+          "3",
+          "6",
+          "7",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
+        ],
+        "annotation": "Three extraction patterns: jsonPath().getString() is the precision drill for quick single values. .extract().as(Class) is the smelter for full deserialization into a POJO. .extract().path() after .then() is the validate-then-drill — assert the response is valid (201) BEFORE pulling out the gem. The third pattern is most common in test frameworks because it fails fast on bad responses. Store extracted values in local variables, then pass them to the next request using pathParam() for chaining API calls."
+      }
+    },
+    {
+      "id": "p5u9_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "List<String> names = given().get(\"/users?page=1\")\n    .jsonPath().getList(\"data.first_name\");\nSystem.out.println(names.size()); // 6",
+        "modification": "Change getList to getString",
+        "question": "What does getString return for an array path?",
+        "options": [
+          "First element only",
+          "Comma-separated string",
+          "Exception thrown"
+        ],
+        "correct": 0,
+        "explanation": "getString() on an array path returns only the first element as a String, silently discarding the rest — like drilling for one gem when there's a vein of six. Always match your extraction method to the expected type — getList() for arrays, getString() for single values, getInt() for numbers."
+      }
+    },
+    {
+      "id": "p5u9_c6",
+      "type": "contrast",
+      "content": {
+        "label": "extract().path() vs jsonPath().getString():",
+        "codeA": "// Validate-then-drill (after .then())\nString id = given().get(\"/users/1\")\n    .then().statusCode(200)\n    .extract().path(\"data.id\");",
+        "codeB": "// Direct drill (no prior validation)\nString id = given().get(\"/users/1\")\n    .jsonPath().getString(\"data.id\");",
+        "question": "Which approach is safer in a test?",
+        "options": [
+          "codeA — validates before extracting",
+          "codeB — simpler and faster",
+          "Both equally safe",
+          "Neither validates"
+        ],
+        "correct": 0,
+        "explanation": "codeA uses the validate-then-drill pattern — it asserts the response is valid (statusCode 200) BEFORE extracting the gem. codeB drills blindly — if the request failed (500), you'd extract null or wrong data from bad ore and only catch the problem later. Always validate the mountain before mining."
+      }
+    },
+    {
+      "id": "p5u9_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How do you chain API calls that depend on previous responses?",
+        "sentence": "Extract values using _____ after validating with statusCode(), store them in _____, and pass them to the next request via _____ to fill URL placeholders.",
+        "blanks": [
+          ".extract().path()",
+          "local variables",
+          "pathParam()"
+        ],
+        "distractors": [
+          ".body().get()",
+          "global fields",
+          "queryParam()",
+          ".parse().find()",
+          "static maps",
+          "header()"
+        ]
+      }
+    },
+    {
+      "id": "p5u9_c8",
+      "type": "connect",
+      "content": {
+        "text": "Amazon tests chain extractions for end-to-end workflows:",
+        "code": "// Create order → get tracking → verify shipment\nString orderId = given().body(order).post(\"/orders\")\n    .then().statusCode(201).extract().path(\"orderId\");\nString trackingId = given().get(\"/orders/{id}/tracking\", orderId)\n    .then().statusCode(200).extract().path(\"trackingId\");\ngiven().get(\"/shipments/{id}\", trackingId)\n    .then().body(\"status\", equalTo(\"IN_TRANSIT\"));",
+        "note": "Real integration tests are multi-step workflows. Each step validates + extracts. If step 2 fails, you know exactly which link in the chain broke. This pattern is daily work for Amazon SDETs."
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "unitId": "p5u8",
+  "title": "Request Specification",
+  "phase": 5,
+  "unit": 8,
+  "teaches": [
+    "restassured.request_spec_builder",
+    "restassured.reusable_specs",
+    "restassured.base_config"
+  ],
+  "requires": [
+    "restassured.given_when_then",
+    "restassured.bearer_token",
+    "restassured.query_params"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p5u8_c1",
+      "type": "hook",
+      "content": {
+        "question": "You have 50 tests that all need the same base URI, auth header, and content type. Do you copy-paste into each test?",
+        "code": "// Before: repeated in EVERY test\ngiven().baseUri(\"https://api.example.com\").header(\"Authorization\",\"Bearer xyz\").contentType(JSON)..."
+      }
+    },
+    {
+      "id": "p5u8_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "This spec is built but tests still hit localhost. Why?",
+        "starterCode": "RequestSpecification spec = new RequestSpecBuilder()\n    .setBaseUri(\"https://api.example.com\")\n    .addHeader(\"Authorization\", \"Bearer token\")\n    .build();\n\n@Test\nvoid getUser() {\n    given().when().get(\"/users/1\").then().statusCode(200);\n}",
+        "hint": "You built the spec but never used it in the test",
+        "expectedOutput": "Add .spec(spec) after given(): given().spec(spec).when().get(...)",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p5u8_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A RequestSpec is a reusable test TEMPLATE — like a pre-filled form at the doctor's office. Your name, address, insurance are already printed (base URI, auth, headers). Each visit, you only fill in \"reason for visit\" (the endpoint + specific params). It eliminates duplicated setup — without it, you'd rewrite your address on 50 forms.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p5u8_c4",
+      "type": "code",
+      "content": {
+        "code": "RequestSpecification baseSpec = new RequestSpecBuilder()\n    .setBaseUri(\"https://reqres.in/api\")\n    .setContentType(ContentType.JSON)\n    .addHeader(\"Authorization\", \"Bearer \" + token)\n    .build();\n\n@Test\nvoid getUser() {\n    given()\n        .spec(baseSpec)\n    .when()\n        .get(\"/users/1\")\n    .then()\n        .statusCode(200);\n}",
+        "highlight": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "10"
+        ],
+        "annotation": "RequestSpecBuilder is the template printer — setBaseUri() is the address, setContentType() is the format preference, addHeader() is the insurance info. .build() finalizes the form. In the test, .spec(baseSpec) applies the pre-filled template so you only add what's unique — the specific endpoint and assertions."
+      }
+    },
+    {
+      "id": "p5u8_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "RequestSpecification spec = new RequestSpecBuilder()\n    .setBaseUri(\"https://api.example.com\")\n    .setContentType(ContentType.JSON)\n    .build();\n\ngiven().spec(spec).contentType(ContentType.XML).post(\"/data\");",
+        "modification": "The spec sets JSON but the test overrides with XML. Which wins?",
+        "question": "What Content-Type is actually sent?",
+        "options": [
+          "JSON (spec wins)",
+          "XML (test override wins)",
+          "Error — conflict"
+        ],
+        "correct": 1,
+        "explanation": "Test-level settings OVERRIDE spec settings. The template is a default, not a lock — like crossing out \"insurance: BlueCross\" on the form and writing a new one. This lets you have a JSON template but override for that one XML endpoint."
+      }
+    },
+    {
+      "id": "p5u8_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Global config vs RequestSpec:",
+        "codeA": "// Global — affects ALL tests in the class\n@BeforeAll\nstatic void setup() {\n    RestAssured.baseURI = \"https://api.example.com\";\n    RestAssured.basePath = \"/api/v1\";\n}",
+        "codeB": "// RequestSpec — explicit template per test/group\nRequestSpecification spec = new RequestSpecBuilder()\n    .setBaseUri(\"https://api.example.com\")\n    .setBasePath(\"/api/v1\")\n    .build();\n// used via given().spec(spec)",
+        "question": "When would you use RequestSpec over global config?",
+        "options": [
+          "Tests hit multiple different APIs",
+          "All tests hit the same API",
+          "Spec is slower",
+          "Global is deprecated"
+        ],
+        "correct": 0,
+        "explanation": "Global config is like having ONE pre-filled form for the whole office — fine when all tests visit the same doctor. RequestSpec lets you create separate templates — adminSpec, userServiceSpec, paymentSpec — so each test picks its own form via .spec(). When your suite tests multiple services, you need multiple templates, not one global setting."
+      }
+    },
+    {
+      "id": "p5u8_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "What problem does RequestSpecBuilder solve in a REST Assured test suite?",
+        "options": [
+          "Eliminates duplicated setup by creating a reusable template with base URI and headers that tests apply via .spec()",
+          "Improves test execution speed by caching HTTP connections",
+          "Automatically generates test data for each request",
+          "Replaces the need for @BeforeAll setup methods entirely"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p5u8_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, test frameworks define specs per service:",
+        "code": "public class BaseApiTest {\n    protected static RequestSpecification orderService;\n    protected static RequestSpecification paymentService;\n\n    @BeforeAll static void init() {\n        orderService = new RequestSpecBuilder()\n            .setBaseUri(Config.get(\"order.service.url\"))\n            .addHeader(\"x-api-key\", Config.get(\"order.api.key\"))\n            .build();\n    }\n}",
+        "note": "Professional test frameworks have a spec-per-service pattern. Tests inherit from BaseApiTest and pick the right spec. This is the architecture interviewers expect you to describe."
+      }
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "unitId": "p1u4",
+  "title": "Encapsulation",
+  "phase": 1,
+  "unit": 4,
+  "teaches": [
+    "oop.encapsulation",
+    "oop.accessmodifiers"
+  ],
+  "requires": [
+    "oop.classes",
+    "oop.constructors"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u4_c1",
+      "type": "hook",
+      "content": {
+        "question": "This code compiles. But it lets ANYONE set a negative salary. How would you prevent that?",
+        "code": "Employee e = new Employee(\"Bob\", -50000);\nSystem.out.println(e.salary); // -50000 ← That's bad!"
+      }
+    },
+    {
+      "id": "p1u4_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Make the 'age' field private and add a setter that REJECTS negative values. If negative, set age to 0.",
+        "starterCode": "class Person {\n    int age; // Make this private + add getter/setter\n\n    Person(int age) {\n        this.age = age;\n    }\n}",
+        "hint": "private int age; then public void setAge(int age) { if (age >= 0) this.age = age; else this.age = 0; }",
+        "expectedOutput": "0",
+        "solutionCode": "class Person {\n    private int age;\n\n    Person(int age) {\n        setAge(age);\n    }\n\n    public void setAge(int age) {\n        if (age >= 0) this.age = age;\n        else this.age = 0;\n    }\n\n    public int getAge() { return age; }\n}\n// Test: new Person(-5).getAge() → 0"
+      }
+    },
+    {
+      "id": "p1u4_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Encapsulation is like an ATM machine. You can deposit and withdraw (public methods), but you can NEVER reach inside and grab the cash directly (private fields). The machine controls HOW money moves — it validates, logs, and rejects bad operations. Without encapsulation, anyone can reach into the vault.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u4_c4",
+      "type": "code",
+      "content": {
+        "code": "class BankAccount {\n    private double balance;        // ← hidden from outside\n\n    public BankAccount(double initial) {\n        this.balance = initial;\n    }\n\n    public double getBalance() {   // ← controlled READ\n        return balance;\n    }\n\n    public void deposit(double amount) {  // ← controlled WRITE\n        if (amount > 0) {                 // ← VALIDATION!\n            balance += amount;\n        }\n    }\n\n    public void withdraw(double amount) {\n        if (amount > 0 && amount <= balance) {\n            balance -= amount;\n        }\n    }\n}",
+        "highlight": [
+          "2",
+          "8",
+          "12",
+          "13"
+        ],
+        "annotation": "private = only this class can touch it. public getters/setters = controlled access with VALIDATION. This is encapsulation — hide data, expose behavior with rules."
+      }
+    },
+    {
+      "id": "p1u4_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "class User {\n    private String name;\n    \n    public String getName() { return name; }\n    public void setName(String name) { this.name = name; }\n}\n\nUser u = new User();\nu.name = \"Hack\";",
+        "modification": "We try to set name directly from outside.",
+        "question": "What happens with u.name = \"Hack\"?",
+        "options": [
+          "Sets name to \"Hack",
+          "Compile error — name is private",
+          "Runtime error"
+        ],
+        "correct": 1,
+        "explanation": "Private fields can ONLY be accessed from inside the same class. Trying to access them from outside = compile error. That's the whole point — force everyone to use setName() where you control what's allowed."
+      }
+    },
+    {
+      "id": "p1u4_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Same data, different protection:",
+        "codeA": "class Config {\n    public String dbUrl;\n    public String dbPassword;\n}\n// Anyone can do: config.dbPassword = \"hacked\";",
+        "codeB": "class Config {\n    private String dbUrl;\n    private String dbPassword;\n    \n    public String getDbUrl() { return dbUrl; }\n    // No setter for password — read-only!\n}",
+        "question": "Why is Code B safer?",
+        "options": [
+          "Password can't be changed after creation",
+          "Password is encrypted",
+          "No difference",
+          "Code B is slower"
+        ],
+        "correct": 0,
+        "explanation": "Code B has no setter for dbPassword — once set in the constructor, nothing outside can change it. This is immutability through encapsulation. Code A lets anyone overwrite the password at any time."
+      }
+    },
+    {
+      "id": "p1u4_c7",
+      "type": "code",
+      "content": {
+        "code": "// Access modifiers (most → least restrictive):\n// private   → only this class\n// (default) → only this package (no keyword)\n// protected → this package + subclasses\n// public    → everyone everywhere\n\nclass Employee {\n    private int id;           // only Employee class\n    String department;        // package-private (default)\n    protected double salary;  // package + subclasses\n    public String name;       // everyone\n}",
+        "highlight": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "annotation": "In practice: make fields PRIVATE, methods PUBLIC. That's the rule 95% of the time. Default and protected are for framework-level code (you'll use them in Selenium BasePage)."
+      }
+    },
+    {
+      "id": "p1u4_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "class Counter {\n    private int count = 0;\n    \n    public int getCount() { return count; }\n    public void increment() { count++; }\n}\n\nCounter c = new Counter();\nc.increment();\nc.increment();\nc.increment();",
+        "modification": "What if we remove \"private\" from count? (make it public)",
+        "question": "Does the code still work?",
+        "options": [
+          "Yes — works exactly the same",
+          "No — compile error",
+          "Yes — but now anyone can set count to anything"
+        ],
+        "correct": 2,
+        "explanation": "Removing private makes it work — BUT now anyone can do c.count = -999; or c.count = 0; bypassing increment(). The code \"works\" but you've lost control. Private + public methods = you control the rules."
+      }
+    },
+    {
+      "id": "p1u4_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "What is encapsulation?",
+        "sentence": "Encapsulation means making fields _____ and exposing them through _____ methods. This prevents _____ access to internal data.",
+        "blanks": [
+          "private",
+          "public",
+          "direct"
+        ],
+        "distractors": [
+          "static",
+          "abstract",
+          "indirect",
+          "protected"
+        ]
+      }
+    },
+    {
+      "id": "p1u4_c10",
+      "type": "connect",
+      "content": {
+        "text": "In Selenium Page Object Model (Phase 7), encapsulation IS the design:",
+        "code": "class LoginPage {\n    private WebDriver driver;                 // hidden\n    private By username = By.id(\"user\");      // hidden\n    private By password = By.id(\"pass\");      // hidden\n    \n    public void login(String user, String pwd) {  // public behavior\n        driver.findElement(username).sendKeys(user);\n        driver.findElement(password).sendKeys(pwd);\n    }\n}",
+        "note": "Tests never see locators. They just call loginPage.login(\"admin\", \"pass\"). If the UI changes, you fix ONE class — not 50 tests. That's encapsulation paying off."
+      }
+    }
+  ]
+}

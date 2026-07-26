@@ -1,0 +1,120 @@
+{
+  "unitId": "p7u3",
+  "title": "Waits & Synchronization",
+  "phase": 7,
+  "unit": 3,
+  "teaches": [
+    "selenium.explicit-waits",
+    "selenium.expected-conditions",
+    "selenium.fluent-wait"
+  ],
+  "requires": [
+    "selenium.webdriver-setup",
+    "selenium.locators"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p7u3_c1",
+      "type": "hook",
+      "content": {
+        "question": "Your test clicks a button, then immediately checks the result. But the page hasn't loaded yet. It fails. You add `Thread.sleep(5000)`. It passes! But now your suite takes 40 minutes. Is there a smarter way?",
+        "code": "driver.findElement(By.id(\"search-btn\")).click();\n// Results take 0.5-3 seconds to load depending on server\ndriver.findElement(By.id(\"results\")); // NoSuchElementException!"
+      }
+    },
+    {
+      "id": "p7u3_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Fix this flaky test WITHOUT using Thread.sleep.",
+        "starterCode": "@Test\npublic void testSearch() {\n    driver.get(\"https://example.com\");\n    driver.findElement(By.id(\"search\")).sendKeys(\"java\");\n    driver.findElement(By.id(\"search-btn\")).click();\n    String result = driver.findElement(By.id(\"results\")).getText();\n    assertTrue(result.contains(\"java\"));\n}",
+        "hint": "WebDriverWait polls for the element until it appears OR a timeout expires.",
+        "expectedOutput": "Use explicit wait to wait for #results to be visible",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p7u3_c3",
+      "type": "analogy",
+      "content": {
+        "text": "`Thread.sleep` is like setting a kitchen timer for 5 minutes every time — even if toast is done in 30 seconds. Explicit waits are like WATCHING the toaster — the moment it pops, you grab it. You set a maximum time (timeout), but react as soon as the condition is met. Faster and reliable.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p7u3_c4",
+      "type": "code",
+      "content": {
+        "code": "WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));\nWebElement results = wait.until(\n    ExpectedConditions.visibilityOfElementLocated(By.id(\"results\"))\n);\nString text = results.getText();",
+        "highlight": [
+          "1",
+          "3"
+        ],
+        "annotation": "`WebDriverWait` polls every 500ms until the condition is true OR 10 seconds pass. `visibilityOfElementLocated` waits for the element to exist AND be visible. If timeout expires, it throws `TimeoutException` — much more informative than `NoSuchElementException`. Common conditions: visibilityOfElementLocated (can user see it?), elementToBeClickable (can user click it?), presenceOfElementLocated (is it in DOM?)."
+      }
+    },
+    {
+      "id": "p7u3_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));\nWebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));\nwait.until(ExpectedConditions.visibilityOfElementLocated(By.id(\"x\")));",
+        "modification": "You have BOTH implicit and explicit waits active.",
+        "question": "What's the problem with mixing implicit and explicit waits?",
+        "options": [
+          "They add up to 20 seconds",
+          "Unpredictable timing behavior",
+          "No problem",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "Mixing implicit and explicit waits causes UNPREDICTABLE behavior. Implicit wait affects ALL findElement calls including those inside explicit waits, leading to unexpected timeouts. Rule: use ONLY explicit waits. Set implicit wait to 0."
+      }
+    },
+    {
+      "id": "p7u3_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Thread.sleep vs Explicit Wait",
+        "codeA": "driver.findElement(By.id(\"btn\")).click();\nThread.sleep(5000); // ALWAYS waits 5s\ndriver.findElement(By.id(\"result\")).getText();",
+        "codeB": "driver.findElement(By.id(\"btn\")).click();\nnew WebDriverWait(driver, Duration.ofSeconds(5))\n    .until(ExpectedConditions.visibilityOfElementLocated(By.id(\"result\")))\n    .getText();",
+        "question": "If the element appears in 200ms, how long does each wait?",
+        "options": [
+          "Both wait 5s",
+          "sleep=5s explicit=200ms",
+          "Both 200ms",
+          "sleep=200ms explicit=5s"
+        ],
+        "correct": 1,
+        "explanation": "Thread.sleep always sleeps the full duration — like setting a kitchen timer for 5 minutes even if toast is done. `WebDriverWait` polls every 500ms and returns immediately when `visibilityOfElementLocated` is satisfied. Over 100 tests, this is the difference between minutes and hours of execution time. If timeout expires without the condition being met, it throws `TimeoutException`."
+      }
+    },
+    {
+      "id": "p7u3_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "What causes most Selenium test flakiness and how do you fix it?",
+        "sentence": "90% of flakiness is timing — replace Thread.sleep with _____ waits, wait for the right condition like _____ before clicking dynamic buttons, and never mix implicit and explicit waits because they cause _____ timing behavior.",
+        "blanks": [
+          "explicit",
+          "elementToBeClickable",
+          "unpredictable"
+        ],
+        "distractors": [
+          "implicit",
+          "visibilityOf",
+          "faster"
+        ]
+      }
+    },
+    {
+      "id": "p7u3_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, UI tests deal with heavy AJAX and dynamic content:",
+        "code": "WebElement addToCart = new WebDriverWait(driver, Duration.ofSeconds(15))\n    .until(ExpectedConditions.elementToBeClickable(\n        By.cssSelector(\"[data-testid='add-to-cart']\")));\naddToCart.click();",
+        "note": "As an SDET-1, you'll spend time fixing flaky tests. The #1 cause is synchronization. Master explicit waits and you eliminate 90% of intermittent failures. Flaky tests erode team trust — they're treated as high-priority bugs."
+      }
+    }
+  ]
+}

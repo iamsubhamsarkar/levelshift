@@ -1,0 +1,118 @@
+{
+  "unitId": "p7u8",
+  "title": "TestNG Framework with Selenium",
+  "phase": 7,
+  "unit": 8,
+  "teaches": [
+    "selenium.testng-integration",
+    "selenium.parallel-selenium",
+    "selenium.data-driven-ui"
+  ],
+  "requires": [
+    "selenium.webdriver-setup",
+    "selenium.page-object-model",
+    "apistrategy.dataprovider",
+    "apistrategy.parallel-tests"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p7u8_c1",
+      "type": "hook",
+      "content": {
+        "question": "You have 500 UI tests. Each takes 3 seconds. That's 25 minutes sequentially. Your team wants test results in under 5 minutes. How do you run 500 browser tests in parallel without them stepping on each other?",
+        "code": "// 500 tests × 3 seconds = 25 minutes (sequential)\n// 500 tests ÷ 10 threads × 3 seconds = 2.5 minutes (parallel!)\n// But each thread needs its OWN browser instance..."
+      }
+    },
+    {
+      "id": "p7u8_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Run two tests in parallel. Both use `driver`. What goes wrong?",
+        "starterCode": "static WebDriver driver; // shared across tests\n\n@Test void testA() { driver.get(\"https://pageA.com\"); /* ... */ }\n@Test void testB() { driver.get(\"https://pageB.com\"); /* ... */ }\n// parallel=\"methods\" thread-count=\"2\" in testng.xml",
+        "hint": "A shared static driver means both tests control the SAME browser.",
+        "expectedOutput": "Tests interfere — testA navigates to pageA, then testB navigates away",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p7u8_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Parallel Selenium tests are like a driving school with multiple students. Sequential = one car, one student at a time (slow). Parallel = multiple cars, one student per car (fast). BUT if two students share one car, they'll fight over the steering wheel. Each parallel test thread needs its OWN WebDriver instance — ThreadLocal is the \"one car per student\" rule.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p7u8_c4",
+      "type": "code",
+      "content": {
+        "code": "private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();\n\n@BeforeMethod\npublic void setup() {\n    driver.set(new ChromeDriver(new ChromeOptions()));\n}\n@AfterMethod\npublic void teardown() { driver.get().quit(); }\n\npublic static WebDriver getDriver() { return driver.get(); }",
+        "highlight": [
+          "1",
+          "5"
+        ],
+        "annotation": "`ThreadLocal<WebDriver>` gives each parallel thread its OWN driver instance — like one car per student in driving school. `driver.set()` in @BeforeMethod creates a fresh browser per test. `driver.get()` retrieves the current thread's browser. No sharing, no conflicts, safe parallelism. This pattern is mandatory when using `parallel=\"methods\"` in testng.xml with thread-count greater than 1."
+      }
+    },
+    {
+      "id": "p7u8_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "@Test(dataProvider = \"logins\")\npublic void testLogin(String user, String pass) {\n    getDriver().get(\"https://app.com/login\");\n    loginPage.login(user, pass);\n    assertTrue(loginPage.isLoggedIn());\n}",
+        "modification": "DataProvider returns 10 rows. parallel=\"methods\" thread-count=\"10\". All 10 hit the login page simultaneously.",
+        "question": "What can go wrong?",
+        "options": [
+          "Nothing",
+          "Server rate-limiting/throttling",
+          "Tests always pass",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "10 simultaneous logins can trigger rate limits, CAPTCHA, or account lockouts on the test environment. Parallel UI tests need: test accounts per thread, a test environment that handles concurrent load, and awareness of server-side limits. Parallel execution tests your INFRASTRUCTURE too."
+      }
+    },
+    {
+      "id": "p7u8_c6",
+      "type": "contrast",
+      "content": {
+        "label": "@BeforeMethod vs @BeforeSuite for driver setup",
+        "codeA": "@BeforeMethod // new browser PER TEST\npublic void setup() { driver.set(new ChromeDriver()); }\n@AfterMethod\npublic void teardown() { driver.get().quit(); }\n// Clean isolation, slower (browser startup per test)",
+        "codeB": "@BeforeClass // one browser per CLASS (reused across methods)\npublic void setup() { driver.set(new ChromeDriver()); }\n@AfterClass\npublic void teardown() { driver.get().quit(); }\n// Faster, but tests share browser state (cookies, etc.)",
+        "question": "Which is safer for parallel execution?",
+        "options": [
+          "BeforeMethod - full isolation",
+          "BeforeClass - faster",
+          "Both equal",
+          "Neither works"
+        ],
+        "correct": 0,
+        "explanation": "@BeforeMethod gives complete isolation — each test gets a fresh browser via `ThreadLocal<WebDriver>` with `driver.set(new ChromeDriver())`, meaning no cookies, no state, no leftover data from other tests. @BeforeClass reuses one browser per class, so tests share state and can cause order-dependent failures. For parallel execution, full isolation prevents the race conditions that shared mutable state causes."
+      }
+    },
+    {
+      "id": "p7u8_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "How do you make Selenium tests thread-safe for parallel execution?",
+        "options": [
+          "Use ThreadLocal<WebDriver> so each thread has its own driver and create/destroy in @BeforeMethod/@AfterMethod with no static mutable state",
+          "Use a static WebDriver shared across all threads for efficiency",
+          "Synchronize all test methods with the synchronized keyword",
+          "Run tests sequentially since parallel is unreliable"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p7u8_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, UI regression suites run with high parallelism:",
+        "code": "<suite parallel=\"methods\" thread-count=\"20\">\n  <listeners>\n    <listener class-name=\"ScreenshotListener\"/>\n    <listener class-name=\"RetryAnalyzer\"/>\n  </listeners>\n</suite>",
+        "note": "As an SDET-1, you'll configure parallel execution for your team's UI tests. The goal is fast CI feedback — under 10 minutes for full regression. You'll balance thread count with test environment capacity and debug thread-safety issues when tests pass locally but fail in parallel CI."
+      }
+    }
+  ]
+}

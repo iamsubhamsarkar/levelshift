@@ -1,0 +1,149 @@
+{
+  "unitId": "p1u3",
+  "title": "Classes & Objects",
+  "phase": 1,
+  "unit": 3,
+  "teaches": [
+    "oop.classes",
+    "oop.constructors",
+    "oop.this"
+  ],
+  "requires": [
+    "basics.methods",
+    "basics.types"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u3_c1",
+      "type": "hook",
+      "content": {
+        "question": "This creates a Dog. But WHERE does \"Rex\" go? What makes new Dog(\"Rex\") work?",
+        "code": "Dog rex = new Dog(\"Rex\");\nSystem.out.println(rex.name); // \"Rex\""
+      }
+    },
+    {
+      "id": "p1u3_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create a class called Car with a \"brand\" field. Make new Car(\"Toyota\") store the brand.",
+        "starterCode": "class Car {\n    // 1. Declare a field to store brand\n    // 2. Create a constructor that accepts brand\n}",
+        "hint": "A constructor has the same name as the class, no return type. Use \"this.\" to refer to the field.",
+        "expectedOutput": "Toyota",
+        "solutionCode": "class Car {\n    String brand;\n    Car(String brand) {\n        this.brand = brand;\n    }\n}\n// Test: System.out.println(new Car(\"Toyota\").brand);"
+      }
+    },
+    {
+      "id": "p1u3_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A class is a blueprint (or cookie cutter). An object is an instance (an actual cookie) created with the \"new\" keyword. One cutter (class) can make hundreds of cookies (objects). Each cookie has the same SHAPE (fields, methods) but different DECORATIONS (values). You define the cutter once, then stamp out as many objects as you need with \"new\".",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u3_c4",
+      "type": "code",
+      "content": {
+        "code": "class Dog {\n    String name;        // ← field (what the object stores)\n    int age;\n\n    Dog(String name, int age) {    // ← constructor\n        this.name = name;          // ← this.name = field, name = parameter\n        this.age = age;\n    }\n\n    String bark() {                // ← method (what the object does)\n        return name + \" says Woof!\";\n    }\n}\n\nDog rex = new Dog(\"Rex\", 3);     // create object\nSystem.out.println(rex.bark());  // \"Rex says Woof!\"",
+        "highlight": [
+          "5",
+          "6"
+        ],
+        "annotation": "\"this\" means \"the current object.\" this.name refers to the FIELD. name (without this) refers to the PARAMETER. Without \"this.\", you'd assign the parameter to itself (field stays null)."
+      }
+    },
+    {
+      "id": "p1u3_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "class Dog {\n    String name;\n    Dog(String name) {\n        name = name; // ← BUG: no \"this.\"\n    }\n}\nDog d = new Dog(\"Rex\");\nSystem.out.println(d.name);",
+        "modification": "What does d.name print without \"this.\"?",
+        "question": "What is d.name?",
+        "options": [
+          "Rex",
+          "null",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "Without \"this.\", \"name = name\" assigns the PARAMETER to ITSELF. The FIELD stays at its default value (null for String). This is the #1 constructor bug beginners make. Always use \"this.\" when field and parameter names match."
+      }
+    },
+    {
+      "id": "p1u3_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Two ways to create a Dog — what's different?",
+        "codeA": "Dog rex;\nrex.bark(); // ???",
+        "codeB": "Dog rex = new Dog(\"Rex\", 3);\nrex.bark(); // works!",
+        "question": "Why does Code A crash?",
+        "options": [
+          "rex is null — never created with new",
+          "bark() doesn't exist",
+          "Dog class is wrong",
+          "Both compile fine"
+        ],
+        "correct": 0,
+        "explanation": "\"Dog rex;\" only DECLARES a variable (a label with nothing in the box). It's null. Calling a method on null = NullPointerException. \"new\" actually CREATES the object in memory. Declaration ≠ creation."
+      }
+    },
+    {
+      "id": "p1u3_c7",
+      "type": "code",
+      "content": {
+        "code": "class Employee {\n    String name;\n    String department;\n    int salary;\n\n    // Constructor\n    Employee(String name, String department, int salary) {\n        this.name = name;\n        this.department = department;\n        this.salary = salary;\n    }\n\n    // Method\n    String summary() {\n        return name + \" | \" + department + \" | $\" + salary;\n    }\n}\n\n// Creating multiple objects from one class:\nEmployee e1 = new Employee(\"Alice\", \"Engineering\", 120000);\nEmployee e2 = new Employee(\"Bob\", \"QA\", 95000);",
+        "highlight": [
+          "7",
+          "8",
+          "9"
+        ],
+        "annotation": "This Employee class is EXACTLY what you'll build as a POJO in REST Assured (Phase 5). Request/response bodies map directly to classes like this. Every field = a JSON key."
+      }
+    },
+    {
+      "id": "p1u3_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "class Counter {\n    int count = 0;\n    void increment() { count++; }\n}\nCounter a = new Counter();\nCounter b = a;\nb.increment();\nSystem.out.println(a.count);",
+        "modification": "b = a. Then we increment b. What's a.count?",
+        "question": "What does a.count print?",
+        "options": [
+          "0",
+          "1",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "\"Counter b = a\" doesn't copy the object — it copies the REFERENCE. Both a and b point to the SAME object in memory. Changing b changes a (they're the same thing). This is fundamental to understanding how Java passes objects."
+      }
+    },
+    {
+      "id": "p1u3_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "What's the difference between a class and an object?",
+        "sentence": "A class is a _____ that defines fields and methods. An object is an _____ created using the _____ keyword.",
+        "blanks": [
+          "blueprint",
+          "instance",
+          "new"
+        ],
+        "distractors": [
+          "interface",
+          "variable",
+          "static",
+          "class"
+        ]
+      }
+    },
+    {
+      "id": "p1u3_c10",
+      "type": "connect",
+      "content": {
+        "text": "In REST Assured (Phase 5), every API response maps to a class exactly like this:",
+        "code": "class UserResponse {\n    String name;\n    String email;\n    int id;\n}\n\n// Deserialize API response into an object:\nUserResponse user = response.as(UserResponse.class);\nSystem.out.println(user.name); // from JSON!",
+        "note": "The class you just learned to write IS the POJO that REST Assured auto-fills from JSON. Same constructor. Same fields. Direct connection."
+      }
+    }
+  ]
+}

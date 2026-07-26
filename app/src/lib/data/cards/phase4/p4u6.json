@@ -1,0 +1,118 @@
+{
+  "unitId": "p4u6",
+  "title": "Recursion & Backtracking",
+  "phase": 4,
+  "unit": 6,
+  "teaches": [
+    "dsa.recursion",
+    "dsa.backtracking",
+    "dsa.permutations"
+  ],
+  "requires": [
+    "basics.types",
+    "collections.arraylist",
+    "dsa.stack_brackets"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p4u6_c1",
+      "type": "hook",
+      "content": {
+        "question": "You're standing in a maze. At each fork, you pick a direction. Dead end? Walk back to the last fork and try a different path. You're doing backtracking! Now imagine writing that as code — how do you \"walk back\"? The answer: the call stack does it for you. When a recursive function returns, you're automatically back at the previous fork.",
+        "code": "// Maze: 3 forks, each with 2 choices\n// Fork 1: Left → Dead end → BACKTRACK\n// Fork 1: Right → Fork 2\n// Fork 2: Left → Fork 3\n// Fork 3: Left → Dead end → BACKTRACK\n// Fork 3: Right → EXIT! \n// Total paths explored: 4. But the maze has 2³ = 8 possible paths.\n// Backtracking prunes dead ends EARLY instead of trying all 8."
+      }
+    },
+    {
+      "id": "p4u6_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write a recursive function to calculate factorial. Handle the base case and recursive case.",
+        "starterCode": "public class Factorial {\n    public static int factorial(int n) {\n        // TODO: Base case — what should factorial(0) return?\n        // TODO: Recursive case — n * factorial(n-1)\n        return 0; // placeholder\n    }\n\n    public static void main(String[] args) {\n        System.out.println(factorial(5));  // Expected: 120\n        System.out.println(factorial(0));  // Expected: 1\n        System.out.println(factorial(1));  // Expected: 1\n    }\n}",
+        "hint": "Base case: if n <= 1, return 1. Recursive case: return n * factorial(n - 1).",
+        "expectedOutput": "120",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p4u6_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Recursion is like Russian nesting dolls (Matryoshka). You open the biggest doll and find a smaller one inside. You keep opening until you reach the tiniest doll (base case). Then you close them back up one by one (unwinding the call stack). Each doll contains the same structure — just smaller. Backtracking is like solving a Sudoku puzzle with a pencil and eraser. Try a number, if it leads to a contradiction, ERASE it (undo) and try the next number. The \"erasing\" is the backtracking step.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p4u6_c4",
+      "type": "code",
+      "content": {
+        "code": "import java.util.*;\n\n// Pattern 1: Simple recursion — Factorial\npublic static int factorial(int n) {\n    if (n <= 1) return 1;          // Base case\n    return n * factorial(n - 1);   // Recursive case\n}\n\n// Pattern 2: Fibonacci with memoization\npublic static int fibonacci(int n, Map<Integer, Integer> memo) {\n    if (n <= 1) return n;\n    if (memo.containsKey(n)) return memo.get(n);\n    int result = fibonacci(n - 1, memo) + fibonacci(n - 2, memo);\n    memo.put(n, result);\n    return result;\n}\n\n// Pattern 3: Generate all permutations (backtracking)\npublic static List<List<Integer>> permute(int[] nums) {\n    List<List<Integer>> result = new ArrayList<>();\n    backtrack(nums, new ArrayList<>(), new boolean[nums.length], result);\n    return result;\n}\n\nprivate static void backtrack(int[] nums, List<Integer> current,\n                               boolean[] used, List<List<Integer>> result) {\n    if (current.size() == nums.length) {\n        result.add(new ArrayList<>(current));  // found a complete permutation\n        return;\n    }\n    for (int i = 0; i < nums.length; i++) {\n        if (used[i]) continue;         // skip already-used elements\n        current.add(nums[i]);          // CHOOSE\n        used[i] = true;\n        backtrack(nums, current, used, result);  // EXPLORE\n        current.remove(current.size() - 1);      // UN-CHOOSE (backtrack)\n        used[i] = false;\n    }\n}\n\n// Pattern 4: Subsets (power set)\npublic static List<List<Integer>> subsets(int[] nums) {\n    List<List<Integer>> result = new ArrayList<>();\n    generateSubsets(nums, 0, new ArrayList<>(), result);\n    return result;\n}\n\nprivate static void generateSubsets(int[] nums, int start,\n                                     List<Integer> current, List<List<Integer>> result) {\n    result.add(new ArrayList<>(current));  // every state is a valid subset\n    for (int i = start; i < nums.length; i++) {\n        current.add(nums[i]);\n        generateSubsets(nums, i + 1, current, result);\n        current.remove(current.size() - 1);  // backtrack\n    }\n}",
+        "highlight": [
+          "31",
+          "32",
+          "33",
+          "34"
+        ],
+        "annotation": "The backtracking template is CHOOSE → EXPLORE → UN-CHOOSE. current.add(nums[i]) chooses, backtrack() explores deeper, current.remove(current.size() - 1) un-chooses so the next loop iteration tries a different element. The used[] boolean array prevents reusing elements within one permutation. result.add(new ArrayList<>(current)) creates a COPY — without it, all entries would reference the same eventually-empty list."
+      }
+    },
+    {
+      "id": "p4u6_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "private static void backtrack(int[] nums, List<Integer> current,\n                               boolean[] used, List<List<Integer>> result) {\n    if (current.size() == nums.length) {\n        result.add(new ArrayList<>(current));\n        return;\n    }\n    for (int i = 0; i < nums.length; i++) {\n        if (used[i]) continue;\n        current.add(nums[i]);\n        used[i] = true;\n        backtrack(nums, current, used, result);\n        current.remove(current.size() - 1);\n        used[i] = false;\n    }\n}\n// nums = {1, 2, 3}",
+        "modification": "What if we remove the `current.remove(current.size() - 1)` and `used[i] = false` lines?",
+        "question": "How many \"permutations\" would we get for nums = {1, 2, 3}?",
+        "options": [
+          "1",
+          "6",
+          "Infinite loop / StackOverflowError"
+        ],
+        "correct": 0,
+        "explanation": "Without the UN-CHOOSE step, after finding [1,2,3] the method returns, but current still contains [1,2,3] and used[] is all true. Back in the for-loop, every used[i] is true so `if (used[i]) continue` skips all elements — no further recursion occurs. We get exactly ONE permutation. The current.remove and used[i] = false lines undo the choice, allowing the for-loop to try different elements at each position."
+      }
+    },
+    {
+      "id": "p4u6_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Fibonacci — naive vs memoized recursion",
+        "codeA": "// Naive recursion: O(2^n) time — exponential!\npublic static int fibNaive(int n) {\n    if (n <= 1) return n;\n    return fibNaive(n - 1) + fibNaive(n - 2);\n}\n// fib(5) calls fib(4) + fib(3)\n// fib(4) calls fib(3) + fib(2)  ← fib(3) computed AGAIN!\n// Total calls for fib(40): ~300 million",
+        "codeB": "// Memoized recursion: O(n) time — linear!\npublic static int fibMemo(int n, Map<Integer, Integer> memo) {\n    if (n <= 1) return n;\n    if (memo.containsKey(n)) return memo.get(n);\n    int result = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);\n    memo.put(n, result);\n    return result;\n}\n// fib(5) computes fib(4), fib(3), fib(2), fib(1), fib(0)\n// Each computed exactly ONCE. Total calls for fib(40): 40",
+        "question": "Why does memoization reduce Fibonacci from O(2^n) to O(n)?",
+        "options": [
+          "Each subproblem is computed once because memo.containsKey returns the cached result",
+          "It uses less stack space",
+          "The base case is different",
+          "It avoids recursion entirely"
+        ],
+        "correct": 0,
+        "explanation": "Naive Fibonacci recomputes the same values exponentially — fibNaive(3) is called millions of times when computing fibNaive(40). With memoization, after the first computation memo.put(n, result) stores the answer. On subsequent calls, memo.containsKey(n) returns true and memo.get(n) gives the cached value in O(1). Each of the n subproblems is solved exactly once — O(n) total."
+      }
+    },
+    {
+      "id": "p4u6_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "What does the UN-CHOOSE step accomplish in the backtracking template?",
+        "options": [
+          "current.remove and used[i] = false undo the choice so the for-loop can try a different element at that position",
+          "It prevents StackOverflowError by reducing recursion depth",
+          "It sorts the result list after each permutation is found",
+          "It resets the base case condition for the next recursive call"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p4u6_c8",
+      "type": "connect",
+      "content": {
+        "text": "Recursion and backtracking appear in SDET work more than you'd expect:",
+        "code": "// Generating all combinations of test parameters (combinatorial testing)\npublic static List<List<String>> generateTestCombinations(\n        List<List<String>> parameterSets) {\n    List<List<String>> result = new ArrayList<>();\n    generate(parameterSets, 0, new ArrayList<>(), result);\n    return result;\n}\n\nprivate static void generate(List<List<String>> params, int depth,\n                              List<String> current, List<List<String>> result) {\n    if (depth == params.size()) {\n        result.add(new ArrayList<>(current));\n        return;\n    }\n    for (String value : params.get(depth)) {\n        current.add(value);\n        generate(params, depth + 1, current, result);\n        current.remove(current.size() - 1);\n    }\n}\n// Input: [[\"Chrome\",\"Firefox\"], [\"Login\",\"Checkout\"], [\"US\",\"EU\"]]\n// Output: All 8 test combinations",
+        "note": "Combinatorial test generation is backtracking. Understanding this pattern lets you build smarter test data generators that explore all meaningful input combinations systematically — a core SDET skill for achieving coverage without redundancy."
+      }
+    }
+  ]
+}

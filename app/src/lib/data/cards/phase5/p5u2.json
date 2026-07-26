@@ -1,0 +1,116 @@
+{
+  "unitId": "p5u2",
+  "title": "REST API Concepts",
+  "phase": 5,
+  "unit": 2,
+  "teaches": [
+    "http.rest_principles",
+    "http.resources",
+    "http.json_structure"
+  ],
+  "requires": [
+    "http.methods",
+    "http.status_codes"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p5u2_c1",
+      "type": "hook",
+      "content": {
+        "question": "Why is it `/users/1` and NOT `/getUser?id=1`? What rule is being followed?",
+        "code": "GET  /users       → list all users\nGET  /users/1     → get user 1\nPOST /users       → create user\nPUT  /users/1     → update user 1\nDELETE /users/1   → delete user 1"
+      }
+    },
+    {
+      "id": "p5u2_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Which of these URIs breaks REST conventions? Why?",
+        "starterCode": "A) GET /users/1/orders\nB) POST /createNewUser\nC) DELETE /users/1\nD) GET /users?status=active",
+        "hint": "REST uses nouns for resources, HTTP methods for actions",
+        "expectedOutput": "B — the verb \"create\" belongs in the METHOD (POST), not in the URI",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p5u2_c3",
+      "type": "analogy",
+      "content": {
+        "text": "REST is like a library system. Resources are the BOOKS (nouns: /books, /members). The HTTP method is what you DO with them (GET = read, POST = donate a new book, DELETE = remove). The URI is the shelf address. You don't say \"goGetBookFromShelf3\" — you say GET /shelf/3. The resource stays the same; the action changes via the method.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p5u2_c4",
+      "type": "code",
+      "content": {
+        "code": "// REST = Representational State Transfer\n// Core constraints:\n// 1. Client-Server separation\n// 2. Stateless (no server-side sessions — each request carries ALL info)\n// 3. Uniform Interface (resources identified by URIs + HTTP methods)\n// 4. JSON is the standard representation format:\n\n// Example resource representation:\n// GET /users/1 →\n// {\"id\": 1, \"name\": \"Subham\", \"roles\": [\"tester\", \"dev\"]}",
+        "highlight": [
+          "4",
+          "5",
+          "10"
+        ],
+        "annotation": "\"Stateless\" means each request carries ALL info needed (auth token, params) — the server doesn't remember previous requests. \"Uniform Interface\" means resources are nouns (/users, /orders) and HTTP methods are verbs (GET, POST, PUT, DELETE). This is why you send an Authorization header on EVERY call."
+      }
+    },
+    {
+      "id": "p5u2_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "{\n  \"user\": {\n    \"name\": \"Subham\",\n    \"skills\": [\"Java\", \"REST\"]\n  }\n}",
+        "modification": "What if you access this JSON with path \"user.skills[2]\"?",
+        "question": "What happens when you access an index that doesn't exist?",
+        "options": [
+          "null/empty",
+          "IndexOutOfBoundsException",
+          "Returns last item"
+        ],
+        "correct": 0,
+        "explanation": "JSON path traversal returns null or empty for missing indices — it doesn't throw exceptions. In REST Assured, asserting on a missing path gives null, which can silently pass if you're not careful. Always validate the array size first."
+      }
+    },
+    {
+      "id": "p5u2_c6",
+      "type": "contrast",
+      "content": {
+        "label": "RESTful vs Non-RESTful API design:",
+        "codeA": "RESTful:\nGET    /orders/42\nPOST   /orders\nPUT    /orders/42\nDELETE /orders/42",
+        "codeB": "Non-RESTful (RPC-style):\nGET /getOrder?id=42\nPOST /createOrder\nPOST /updateOrder\nPOST /deleteOrder",
+        "question": "Why do companies prefer RESTful design for public APIs?",
+        "options": [
+          "Predictable URL patterns",
+          "HTTP caching works naturally",
+          "Standard tooling support",
+          "All of the above"
+        ],
+        "correct": 3,
+        "explanation": "RESTful APIs use the Uniform Interface — the method is the verb, the URI is the noun (like the library system where GET /shelf/3 is self-explanatory). This makes URLs predictable, GET responses cacheable (reading a book doesn't change it), and every HTTP client already understands the methods. Non-RESTful APIs put verbs in URIs, breaking the shelf-address pattern."
+      }
+    },
+    {
+      "id": "p5u2_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "What does \"stateless\" mean in REST?",
+        "options": [
+          "Each request carries all info needed — the server doesn't remember previous requests",
+          "The server stores session data between calls",
+          "Clients must re-authenticate only once",
+          "The API never changes state"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p5u2_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, every internal service exposes REST APIs. When you test them:",
+        "code": "given()\n  .basePath(\"/api/v1\")\n.when()\n  .get(\"/products/{id}\", 42)\n.then()\n  .body(\"name\", notNullValue());",
+        "note": "Understanding REST design helps you predict endpoint patterns during exploratory testing — if you know GET /orders works, you can guess GET /orders/1/items exists without reading docs."
+      }
+    }
+  ]
+}

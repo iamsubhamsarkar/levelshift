@@ -1,0 +1,142 @@
+{
+  "unitId": "p1u2",
+  "title": "Control Flow & Methods",
+  "phase": 1,
+  "unit": 2,
+  "teaches": [
+    "basics.controlflow",
+    "basics.methods"
+  ],
+  "requires": [
+    "basics.types"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u2_c1",
+      "type": "hook",
+      "content": {
+        "question": "This method returns \"adult\" for age 18. But what about age 18 EXACTLY? Look carefully.",
+        "code": "String check(int age) {\n    if (age > 18) return \"adult\";\n    else return \"minor\";\n}"
+      }
+    },
+    {
+      "id": "p1u2_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write an if/else that prints \"even\" if a number is even, \"odd\" otherwise. (Use the modulo operator %)",
+        "starterCode": "int num = 7;\n// Your code here — print \"even\" or \"odd\"",
+        "hint": "num % 2 gives the remainder when divided by 2. If remainder is 0, it's even.",
+        "expectedOutput": "odd",
+        "solutionCode": "int num = 7;\nif (num % 2 == 0) {\n    System.out.println(\"even\");\n} else {\n    System.out.println(\"odd\");\n}"
+      }
+    },
+    {
+      "id": "p1u2_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A method is like a vending machine. You put something IN (parameters), it does its work inside (body), and gives something back OUT (return value). Some machines take nothing in (no parameters) and some give nothing back (void). But they all DO something.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u2_c4",
+      "type": "code",
+      "content": {
+        "code": "// Method anatomy:\nstatic int add(int a, int b) {    // ← parameters IN\n    int result = a + b;           // ← body (does work)\n    return result;                // ← gives something OUT\n}\n\n// Calling it:\nint sum = add(5, 3);  // sum = 8",
+        "highlight": [
+          "2",
+          "4"
+        ],
+        "annotation": "Return type (int) = what comes out. Parameters (int a, int b) = what goes in. \"void\" means nothing comes out. \"static\" means you can call it without an object (we'll cover this in Unit 3). Java picks which overloaded method to call based on the arguments you pass — matching parameter count and types."
+      }
+    },
+    {
+      "id": "p1u2_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "static int multiply(int a, int b) {\n    return a * b;\n}\nSystem.out.println(multiply(3, 4));",
+        "modification": "What if we change return type to void? → static void multiply(int a, int b) { return a * b; }",
+        "question": "What happens?",
+        "options": [
+          "Prints 12",
+          "Prints nothing",
+          "Compile error"
+        ],
+        "correct": 2,
+        "explanation": "If return type is void, you CANNOT return a value. \"return a * b;\" in a void method is a compile error. Void methods can only use \"return;\" (with nothing) or simply end."
+      }
+    },
+    {
+      "id": "p1u2_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Same result, different approach:",
+        "codeA": "// If-else chain\nString grade(int score) {\n    if (score >= 90) return \"A\";\n    else if (score >= 80) return \"B\";\n    else if (score >= 70) return \"C\";\n    else return \"F\";\n}",
+        "codeB": "// Ternary operator\nString status(int age) {\n    return age >= 18 ? \"adult\" : \"minor\";\n}",
+        "question": "When would you use ternary vs if-else?",
+        "options": [
+          "Ternary for simple 2-way decisions",
+          "If-else for everything",
+          "They're identical",
+          "Ternary is faster"
+        ],
+        "correct": 0,
+        "explanation": "Ternary (? :) is for simple A-or-B decisions in one line. If-else is for multiple conditions or complex logic. Use ternary when readability improves — don't nest ternaries (that's unreadable)."
+      }
+    },
+    {
+      "id": "p1u2_c7",
+      "type": "code",
+      "content": {
+        "code": "// For loop — when you know how many times\nfor (int i = 0; i < 5; i++) {\n    System.out.println(i);  // 0, 1, 2, 3, 4\n}\n\n// While loop — when you don't know how many times\nint count = 0;\nwhile (count < 3) {\n    count++;  // runs until condition is false\n}\n\n// For-each — iterating over collections\nString[] names = {\"A\", \"B\", \"C\"};\nfor (String name : names) {\n    System.out.println(name);\n}",
+        "highlight": [
+          "2",
+          "8",
+          "13"
+        ],
+        "annotation": "For-each (enhanced for) is what you'll use 90% of the time with Collections. It's cleaner than index-based for loops. You'll see this everywhere in test frameworks."
+      }
+    },
+    {
+      "id": "p1u2_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "static void greet(String name) {\n    System.out.println(\"Hello \" + name);\n}\ngreet(null);",
+        "modification": "What happens when you pass null?",
+        "question": "What's the output?",
+        "options": [
+          "Hello null",
+          "NullPointerException",
+          "Compile error"
+        ],
+        "correct": 0,
+        "explanation": "Surprise! String concatenation with null produces \"Hello null\" (not an error). But if you called name.length() inside the method, THAT would throw NullPointerException. Concatenation is safe with null, method calls are not."
+      }
+    },
+    {
+      "id": "p1u2_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "Interviewer asks — \"What is method overloading?\"",
+        "options": [
+          "Same name but different parameters — Java picks based on arguments",
+          "Same name and same parameters but different return types",
+          "Overriding a parent method in a child class",
+          "Calling a method multiple times in a loop"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p1u2_c10",
+      "type": "connect",
+      "content": {
+        "text": "In Selenium (Phase 7), you'll call methods constantly — and overloading is everywhere:",
+        "code": "driver.findElement(By.id(\"submit\"));       // By ID\ndriver.findElement(By.cssSelector(\".btn\")); // By CSS\ndriver.findElement(By.xpath(\"//button\"));   // By XPath",
+        "note": "Same method name (findElement), different locator types. That's overloading in action — different parameter, different behavior."
+      }
+    }
+  ]
+}

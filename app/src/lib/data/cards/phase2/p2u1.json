@@ -1,0 +1,133 @@
+{
+  "unitId": "p2u1",
+  "title": "ArrayList Basics",
+  "phase": 2,
+  "unit": 1,
+  "teaches": [
+    "collections.arraylist",
+    "collections.autoboxing"
+  ],
+  "requires": [
+    "basics.types",
+    "basics.arrays"
+  ],
+  "estimatedMinutes": 27,
+  "cards": [
+    {
+      "id": "p2u1_c1",
+      "type": "hook",
+      "content": {
+        "question": "This code compiles and runs. But what's the size of the list?",
+        "code": "ArrayList<Integer> nums = new ArrayList<>();\nnums.add(10);\nnums.add(20);\nnums.remove(0);\nnums.add(30);\nSystem.out.println(nums.size());"
+      }
+    },
+    {
+      "id": "p2u1_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create an ArrayList of Strings, add 3 fruit names, and print the second one.",
+        "starterCode": "import java.util.ArrayList;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Create ArrayList, add 3 fruits, print second\n    }\n}",
+        "hint": "ArrayList<String> fruits = new ArrayList<>(); then use .add() and .get()",
+        "expectedOutput": "banana",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p2u1_c3",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Remove \"banana\" from your list by value (not index). Print the remaining size.",
+        "starterCode": "import java.util.ArrayList;\n\npublic class Main {\n    public static void main(String[] args) {\n        ArrayList<String> fruits = new ArrayList<>();\n        fruits.add(\"apple\");\n        fruits.add(\"banana\");\n        fruits.add(\"cherry\");\n        // Remove banana, print size\n    }\n}",
+        "hint": ".remove() can take an object OR an index",
+        "expectedOutput": "2",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p2u1_c4",
+      "type": "analogy",
+      "content": {
+        "text": "An array is a row of lockers bolted to the wall — fixed size, numbered 0 to N. An ArrayList is a stretchy backpack: throw items in, take them out, and it expands or shrinks automatically. You trade a tiny bit of speed for massive flexibility.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p2u1_c5",
+      "type": "code",
+      "content": {
+        "code": "ArrayList<String> names = new ArrayList<>();\nnames.add(\"Alice\");           // [Alice]\nnames.add(\"Bob\");             // [Alice, Bob]\nnames.get(0);                 // \"Alice\"\nnames.remove(\"Bob\");          // [Alice]\nnames.size();                 // 1",
+        "highlight": [
+          "1",
+          "2"
+        ],
+        "annotation": "ArrayList uses generics (<String>) to enforce type safety at compile time. You CANNOT add an int to an ArrayList<String>. The diamond operator <> on the right lets Java infer the type. When using ArrayList<Integer>, .remove() is overloaded — remove(int index) removes by position, remove(Integer.valueOf(x)) removes by value. This autoboxing ambiguity is a common trap."
+      }
+    },
+    {
+      "id": "p2u1_c6",
+      "type": "break_it",
+      "content": {
+        "setup": "ArrayList<Integer> nums = new ArrayList<>();\nnums.add(1);\nnums.add(2);\nnums.add(3);\nnums.remove(1);\nSystem.out.println(nums);",
+        "modification": "What does nums.remove(1) actually remove?",
+        "question": "What prints?",
+        "options": [
+          "[1",
+          "3]",
+          "[1",
+          "2]",
+          "[2",
+          "3]"
+        ],
+        "correct": 0,
+        "explanation": "remove(1) removes the element at INDEX 1 (which is \"2\"), NOT the Integer value 1. To remove by value, use remove(Integer.valueOf(1)). This is the autoboxing ambiguity — .remove() is overloaded for both index and object."
+      }
+    },
+    {
+      "id": "p2u1_c7",
+      "type": "contrast",
+      "content": {
+        "label": "Fixed array vs dynamic ArrayList",
+        "codeA": "String[] arr = new String[3];\narr[0] = \"a\";\narr[1] = \"b\";\n// arr[3] = \"d\"; // CRASH!\nSystem.out.println(arr.length);",
+        "codeB": "ArrayList<String> list = new ArrayList<>();\nlist.add(\"a\");\nlist.add(\"b\");\nlist.add(\"d\"); // No problem!\nSystem.out.println(list.size());",
+        "question": "What's the key advantage of ArrayList over arrays?",
+        "options": [
+          "Dynamic resizing",
+          "Faster access",
+          "Less memory",
+          "Type safety"
+        ],
+        "correct": 0,
+        "explanation": "An array has fixed size set at creation — like lockers bolted to the wall. An ArrayList is a stretchy backpack that grows and shrinks automatically. Both give O(1) random access via index. ArrayList uses generics for type safety and provides built-in methods like .add(), .remove(), and .size()."
+      }
+    },
+    {
+      "id": "p2u1_c8",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How does ArrayList compare to a fixed array?",
+        "sentence": "An ArrayList is like a _____ that expands or shrinks automatically, uses _____ to enforce type safety, and provides methods like .add() and _____.",
+        "blanks": [
+          "stretchy backpack",
+          "generics",
+          ".remove()"
+        ],
+        "distractors": [
+          "fixed locker",
+          "primitives",
+          ".length",
+          "autoboxing"
+        ]
+      }
+    },
+    {
+      "id": "p2u1_c9",
+      "type": "connect",
+      "content": {
+        "text": "In test automation, you'll collect dynamic results into ArrayLists constantly:",
+        "code": "List<String> failures = new ArrayList<>();\nfor (TestCase tc : testSuite) {\n    if (!tc.passed()) failures.add(tc.name());\n}\nassertEquals(0, failures.size());",
+        "note": "Notice we declared as List<String> (interface), not ArrayList<String>. You'll learn why interfaces matter in Phase 3."
+      }
+    }
+  ]
+}

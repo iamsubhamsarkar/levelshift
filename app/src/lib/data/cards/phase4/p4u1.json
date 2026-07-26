@@ -1,0 +1,124 @@
+{
+  "unitId": "p4u1",
+  "title": "Arrays & String Patterns",
+  "phase": 4,
+  "unit": 1,
+  "teaches": [
+    "dsa.array_traversal",
+    "dsa.two_pointer",
+    "dsa.string_manipulation"
+  ],
+  "requires": [
+    "basics.types",
+    "basics.strings",
+    "collections.arraylist"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p4u1_c1",
+      "type": "hook",
+      "content": {
+        "question": "You have a sorted array [1, 2, 3, 4, 6, 8, 9, 11]. Find TWO numbers that add up to 10 — but you can only walk two fingers inward from both ends. How many checks does it take?",
+        "code": "int[] arr = {1, 2, 3, 4, 6, 8, 9, 11};\n// Target: 10\n// Start: left=0(value 1), right=7(value 11)\n// 1+11=12 > 10 → move right inward\n// 1+9=10 → FOUND! Only 2 checks!\n// Brute force would need up to 28 checks (every pair)"
+      }
+    },
+    {
+      "id": "p4u1_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Reverse an array in-place (no extra array). Fill in the swap logic.",
+        "starterCode": "public class ReverseArray {\n    public static void reverse(int[] arr) {\n        int left = 0;\n        int right = arr.length - 1;\n        while (left < right) {\n            // TODO: swap arr[left] and arr[right]\n            // TODO: move pointers inward\n        }\n    }\n\n    public static void main(String[] args) {\n        int[] nums = {1, 2, 3, 4, 5};\n        reverse(nums);\n        System.out.println(java.util.Arrays.toString(nums));\n        // Expected: [5, 4, 3, 2, 1]\n    }\n}",
+        "hint": "Use a temp variable to swap. Move left++ and right--.",
+        "expectedOutput": "[5, 4, 3, 2, 1]",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p4u1_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Two-pointer is like two people searching a bookshelf from opposite ends. One starts at the left, one at the right. They walk toward each other, eliminating half the possibilities with each step. Instead of one person checking every single book (O(n²)), two people working inward solve it in O(n). The key insight: in a SORTED array, if the sum is too big, shrink from the right. Too small? Advance from the left.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p4u1_c4",
+      "type": "code",
+      "content": {
+        "code": "// Pattern 1: Two-pointer on sorted array (Two Sum)\npublic static int[] twoSumSorted(int[] arr, int target) {\n    int left = 0, right = arr.length - 1;\n    while (left < right) {\n        int sum = arr[left] + arr[right];\n        if (sum == target) return new int[]{left, right};\n        else if (sum < target) left++;\n        else right--;\n    }\n    return new int[]{-1, -1};\n}\n\n// Pattern 2: In-place string reversal with StringBuilder\npublic static String reverseWords(String s) {\n    StringBuilder sb = new StringBuilder();\n    String[] words = s.trim().split(\"\\\\s+\");\n    for (int i = words.length - 1; i >= 0; i--) {\n        sb.append(words[i]);\n        if (i > 0) sb.append(\" \");\n    }\n    return sb.toString();\n}\n\n// Pattern 3: Check if a string is a palindrome (two-pointer)\npublic static boolean isPalindrome(String s) {\n    int left = 0, right = s.length() - 1;\n    while (left < right) {\n        if (s.charAt(left) != s.charAt(right)) return false;\n        left++;\n        right--;\n    }\n    return true;\n}",
+        "highlight": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "annotation": "The two-pointer pattern works on SORTED arrays. The decision — move left or right — depends on comparing current sum to target. Time O(n), Space O(1). StringBuilder is preferred over String concatenation in loops because Strings are immutable — each + creates a new object."
+      }
+    },
+    {
+      "id": "p4u1_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "public static int[] twoSumSorted(int[] arr, int target) {\n    int left = 0, right = arr.length - 1;\n    while (left < right) {\n        int sum = arr[left] + arr[right];\n        if (sum == target) return new int[]{left, right};\n        else if (sum < target) left++;\n        else right--;\n    }\n    return new int[]{-1, -1};\n}\n// arr = {1, 3, 5, 7, 9}, target = 8",
+        "modification": "What if we change `left < right` to `left <= right`?",
+        "question": "What happens when target = 6 and arr = {1, 2, 3, 4, 5}?",
+        "options": [
+          "Returns {2",
+          "2} — same element used twice",
+          "Still works correctly",
+          "ArrayIndexOutOfBoundsException"
+        ],
+        "correct": 0,
+        "explanation": "With left <= right, when left and right both equal 2, the while loop still runs. We compute sum = arr[2] + arr[2] = 6 which equals target, so we return {2, 2}. But left and right point to the SAME index — we used one element twice. The strict < in `while (left < right)` guarantees left and right always reference TWO different positions in the array."
+      }
+    },
+    {
+      "id": "p4u1_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Finding a pair that sums to target",
+        "codeA": "// Brute force: O(n²) time, O(1) space\npublic static int[] twoSumBrute(int[] arr, int target) {\n    for (int i = 0; i < arr.length; i++) {\n        for (int j = i + 1; j < arr.length; j++) {\n            if (arr[i] + arr[j] == target)\n                return new int[]{i, j};\n        }\n    }\n    return new int[]{-1, -1};\n}",
+        "codeB": "// Two-pointer: O(n) time, O(1) space (sorted input)\npublic static int[] twoSumOptimal(int[] arr, int target) {\n    int left = 0, right = arr.length - 1;\n    while (left < right) {\n        int sum = arr[left] + arr[right];\n        if (sum == target) return new int[]{left, right};\n        else if (sum < target) left++;\n        else right--;\n    }\n    return new int[]{-1, -1};\n}",
+        "question": "Why is two-pointer O(n) while brute force is O(n²)?",
+        "options": [
+          "Each pointer moves at most n times total",
+          "Sorting makes it faster",
+          "Two loops are always slower",
+          "It uses less memory"
+        ],
+        "correct": 0,
+        "explanation": "In two-pointer, left only increments and right only decrements. Combined they traverse the array once — at most n moves total. Brute force nests two for-loops checking every pair with indices i and j. Two-pointer requires the array to be SORTED; if unsorted, sorting first costs O(n log n) which is still better than O(n²)."
+      }
+    },
+    {
+      "id": "p4u1_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "When would you use two-pointer instead of nested loops for Two Sum?",
+        "sentence": "Two-pointer works on _____ arrays, giving O(n) time and O(1) space because left only _____ and right only _____.",
+        "blanks": [
+          "sorted",
+          "increments",
+          "decrements"
+        ],
+        "distractors": [
+          "unsorted",
+          "resets",
+          "doubles"
+        ]
+      }
+    },
+    {
+      "id": "p4u1_c8",
+      "type": "connect",
+      "content": {
+        "text": "In SDET interviews, array/string problems are the most common first round. You'll see them in:",
+        "code": "// Validating API response arrays\nList<String> responseItems = response.jsonPath().getList(\"items\");\n// Check for duplicates — use the two-pointer pattern on sorted data\nCollections.sort(responseItems);\nfor (int i = 1; i < responseItems.size(); i++) {\n    if (responseItems.get(i).equals(responseItems.get(i-1))) {\n        System.out.println(\"Duplicate found: \" + responseItems.get(i));\n    }\n}",
+        "note": "Array traversal and two-pointer are foundational. Every subsequent DSA pattern builds on the ability to walk through data intelligently rather than brute-forcing every combination."
+      }
+    }
+  ]
+}

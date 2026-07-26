@@ -1,0 +1,133 @@
+{
+  "unitId": "p2u5",
+  "title": "Iterators & Streams Intro",
+  "phase": 2,
+  "unit": 5,
+  "teaches": [
+    "collections.iterators",
+    "collections.streams_intro"
+  ],
+  "requires": [
+    "collections.arraylist",
+    "collections.generics"
+  ],
+  "estimatedMinutes": 27,
+  "cards": [
+    {
+      "id": "p2u5_c1",
+      "type": "hook",
+      "content": {
+        "question": "This crashes. But the logic LOOKS fine. Why?",
+        "code": "List<String> names = new ArrayList<>(List.of(\"a\", \"bb\", \"ccc\"));\nfor (String s : names) {\n    if (s.length() > 1) names.remove(s);\n}"
+      }
+    },
+    {
+      "id": "p2u5_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Use an Iterator to safely remove all strings longer than 2 characters from this list.",
+        "starterCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<String> words = new ArrayList<>(List.of(\"hi\", \"hello\", \"ok\", \"world\"));\n        // Use Iterator to remove words with length > 2\n        System.out.println(words);\n    }\n}",
+        "hint": "Get an Iterator with .iterator(). Use while(it.hasNext()), it.next(), and it.remove()",
+        "expectedOutput": "[hi, ok]",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p2u5_c3",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Use a stream to filter this list to only even numbers and collect into a new list.",
+        "starterCode": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Integer> nums = List.of(1, 2, 3, 4, 5, 6);\n        // Use .stream().filter().collect() to get evens\n    }\n}",
+        "hint": "nums.stream().filter(n -> n % 2 == 0).collect(Collectors.toList())",
+        "expectedOutput": "[2, 4, 6]",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p2u5_c4",
+      "type": "analogy",
+      "content": {
+        "text": "An Iterator is a bookmark in a book — it tracks your position and lets you move forward one page at a time (and optionally rip out the current page safely). A Stream is a conveyor belt in a factory: items flow through stations (filter, transform, collect) and you get the finished product at the end without touching the original pile.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p2u5_c5",
+      "type": "code",
+      "content": {
+        "code": "List<String> names = List.of(\"Alice\", \"Bob\", \"Charlie\", \"Dave\");\nList<String> long_names = names.stream()\n    .filter(n -> n.length() > 3)\n    .map(String::toUpperCase)\n    .collect(Collectors.toList());\n// Result: [ALICE, CHARLIE, DAVE]",
+        "highlight": [
+          "3",
+          "4"
+        ],
+        "annotation": "filter() keeps elements matching a condition. map() transforms each element. collect() gathers results into a new collection. The original list is NEVER modified — streams are non-mutating pipelines. A stream can only be consumed ONCE — after a terminal operation (forEach, collect), it is closed. Reusing a consumed stream throws IllegalStateException. The for-each loop uses an Iterator internally; calling list.remove() directly during iteration causes ConcurrentModificationException because the Iterator's modification count becomes out of sync. Use Iterator.remove() to safely remove during iteration."
+      }
+    },
+    {
+      "id": "p2u5_c6",
+      "type": "break_it",
+      "content": {
+        "setup": "List<Integer> nums = List.of(1, 2, 3, 4, 5);\nStream<Integer> s = nums.stream().filter(n -> n > 2);\ns.forEach(System.out::println);\ns.forEach(System.out::println);  // second use",
+        "modification": "We call forEach() on the same stream TWICE.",
+        "question": "What happens on the second forEach()?",
+        "options": [
+          "Prints 3",
+          "4",
+          "5 again",
+          "Prints nothing",
+          "IllegalStateException",
+          "Compile error"
+        ],
+        "correct": 2,
+        "explanation": "A stream can only be consumed ONCE. After a terminal operation like forEach or collect, the stream is closed. Reusing a consumed stream throws IllegalStateException. Create a new stream from the source to process again."
+      }
+    },
+    {
+      "id": "p2u5_c7",
+      "type": "contrast",
+      "content": {
+        "label": "Traditional loop vs Stream pipeline",
+        "codeA": "// Imperative: HOW to do it\nList<String> result = new ArrayList<>();\nfor (String s : names) {\n    if (s.length() > 3) {\n        result.add(s.toUpperCase());\n    }\n}",
+        "codeB": "// Declarative: WHAT to do\nList<String> result = names.stream()\n    .filter(s -> s.length() > 3)\n    .map(String::toUpperCase)\n    .collect(Collectors.toList());",
+        "question": "What's the main advantage of the stream approach?",
+        "options": [
+          "Reads like a description of intent",
+          "Faster performance",
+          "Less memory",
+          "Modifies original list"
+        ],
+        "correct": 0,
+        "explanation": "A stream is a conveyor belt — items flow through stations (filter, transform, collect) describing WHAT you want, not HOW. The original list is never modified. Streams are non-mutating pipelines that read like a description of intent rather than step-by-step instructions."
+      }
+    },
+    {
+      "id": "p2u5_c8",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Why is removing elements during a for-each loop unsafe?",
+        "sentence": "The for-each loop uses an _____ internally; calling list.remove() directly causes _____ because the modification count is out of sync. Use Iterator.remove() to safely _____ during iteration.",
+        "blanks": [
+          "Iterator",
+          "ConcurrentModificationException",
+          "remove"
+        ],
+        "distractors": [
+          "Stream",
+          "IllegalStateException",
+          "filter",
+          "collect"
+        ]
+      }
+    },
+    {
+      "id": "p2u5_c9",
+      "type": "connect",
+      "content": {
+        "text": "In test automation, streams transform API response data into assertions cleanly:",
+        "code": "List<User> users = response.jsonPath().getList(\"users\", User.class);\nList<String> activeEmails = users.stream()\n    .filter(User::isActive)\n    .map(User::getEmail)\n    .collect(Collectors.toList());\nassertTrue(activeEmails.contains(\"sdet@amazon.com\"));",
+        "note": "This pattern — extract list from response, filter, transform, assert — is the backbone of collection-based API testing. You'll master it in Phase 5."
+      }
+    }
+  ]
+}

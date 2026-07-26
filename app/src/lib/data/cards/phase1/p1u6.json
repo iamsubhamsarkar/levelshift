@@ -1,0 +1,151 @@
+{
+  "unitId": "p1u6",
+  "title": "Polymorphism",
+  "phase": 1,
+  "unit": 6,
+  "teaches": [
+    "oop.polymorphism",
+    "oop.overloading",
+    "oop.overriding"
+  ],
+  "requires": [
+    "oop.inheritance"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u6_c1",
+      "type": "hook",
+      "content": {
+        "question": "Same variable type, different objects. Different output. How?",
+        "code": "Animal a = new Dog();  a.speak(); // \"Woof\"\nAnimal b = new Cat();  b.speak(); // \"Meow\"\nAnimal c = new Duck(); c.speak(); // \"Quack\""
+      }
+    },
+    {
+      "id": "p1u6_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Override the describe() method in Circle so it prints \"Circle with radius X\" instead of the parent's generic message.",
+        "starterCode": "class Shape {\n    String describe() { return \"I am a shape\"; }\n}\nclass Circle extends Shape {\n    double radius;\n    Circle(double r) { this.radius = r; }\n    // Override describe() here\n}",
+        "hint": "Same method signature: String describe() { return \"Circle with radius \" + radius; }",
+        "expectedOutput": "Circle with radius 5.0",
+        "solutionCode": "class Shape {\n    String describe() { return \"I am a shape\"; }\n}\nclass Circle extends Shape {\n    double radius;\n    Circle(double r) { this.radius = r; }\n    @Override\n    String describe() { return \"Circle with radius \" + radius; }\n}\n// Test: new Circle(5.0).describe() → \"Circle with radius 5.0\""
+      }
+    },
+    {
+      "id": "p1u6_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Polymorphism = \"many forms.\" Same remote control button (play), different devices, different result. Press play on TV = shows video. Press play on speaker = plays music. Press play on game console = starts game. The BUTTON is the same. The BEHAVIOR depends on what you plugged in.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u6_c4",
+      "type": "code",
+      "content": {
+        "code": "class Animal {\n    void speak() { System.out.println(\"...\"); }\n}\nclass Dog extends Animal {\n    @Override                                    // ← marks intentional override\n    void speak() { System.out.println(\"Woof!\"); }\n}\nclass Cat extends Animal {\n    @Override\n    void speak() { System.out.println(\"Meow!\"); }\n}\n\n// Polymorphism in action:\nAnimal pet = new Dog();\npet.speak();  // \"Woof!\" — Dog's version runs\n\npet = new Cat();\npet.speak();  // \"Meow!\" — Cat's version runs",
+        "highlight": [
+          "5",
+          "15",
+          "16"
+        ],
+        "annotation": "@Override = \"I'm intentionally replacing parent's method.\" Java checks at RUNTIME which actual object this is, and calls THAT version. Variable type (Animal) doesn't matter — object type (Dog/Cat) does."
+      }
+    },
+    {
+      "id": "p1u6_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "class Parent {\n    void greet() { System.out.println(\"Hello from Parent\"); }\n}\nclass Child extends Parent {\n    void greet() { System.out.println(\"Hello from Child\"); }\n}\nParent p = new Child();\np.greet();",
+        "modification": "Variable is Parent type, object is Child. Which greet() runs?",
+        "question": "What gets printed?",
+        "options": [
+          "Hello from Parent",
+          "Hello from Child",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "Runtime polymorphism — Java looks at the ACTUAL OBJECT (Child), not the variable type (Parent). The Child's greet() overrides Parent's. This is the core of polymorphism."
+      }
+    },
+    {
+      "id": "p1u6_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Overloading vs Overriding — which is which?",
+        "codeA": "class Calculator {\n    int add(int a, int b) { return a + b; }\n    double add(double a, double b) { return a + b; }\n    int add(int a, int b, int c) { return a+b+c; }\n}",
+        "codeB": "class Animal {\n    void speak() { System.out.println(\"...\"); }\n}\nclass Dog extends Animal {\n    @Override\n    void speak() { System.out.println(\"Woof\"); }\n}",
+        "question": "Which is overloading and which is overriding?",
+        "options": [
+          "A=Overloading B=Overriding",
+          "A=Overriding B=Overloading",
+          "Both are overloading",
+          "Both are overriding"
+        ],
+        "correct": 0,
+        "explanation": "OVERLOADING = same class, same name, DIFFERENT parameters (compile-time). OVERRIDING = child class replaces parent's method, SAME signature (runtime). Overloading = many versions. Overriding = new version replaces old."
+      }
+    },
+    {
+      "id": "p1u6_c7",
+      "type": "code",
+      "content": {
+        "code": "// WHY polymorphism matters — real example:\nvoid testAllBrowsers(WebDriver driver) {\n    driver.get(\"https://example.com\");    // same code!\n    driver.findElement(By.id(\"x\"));       // same code!\n}\n\n// Same method, different browsers:\ntestAllBrowsers(new ChromeDriver());   // tests Chrome\ntestAllBrowsers(new FirefoxDriver());  // tests Firefox\ntestAllBrowsers(new SafariDriver());   // tests Safari",
+        "highlight": [
+          "2",
+          "3",
+          "8",
+          "9",
+          "10"
+        ],
+        "annotation": "ONE method handles ALL browsers. You write test logic ONCE. Pass different driver implementations. That's polymorphism solving a real problem — your Selenium framework will use this daily. In Selenium, WebDriver is an interface. ChromeDriver and FirefoxDriver implement it. Tests reference the parent type (WebDriver) so switching browsers means changing one line."
+      }
+    },
+    {
+      "id": "p1u6_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "class Animal {\n    void speak() { System.out.println(\"Animal\"); }\n}\nclass Dog extends Animal {\n    void speak() { System.out.println(\"Dog\"); }\n    void fetch() { System.out.println(\"Fetching!\"); }\n}\nAnimal a = new Dog();\na.fetch();",
+        "modification": "Variable type is Animal. We call fetch() which only Dog has.",
+        "question": "What happens?",
+        "options": [
+          "Prints \"Fetching!",
+          "Compile error — Animal doesn't have fetch()",
+          "Runtime error"
+        ],
+        "correct": 1,
+        "explanation": "Compile error! The COMPILER only sees the variable type (Animal). Animal has no fetch(). Even though the object IS a Dog, you can only call methods that the DECLARED type knows about. You'd need to cast: ((Dog)a).fetch(); Polymorphism gives you parent's interface, not child's extras."
+      }
+    },
+    {
+      "id": "p1u6_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Why is polymorphism essential in Selenium?",
+        "sentence": "WebDriver is an _____ with implementations like _____. Tests reference the _____ type so switching browsers = one line change.",
+        "blanks": [
+          "interface",
+          "ChromeDriver",
+          "parent"
+        ],
+        "distractors": [
+          "class",
+          "TestNG",
+          "child",
+          "abstract"
+        ]
+      }
+    },
+    {
+      "id": "p1u6_c10",
+      "type": "connect",
+      "content": {
+        "text": "In REST Assured (Phase 5), polymorphism enables environment switching:",
+        "code": "RequestSpecification getSpec(String env) {\n    if (env.equals(\"prod\")) return prodSpec;\n    if (env.equals(\"qa\")) return qaSpec;\n    return devSpec;\n}\n\n// Same test code, different environment:\ngiven().spec(getSpec(\"qa\")).get(\"/users\").then().statusCode(200);\ngiven().spec(getSpec(\"prod\")).get(\"/users\").then().statusCode(200);",
+        "note": "One interface (RequestSpecification), many implementations. You already built this pattern in your CRAFTS API testing project. Now you know WHY it works."
+      }
+    }
+  ]
+}

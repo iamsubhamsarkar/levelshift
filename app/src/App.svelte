@@ -1,0 +1,104 @@
+<script>
+  import { onMount } from 'svelte';
+  import Dashboard from './lib/components/Dashboard.svelte';
+  import LearnView from './lib/components/LearnView.svelte';
+  import QuickChallenge from './lib/components/QuickChallenge.svelte';
+  import Settings from './lib/components/Settings.svelte';
+  import Onboarding from './lib/components/Onboarding.svelte';
+  import ReadinessReport from './lib/components/ReadinessReport.svelte';
+  import CourseMap from './lib/components/CourseMap.svelte';
+  import { initializeApp, userSettings } from './lib/stores/progress.js';
+  import { initializeGamification } from './lib/engines/gamification.js';
+
+  let currentRoute = 'dashboard';
+  let notifications = null;
+  let showNotification = false;
+  let needsOnboarding = false;
+
+  function handleRouteChange() {
+    const hash = window.location.hash.slice(1) || 'dashboard';
+    currentRoute = hash;
+  }
+
+  function navigate(route) {
+    window.location.hash = route;
+  }
+
+  function dismissNotification() {
+    showNotification = false;
+  }
+
+  function completeOnboarding() {
+    needsOnboarding = false;
+    navigate('dashboard');
+  }
+
+  onMount(() => {
+    initializeApp();
+
+    // Check if first-time user
+    const unsub = userSettings.subscribe(s => {
+      needsOnboarding = !s.onboarded;
+    });
+    unsub();
+
+    if (!needsOnboarding) {
+      notifications = initializeGamification();
+      if (notifications && notifications.length > 0) {
+        showNotification = true;
+      }
+    }
+
+    handleRouteChange();
+    window.addEventListener('hashchange', handleRouteChange);
+    return () => window.removeEventListener('hashchange', handleRouteChange);
+  });
+</script>
+
+<!-- Notification banner -->
+{#if showNotification && notifications}
+  <div class="fixed top-0 left-0 right-0 z-50 p-3 animate-slide-up">
+    {#each notifications as notif}
+      <div 
+        class="max-w-lg mx-auto rounded-lg p-4 border shadow-lg mb-2
+          {notif.type === 'critical' || notif.type === 'severe' ? 'bg-accent-red/10 border-accent-red/30' : ''}
+          {notif.type === 'danger' || notif.type === 'warning' ? 'bg-accent-yellow/10 border-accent-yellow/30' : ''}
+          {notif.type === 'info' ? 'bg-accent-blue/10 border-accent-blue/30' : ''}"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <p class="text-sm text-text-primary">{notif.message}</p>
+          <button class="text-text-muted hover:text-text-primary text-lg leading-none" on:click={dismissNotification}>×</button>
+        </div>
+        {#if notif.xpLoss}
+          <p class="text-xs text-accent-red mt-1">{notif.xpLoss} XP</p>
+        {/if}
+      </div>
+    {/each}
+  </div>
+{/if}
+
+<main class="min-h-screen bg-surface-0 overflow-x-hidden">
+  {#if needsOnboarding}
+    <Onboarding onComplete={completeOnboarding} />
+  {:else if currentRoute === 'dashboard'}
+    <Dashboard {navigate} />
+  {:else if currentRoute.startsWith('learn')}
+    <LearnView {navigate} />
+  {:else if currentRoute === 'challenge'}
+    <QuickChallenge {navigate} />
+  {:else if currentRoute === 'settings'}
+    <Settings {navigate} />
+  {:else if currentRoute === 'report'}
+    <ReadinessReport {navigate} />
+  {:else if currentRoute === 'course'}
+    <CourseMap {navigate} />
+  {:else}
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="card text-center">
+        <h2 class="text-xl font-semibold text-accent-red">404</h2>
+        <p class="text-text-secondary">Route not found</p>
+        <button class="btn-primary mt-4" on:click={() => navigate('dashboard')}>Go Home</button>
+      </div>
+    </div>
+  {/if}
+</main>

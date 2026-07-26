@@ -1,0 +1,119 @@
+{
+  "unitId": "p6u3",
+  "title": "Contract Testing",
+  "phase": 6,
+  "unit": 3,
+  "teaches": [
+    "apistrategy.schema-validation",
+    "apistrategy.contract-testing",
+    "apistrategy.pact-basics"
+  ],
+  "requires": [
+    "restassured.requests",
+    "restassured.assertions",
+    "apistrategy.positive-negative"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p6u3_c1",
+      "type": "hook",
+      "content": {
+        "question": "The frontend team says your API suddenly broke their app. You say \"I didn't change anything!\" But you renamed a JSON field from `userName` to `user_name`. Whose fault is it?",
+        "code": "// Before: {\"userName\": \"John\", \"age\": 25}\n// After:  {\"user_name\": \"John\", \"age\": 25}\n// Frontend code: response.data.userName → undefined"
+      }
+    },
+    {
+      "id": "p6u3_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Validate that a response ALWAYS contains an \"id\" field that is an integer.",
+        "starterCode": "@Test\npublic void testResponseStructure() {\n    given()\n        .get(\"/users/1\")\n    .then()\n        .statusCode(200);\n    // How do you enforce that \"id\" MUST be integer?\n    // What if someone adds a field? Removes one?\n}",
+        "hint": "JSON Schema defines the \"contract\" — the structure every response must follow.",
+        "expectedOutput": "Validation against a schema file",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p6u3_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A contract test is like a legal contract between two businesses. The producer (API server) promises \"I will always return these fields in this format.\" The consumer (frontend/client) promises \"I only need these fields.\" If either side breaks the agreement, the contract test CATCHES it before production. It's not testing behavior — it's testing the SHAPE of communication.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p6u3_c4",
+      "type": "code",
+      "content": {
+        "code": "@Test\npublic void testUserSchemaContract() {\n    given()\n        .get(\"/users/1\")\n    .then()\n        .assertThat()\n        .body(matchesJsonSchemaInClasspath(\"user-schema.json\"));\n}",
+        "highlight": [
+          "6"
+        ],
+        "annotation": "`matchesJsonSchemaInClasspath` validates the response body against a JSON Schema file in src/test/resources. The schema defines required fields, types, and formats — it is the contract between producer and consumer. If the API removes a field or changes a type, this test fails immediately — before any consumer is affected. Unlike integration tests that verify behavior, schema validation verifies the shape of communication. The schema acts as a shared contract between producer and consumer — if the shape changes, the test fails immediately."
+      }
+    },
+    {
+      "id": "p6u3_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "// user-schema.json: {\"required\":[\"id\",\"name\"],\"properties\":{\"id\":{\"type\":\"integer\"}}}\ngiven().get(\"/users/1\").then()\n    .body(matchesJsonSchemaInClasspath(\"user-schema.json\"));",
+        "modification": "The API team adds a new optional field `\"avatar\": \"url\"`. Does this test fail?",
+        "question": "Does adding a NEW optional field break schema validation?",
+        "options": [
+          "Yes - unknown fields fail",
+          "No - only required/type changes fail",
+          "Depends on schema settings"
+        ],
+        "correct": 2,
+        "explanation": "By default, JSON Schema allows additional properties. If you set `\"additionalProperties\": false` in your schema, new fields WILL break the test. Choose based on your contract strictness — strict schemas catch accidental additions, lenient schemas allow evolution."
+      }
+    },
+    {
+      "id": "p6u3_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Schema Validation vs Pact Contract Testing",
+        "codeA": "// Schema: producer-side validation\n// \"Does MY response match MY schema?\"\ngiven().get(\"/users/1\").then()\n    .body(matchesJsonSchemaInClasspath(\"schema.json\"));",
+        "codeB": "// Pact: consumer-driven contract\n// \"Does the producer return what I (consumer) NEED?\"\n@Pact(consumer = \"Frontend\")\npublic RequestResponsePact userPact(PactDslWithProvider builder) {\n    return builder.given(\"user exists\")\n        .uponReceiving(\"get user\").path(\"/users/1\")\n        .willRespondWith().status(200).body(\"{\\\"id\\\":1}\").toPact();\n}",
+        "question": "Who defines the contract in Pact?",
+        "options": [
+          "The producer (API server)",
+          "The consumer (client/frontend)",
+          "Both together",
+          "Neither"
+        ],
+        "correct": 1,
+        "explanation": "Pact is consumer-driven — the consumer defines \"I need these fields\" and the producer verifies it can fulfill that contract. Schema validation is producer-side — `matchesJsonSchemaInClasspath` checks the response against the producer's own schema file. Pact flips this by having clients specify their needs, ensuring producers never break what consumers actually use."
+      }
+    },
+    {
+      "id": "p6u3_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Why do you need contract tests if you already have integration tests?",
+        "sentence": "Integration tests verify behavior at a point in time, but _____ tests verify the agreement between services over time by validating the _____ of communication, and Pact runs without real HTTP calls because the contract is _____ between producer and consumer.",
+        "blanks": [
+          "contract",
+          "shape",
+          "shared"
+        ],
+        "distractors": [
+          "performance",
+          "speed",
+          "encrypted"
+        ]
+      }
+    },
+    {
+      "id": "p6u3_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, microservices communicate via APIs constantly. When one team changes their API shape:",
+        "code": "Team A: Changes response field name\nTeam A's tests: ✅ PASS (they updated their tests)\nTeam B's code:  💥 BREAKS in production\n\nWith contract tests:\nTeam A's build: ❌ FAIL - breaks Team B's contract\n→ Caught BEFORE deployment",
+        "note": "As an SDET-1, you'll maintain schema contracts for your service's API. When a developer makes a breaking change, YOUR contract test catches it in the build pipeline — preventing production incidents that would require a COE."
+      }
+    }
+  ]
+}

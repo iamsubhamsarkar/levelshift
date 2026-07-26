@@ -1,0 +1,123 @@
+{
+  "unitId": "p5u7",
+  "title": "Authentication in API Tests",
+  "phase": 5,
+  "unit": 7,
+  "teaches": [
+    "restassured.basic_auth",
+    "restassured.bearer_token",
+    "restassured.oauth2"
+  ],
+  "requires": [
+    "restassured.given_when_then",
+    "http.headers"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p5u7_c1",
+      "type": "hook",
+      "content": {
+        "question": "Why does this request return 401 when the endpoint clearly exists?",
+        "code": "given().when().get(\"/secure/users\").then().statusCode(401); // Unauthorized!"
+      }
+    },
+    {
+      "id": "p5u7_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "This test should work — the credentials are correct. Why does it fail?",
+        "starterCode": "given()\n    .header(\"Authorization\", \"admin:password123\")\n.when()\n    .get(\"/secure/profile\")\n.then()\n    .statusCode(200);",
+        "hint": "Basic Auth requires a specific format with Base64 encoding",
+        "expectedOutput": "Use .auth().basic(\"admin\", \"password123\") or header value must be \"Basic \" + Base64(\"admin:password123\"). Raw credentials in the header won't work.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p5u7_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Authentication is like airport security. Basic Auth is showing your passport (credentials sent every time — simple but exposed). Bearer Token is a boarding pass (issued once after ID check, shown at every gate). OAuth2 is the full check-in process — you prove identity once, get a token, and use it everywhere without re-proving.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p5u7_c4",
+      "type": "code",
+      "content": {
+        "code": "// Basic Auth — shows passport every time (auto-encodes to Base64)\ngiven()\n    .auth().basic(\"admin\", \"password123\")\n.when()\n    .get(\"/secure/profile\")\n.then()\n    .statusCode(200);\n\n// Bearer Token — shows boarding pass at each gate\ngiven()\n    .header(\"Authorization\", \"Bearer \" + token)\n.when()\n    .get(\"/secure/users\")\n.then()\n    .statusCode(200);\n\n// OAuth2 shortcut — equivalent to Bearer header\ngiven()\n    .auth().oauth2(token)\n.when()\n    .get(\"/secure/data\")\n.then()\n    .statusCode(200);",
+        "highlight": [
+          "3",
+          "10",
+          "18"
+        ],
+        "annotation": ".auth().basic() is the passport — auto-encodes credentials to Base64 and sends them every time. .header(\"Authorization\", \"Bearer \" + token) is the boarding pass — a pre-issued token shown at each gate. .auth().oauth2(token) is a REST Assured shortcut that does the same thing as the Bearer header. In test suites, use @BeforeAll to fetch the token once, then share it across all tests in the class."
+      }
+    },
+    {
+      "id": "p5u7_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "given()\n    .auth().oauth2(\"valid-token-here\")\n.when()\n    .get(\"/secure/data\")\n.then()\n    .statusCode(200);",
+        "modification": "Use an expired token (tokens typically expire in 1 hour)",
+        "question": "What status code do you get with an expired token?",
+        "options": [
+          "401 Unauthorized",
+          "403 Forbidden",
+          "200 with empty body"
+        ],
+        "correct": 0,
+        "explanation": "401 means \"who are you?\" — the boarding pass has expired, show a new one. 403 means \"I know who you are, but you can't access this\" — valid pass, wrong terminal. Expired tokens = 401. Valid token + wrong role = 403."
+      }
+    },
+    {
+      "id": "p5u7_c6",
+      "type": "contrast",
+      "content": {
+        "label": "401 Unauthorized vs 403 Forbidden:",
+        "codeA": "// 401 — expired boarding pass\ngiven()\n    .auth().oauth2(\"expired-token\")\n.when()\n    .get(\"/admin/users\")\n.then()\n    .statusCode(401); // \"show me a valid pass\"",
+        "codeB": "// 403 — valid pass, wrong terminal\ngiven()\n    .auth().oauth2(\"regular-user-token\")\n.when()\n    .get(\"/admin/users\")\n.then()\n    .statusCode(403); // \"this gate isn't for you\"",
+        "question": "Your test gets 403. Is it an auth problem or authorization problem?",
+        "options": [
+          "Authentication (identity)",
+          "Authorization (permissions)",
+          "Both",
+          "Neither"
+        ],
+        "correct": 1,
+        "explanation": "403 means the boarding pass is valid (authentication passed — the server knows who you are) but you're at the wrong terminal (authorization failed — you lack permission for /admin). Fix by using a token with the right role, not by re-authenticating with better credentials."
+      }
+    },
+    {
+      "id": "p5u7_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How do you handle authentication in REST Assured tests?",
+        "sentence": "For Basic Auth use _____ which auto-encodes credentials, for token-based APIs use _____ as a header value, and centralize token fetching in a _____ method so tests don't manage auth themselves.",
+        "blanks": [
+          ".auth().basic()",
+          "Bearer \" + token",
+          "@BeforeAll"
+        ],
+        "distractors": [
+          ".header().auth()",
+          "Token \" + secret",
+          "@AfterEach",
+          ".credentials()",
+          "Basic \" + raw",
+          "@Test"
+        ]
+      }
+    },
+    {
+      "id": "p5u7_c8",
+      "type": "connect",
+      "content": {
+        "text": "Amazon internal services use SigV4 signing, but external API tests use Bearer:",
+        "code": "private static String token;\n\n@BeforeAll\nstatic void authenticate() {\n    token = given().contentType(JSON)\n        .body(Map.of(\"username\", \"test\", \"password\", \"pass\"))\n        .post(\"/auth/login\").jsonPath().getString(\"token\");\n}",
+        "note": "Token management is a framework concern, not a test concern. Tests should call getToken() — they shouldn't know HOW authentication works. This separation is what interviewers look for in your framework design."
+      }
+    }
+  ]
+}

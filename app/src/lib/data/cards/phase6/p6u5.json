@@ -1,0 +1,121 @@
+{
+  "unitId": "p6u5",
+  "title": "API Test Reporting & Logging",
+  "phase": 6,
+  "unit": 5,
+  "teaches": [
+    "apistrategy.allure-reports",
+    "apistrategy.logging",
+    "apistrategy.failure-analysis"
+  ],
+  "requires": [
+    "restassured.requests",
+    "apistrategy.ci-execution",
+    "apistrategy.positive-negative"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p6u5_c1",
+      "type": "hook",
+      "content": {
+        "question": "Your nightly test run shows \"47 tests failed.\" Your manager asks \"What broke?\" You open the report and see... just red X marks. No logs, no request/response bodies, no context. How long until you find the bug?",
+        "code": "❌ testCreateUser - AssertionError: expected 201 but got 500\n// Cool. But WHY did it return 500? What was the request body?"
+      }
+    },
+    {
+      "id": "p6u5_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Add logging to capture the FULL request and response when a test fails.",
+        "starterCode": "@Test\npublic void testCreateUser() {\n    given()\n        .body(\"{\\\"name\\\":\\\"John\\\"}\")\n        .post(\"/users\")\n    .then()\n        .statusCode(201);\n    // When this fails, you see NOTHING about what was sent/received.\n    // How do you capture that context?\n}",
+        "hint": "RestAssured has `.log().all()` and Allure has `@Step` annotations.",
+        "expectedOutput": "Full request/response visible in failure reports",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p6u5_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A test report without context is like a doctor saying \"you're sick\" without running tests. Allure reports are like a complete medical chart — symptoms (assertion failure), history (request sent), lab results (response received), and diagnosis (root cause). Good reporting means ANY team member can diagnose a failure without re-running the test or asking you.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p6u5_c4",
+      "type": "code",
+      "content": {
+        "code": "@Test\n@Description(\"Verify user creation returns 201\")\n@Severity(SeverityLevel.CRITICAL)\npublic void testCreateUser() {\n    Response resp = given().filter(new AllureRestAssured())\n        .body(\"{\\\"name\\\":\\\"John\\\"}\").post(\"/users\");\n    Allure.addAttachment(\"Response\", resp.asString());\n    assertEquals(resp.statusCode(), 201);\n}",
+        "highlight": [
+          "5",
+          "7"
+        ],
+        "annotation": "`AllureRestAssured()` filter automatically captures request/response in Allure reports. `addAttachment` lets you attach extra context — response bodies, screenshots, environment info. When this test fails, the Allure report shows EXACTLY what was sent and received."
+      }
+    },
+    {
+      "id": "p6u5_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "given()\n    .log().all()  // logs to console\n    .post(\"/users\")\n.then()\n    .statusCode(201);",
+        "modification": "Tests run in CI with 50 parallel threads. Where do these logs GO?",
+        "question": "What's wrong with `.log().all()` in CI?",
+        "options": [
+          "Console logs get interleaved and unreadable",
+          "It slows tests down",
+          "Nothing wrong",
+          "It causes test failures"
+        ],
+        "correct": 0,
+        "explanation": "With parallel execution, console logs from 50 threads mix together — you can't tell which request belongs to which test. Use structured logging (Allure attachments, test listeners) that attach logs PER TEST instead of dumping to shared console output."
+      }
+    },
+    {
+      "id": "p6u5_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Allure Reports vs ExtentReports",
+        "codeA": "// Allure: annotation-driven, integrates with CI\n@Step(\"Create user with name: {name}\")\npublic void createUser(String name) {\n    given().body(\"{\\\"name\\\":\\\"\" + name + \"\\\"}\")\n        .post(\"/users\").then().statusCode(201);\n}",
+        "codeB": "// ExtentReports: programmatic, custom dashboards\nExtentTest test = extent.createTest(\"Create User\");\nResponse r = given().body(\"{\\\"name\\\":\\\"John\\\"}\").post(\"/users\");\ntest.log(Status.INFO, \"Response: \" + r.asString());\ntest.log(r.statusCode()==201 ? Status.PASS : Status.FAIL, \"Status check\");",
+        "question": "Which is better for a large SDET team?",
+        "options": [
+          "Allure - less boilerplate and CI plugins",
+          "ExtentReports - more control",
+          "Depends on team needs",
+          "Neither"
+        ],
+        "correct": 0,
+        "explanation": "Allure uses `@Step` annotations and the `AllureRestAssured()` filter to capture request/response automatically with minimal code. It attaches context via `addAttachment` and integrates with CI out of the box. ExtentReports requires programmatic logging for every action. For large teams, Allure's annotation-driven approach means less boilerplate and consistent reporting across all test classes."
+      }
+    },
+    {
+      "id": "p6u5_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How do you debug a test that passed yesterday and failed today with no code change?",
+        "sentence": "I check the _____ report which shows the exact request body and full response received, the environment state, and the _____ tab showing when it last passed — common causes include test data pollution from _____ runs.",
+        "blanks": [
+          "Allure",
+          "history",
+          "parallel"
+        ],
+        "distractors": [
+          "JUnit",
+          "summary",
+          "sequential"
+        ]
+      }
+    },
+    {
+      "id": "p6u5_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, test reports are reviewed daily in operational dashboards:",
+        "code": "Test Suite: UserService API\nPass Rate: 98.2% (196/200)\nFailed: testRateLimit (timeout), testBulkCreate (500)\nTrend: ↓ from 99.5% since Tuesday\nAction: Rate limit test needs longer timeout for gamma",
+        "note": "As an SDET-1, your test reports are a SERVICE HEALTH SIGNAL. When tests fail, on-call engineers read YOUR reports to decide if it's a test issue or a real service bug. Clear reporting with request/response context saves hours of debugging during incidents."
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "unitId": "p7u2",
+  "title": "Element Locators",
+  "phase": 7,
+  "unit": 2,
+  "teaches": [
+    "selenium.locators",
+    "selenium.xpath",
+    "selenium.css-selectors"
+  ],
+  "requires": [
+    "selenium.webdriver-setup",
+    "java.strings"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p7u2_c1",
+      "type": "hook",
+      "content": {
+        "question": "There are 500 elements on a webpage. You need to click ONE specific button. How does Selenium know WHICH one you mean?",
+        "code": "// Selenium doesn't understand English. It needs an ADDRESS.\ndriver.findElement(By.???(\"???\")).click();"
+      }
+    },
+    {
+      "id": "p7u2_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Find and click the \"Submit\" button on a page. Which locator works?",
+        "starterCode": "driver.get(\"https://example.com/form\");\n// HTML: <button id=\"submit-btn\" class=\"btn primary\">Submit</button>\ndriver.findElement(By.name(\"Submit\")).click(); // Does this work?",
+        "hint": "`By.name()` looks for the `name` HTML attribute, not the button text.",
+        "expectedOutput": "NoSuchElementException — there's no name=\"Submit\" attribute",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p7u2_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Locators are like addresses for elements. `By.id` is a house number — unique and fastest. `By.className` is a street name — multiple houses share it. `By.xpath` is GPS coordinates — can find anything but complex and fragile. `By.cssSelector` is postal code + street — precise and efficient. Always prefer the simplest address that uniquely identifies the element.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p7u2_c4",
+      "type": "code",
+      "content": {
+        "code": "driver.findElement(By.id(\"login-btn\"));\ndriver.findElement(By.cssSelector(\".btn.primary\"));\ndriver.findElement(By.xpath(\"//button[text()='Login']\"));\ndriver.findElement(By.name(\"username\"));\ndriver.findElement(By.linkText(\"Sign Up\"));",
+        "highlight": [
+          "1",
+          "2"
+        ],
+        "annotation": "ID is fastest because browsers index by ID internally. CSS selectors are nearly as fast and more flexible. XPath is slowest but can traverse UP the DOM tree (parent from child) — something CSS can't do. Use ID when available, CSS for most cases, XPath only when CSS can't express the relationship. Best practice: use data-testid attributes added by developers — they survive UI redesigns unlike CSS classes or XPath."
+      }
+    },
+    {
+      "id": "p7u2_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "// HTML: <div class=\"btn\">Save</div> <div class=\"btn\">Cancel</div>\nWebElement el = driver.findElement(By.className(\"btn\"));\nel.click();",
+        "modification": "There are TWO elements with class \"btn\". Which one gets clicked?",
+        "question": "What does findElement return when multiple elements match?",
+        "options": [
+          "Throws exception",
+          "Returns the FIRST match",
+          "Returns a random one",
+          "Returns null"
+        ],
+        "correct": 1,
+        "explanation": "`findElement` always returns the FIRST matching element in DOM order. If you need a specific one, use a more precise locator or `findElements` (plural) to get ALL matches as a List."
+      }
+    },
+    {
+      "id": "p7u2_c6",
+      "type": "contrast",
+      "content": {
+        "label": "CSS Selector vs XPath",
+        "codeA": "// CSS: concise, fast, forward-only\ndriver.findElement(By.cssSelector(\"#login .btn-primary\"));\ndriver.findElement(By.cssSelector(\"input[type='email']\"));",
+        "codeB": "// XPath: verbose, slower, can go UP\ndriver.findElement(By.xpath(\"//input[@type='email']/..\"));\ndriver.findElement(By.xpath(\"//span[contains(text(),'Welcome')]\"));",
+        "question": "When MUST you use XPath over CSS?",
+        "options": [
+          "When you need to find a parent element",
+          "When id exists",
+          "When speed matters",
+          "Always use XPath"
+        ],
+        "correct": 0,
+        "explanation": "CSS selectors can only traverse DOWN the DOM — like an address that only goes from street to house number. XPath can go UP with `/..` (child to parent) and match text content with `contains(text())`. Use `By.id` when available as the fastest locator, `By.cssSelector` as default for most cases, and `By.xpath` only when you need upward traversal or text matching."
+      }
+    },
+    {
+      "id": "p7u2_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "Your XPath locator broke after a UI redesign. How do you write stable locators?",
+        "options": [
+          "Use data-testid attributes via By.cssSelector because they survive redesigns unlike positional XPath",
+          "Always use By.xpath with full DOM paths for accuracy",
+          "Use By.className since class names never change",
+          "Avoid all locators and use JavaScript execution"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p7u2_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, SDETs request `data-testid` attributes from developers:",
+        "code": "<!-- Bad: fragile -->\n<div class=\"sc-bZQynM kFpoIF\">Add to Cart</div>\n<!-- Good: stable testing contract -->\n<div data-testid=\"add-to-cart-btn\">Add to Cart</div>",
+        "note": "As an SDET-1, you'll collaborate with frontend developers to add `data-testid` attributes. This creates a CONTRACT between test code and UI code — developers can refactor freely without breaking your tests."
+      }
+    }
+  ]
+}

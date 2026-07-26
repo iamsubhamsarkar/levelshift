@@ -1,0 +1,152 @@
+{
+  "unitId": "p1u8",
+  "title": "OOP Integration Challenge",
+  "phase": 1,
+  "unit": 8,
+  "teaches": [
+    "oop.integration"
+  ],
+  "requires": [
+    "oop.polymorphism",
+    "oop.interfaces",
+    "oop.encapsulation"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u8_c1",
+      "type": "hook",
+      "content": {
+        "question": "You're building a test framework. You need: a base class all tests share, different test types (API, UI, Performance), and a contract that guarantees every test can run + report. Which OOP concepts do you combine?",
+        "code": "// What goes here?\n// abstract? interface? inheritance? encapsulation?"
+      }
+    },
+    {
+      "id": "p1u8_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Design a mini hierarchy: Create an abstract class TestCase with an abstract method execute(), and an interface Reportable with a method generateReport(). Then create ApiTestCase that extends TestCase AND implements Reportable.",
+        "starterCode": "// 1. abstract class TestCase { abstract void execute(); }\n// 2. interface Reportable { String generateReport(); }\n// 3. class ApiTestCase extends TestCase implements Reportable { ... }",
+        "hint": "ApiTestCase must implement BOTH execute() from TestCase AND generateReport() from Reportable.",
+        "expectedOutput": "ApiTestCase",
+        "solutionCode": "abstract class TestCase {\n    abstract void execute();\n}\n\ninterface Reportable {\n    String generateReport();\n}\n\nclass ApiTestCase extends TestCase implements Reportable {\n    void execute() { System.out.println(\"Running API test\"); }\n    public String generateReport() { return \"ApiTestCase\"; }\n}\n// Test: new ApiTestCase().generateReport() → \"ApiTestCase\""
+      }
+    },
+    {
+      "id": "p1u8_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Building a test framework with OOP is like building a restaurant: The KITCHEN LAYOUT is the abstract class (shared infrastructure — oven, stove, fridge). The MENU ITEMS are the subclasses (each dish uses the kitchen differently). The HEALTH CODE is the interface (every restaurant MUST have handwashing, food temp checks — the contract). You can have many restaurant types that all share the kitchen AND follow the code.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u8_c4",
+      "type": "code",
+      "content": {
+        "code": "// Complete mini-framework using ALL OOP concepts:\n\ninterface Executable {\n    void run();\n    default void retry(int times) {\n        for (int i = 0; i < times; i++) {\n            try { run(); return; } catch (Exception e) {\n                if (i == times - 1) throw e;\n            }\n        }\n    }\n}\n\nabstract class BaseTest implements Executable {\n    private String testName;         // encapsulation\n    protected long startTime;\n    \n    BaseTest(String name) {          // constructor\n        this.testName = name;\n    }\n    \n    public String getName() { return testName; }\n    \n    public void run() {              // template method pattern\n        setup();\n        execute();\n        teardown();\n    }\n    \n    void setup() { startTime = System.currentTimeMillis(); }\n    abstract void execute();         // subclass fills this\n    void teardown() { }\n}\n\nclass ApiTest extends BaseTest {\n    ApiTest(String name) { super(name); }\n    \n    @Override\n    void execute() {\n        System.out.println(\"Testing API: \" + getName());\n    }\n}\n\nclass UiTest extends BaseTest {\n    UiTest(String name) { super(name); }\n    \n    @Override\n    void execute() {\n        System.out.println(\"Testing UI: \" + getName());\n    }\n}",
+        "highlight": [
+          "3",
+          "14",
+          "26",
+          "30",
+          "36",
+          "44"
+        ],
+        "annotation": "This combines ALL concepts: Interface (Executable contract + default retry), Abstract class (BaseTest template), Inheritance (ApiTest/UiTest extend BaseTest), Encapsulation (private testName), Polymorphism (both work through BaseTest reference). The pattern: interface (contract) → abstract base class (shared setup) → concrete classes (specific implementations like ApiTest, UiTest)."
+      }
+    },
+    {
+      "id": "p1u8_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "BaseTest test1 = new ApiTest(\"Login API\");\nBaseTest test2 = new UiTest(\"Login Page\");\n\nBaseTest[] suite = {test1, test2};\nfor (BaseTest t : suite) {\n    t.run();\n}",
+        "modification": "We loop through different test types using the SAME variable type.",
+        "question": "What gets printed?",
+        "options": [
+          "Both print \"Testing API",
+          "test1=API test2=UI (polymorphism!)",
+          "Compile error"
+        ],
+        "correct": 1,
+        "explanation": "Polymorphism in action! Both stored as BaseTest, but run() calls execute() which is overridden differently in each subclass. The loop doesn't know or care which type — it just calls run(). THIS is how real test runners work."
+      }
+    },
+    {
+      "id": "p1u8_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Two framework designs — which is better?",
+        "codeA": "// No OOP:\nvoid runApiTest(String url) { /* 50 lines */ }\nvoid runUiTest(String page) { /* 50 lines */ }\nvoid runPerfTest(String endpoint) { /* 50 lines */ }\n// Duplicated setup/teardown in each!",
+        "codeB": "// With OOP:\nabstract class BaseTest {\n    void run() { setup(); execute(); teardown(); }\n    abstract void execute();\n}\nclass ApiTest extends BaseTest { void execute() {/**/} }\nclass UiTest extends BaseTest { void execute() {/**/} }\nclass PerfTest extends BaseTest { void execute() {/**/} }",
+        "question": "Why is Code B dramatically better?",
+        "options": [
+          "Setup/teardown written ONCE. Add new test type = just 1 new class.",
+          "Code B is faster",
+          "No real difference for 3 tests",
+          "Code A is more readable"
+        ],
+        "correct": 0,
+        "explanation": "Code A duplicates setup/teardown 3 times. Adding a 4th test type = copy-paste again. Code B writes infrastructure ONCE. New test type = one tiny class with just execute(). At scale (50 test types), Code A is unmaintainable."
+      }
+    },
+    {
+      "id": "p1u8_c7",
+      "type": "code",
+      "content": {
+        "code": "// Real-world pattern: Factory + Polymorphism\nclass TestFactory {\n    static BaseTest create(String type, String name) {\n        switch(type) {\n            case \"api\": return new ApiTest(name);\n            case \"ui\": return new UiTest(name);\n            case \"perf\": return new PerfTest(name);\n            default: throw new IllegalArgumentException(\"Unknown: \" + type);\n        }\n    }\n}\n\n// Usage — create any test from config:\nBaseTest test = TestFactory.create(\"api\", \"User CRUD\");\ntest.run();  // polymorphism handles the rest",
+        "highlight": [
+          "3",
+          "14",
+          "15"
+        ],
+        "annotation": "Factory pattern + polymorphism = create objects without knowing their exact type at compile time. Test runners use this to instantiate tests from configuration files. You'll build exactly this in your Selenium framework."
+      }
+    },
+    {
+      "id": "p1u8_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "interface Loggable {\n    default void log(String msg) { System.out.println(\"[LOG] \" + msg); }\n}\ninterface Retryable {\n    default void log(String msg) { System.out.println(\"[RETRY] \" + msg); }\n}\n\nclass SmartTest implements Loggable, Retryable {\n    // Both interfaces have log()!\n}",
+        "modification": "Two interfaces, same default method signature.",
+        "question": "What happens?",
+        "options": [
+          "Uses Loggable's version",
+          "Uses Retryable's version",
+          "Compile error — must override"
+        ],
+        "correct": 2,
+        "explanation": "Diamond problem! SmartTest MUST override log() to resolve the conflict. It can choose to call either: Loggable.super.log(msg) or Retryable.super.log(msg) or write its own. Java won't pick for you."
+      }
+    },
+    {
+      "id": "p1u8_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How would you design a test framework using OOP?",
+        "sentence": "Use an _____ for the contract, an _____ base class for shared setup/teardown, and _____ classes for each test type.",
+        "blanks": [
+          "interface",
+          "abstract",
+          "concrete"
+        ],
+        "distractors": [
+          "static",
+          "final",
+          "private",
+          "void"
+        ]
+      }
+    },
+    {
+      "id": "p1u8_c10",
+      "type": "connect",
+      "content": {
+        "text": "This entire unit IS your Selenium framework (Phase 7):",
+        "code": "abstract class BasePage {                    // shared infra\n    protected WebDriver driver;\n    protected void click(By l) { /*...*/ }\n    protected void type(By l, String t) { /*...*/ }\n}\nclass LoginPage extends BasePage { /*...*/ } // specific pages\nclass HomePage extends BasePage { /*...*/ }\n\ninterface TestLifecycle {                    // contract\n    void setup();\n    void execute();\n    void teardown();\n}",
+        "note": "You just learned EVERY concept needed to build a production test framework. Phase 7 will connect these pieces into a working Selenium project. The OOP foundation is complete."
+      }
+    }
+  ]
+}

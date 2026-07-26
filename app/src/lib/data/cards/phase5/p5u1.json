@@ -1,0 +1,123 @@
+{
+  "unitId": "p5u1",
+  "title": "HTTP Fundamentals",
+  "phase": 5,
+  "unit": 1,
+  "teaches": [
+    "http.methods",
+    "http.status_codes",
+    "http.headers"
+  ],
+  "requires": [
+    "basics.types",
+    "basics.strings"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p5u1_c1",
+      "type": "hook",
+      "content": {
+        "question": "You hit a URL in your browser. What VERB did you just use without knowing it?",
+        "code": "GET https://api.github.com/users/octocat"
+      }
+    },
+    {
+      "id": "p5u1_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Match each status code to its meaning — which one means \"created successfully\"?",
+        "starterCode": "200 → ?\n201 → ?\n404 → ?\n500 → ?",
+        "hint": "2xx = success, 4xx = client error, 5xx = server error",
+        "expectedOutput": "200=OK, 201=Created, 404=Not Found, 500=Internal Server Error",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p5u1_c3",
+      "type": "analogy",
+      "content": {
+        "text": "HTTP is a conversation between a waiter (client) and kitchen (server). The METHOD is what you ask (\"I'd like to ORDER\" = POST, \"What's on the menu?\" = GET). The STATUS CODE is the kitchen's reply (\"Here you go\" = 200, \"We don't have that\" = 404). HEADERS are side notes on the order slip — \"no nuts\" (Accept: application/json), \"table 5\" (Authorization: Bearer token).",
+        "visual": null
+      }
+    },
+    {
+      "id": "p5u1_c4",
+      "type": "code",
+      "content": {
+        "code": "// HTTP Request anatomy:\n// METHOD  URL                        (what + where)\n// GET     https://api.example.com/users/1\n// Headers: Accept: application/json  (metadata)\n// Body:    (empty for GET)           (payload)\n\n// HTTP Response anatomy:\n// Status:  200 OK\n// Headers: Content-Type: application/json\n// Body:    {\"id\": 1, \"name\": \"Subham\"}",
+        "highlight": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "annotation": "Every HTTP exchange has a METHOD (the verb — GET, POST, PUT, DELETE), a URL (the address), HEADERS (metadata like Accept and Content-Type), and an optional BODY (the payload). GET/DELETE typically have no body. POST/PUT carry a body. Headers travel in BOTH directions — request and response."
+      }
+    },
+    {
+      "id": "p5u1_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "POST /users\nContent-Type: application/json\nBody: {\"name\": \"Subham\"}\n→ Response: 201 Created",
+        "modification": "What if you send POST without Content-Type header?",
+        "question": "What likely happens?",
+        "options": [
+          "200 OK",
+          "415 Unsupported Media Type",
+          "404 Not Found"
+        ],
+        "correct": 1,
+        "explanation": "The server doesn't know how to parse the body without Content-Type. It returns 415 — \"I don't understand this format.\" Always set Content-Type when sending a body."
+      }
+    },
+    {
+      "id": "p5u1_c6",
+      "type": "contrast",
+      "content": {
+        "label": "GET vs POST — when to use which:",
+        "codeA": "GET /users/1\n(No body, safe, idempotent)\n→ 200 + user data",
+        "codeB": "POST /users\nBody: {\"name\": \"New User\"}\n(Has body, NOT idempotent)\n→ 201 + created user",
+        "question": "Why can't you use GET to create a resource?",
+        "options": [
+          "GET has no body to send data",
+          "GET is idempotent by contract",
+          "Both reasons",
+          "It's just convention"
+        ],
+        "correct": 2,
+        "explanation": "GET has no body (as shown in the request anatomy — \"empty for GET\") and is idempotent like the kitchen answering \"What's on the menu?\" the same way every time. POST is \"I'd like to ORDER\" — it creates something new each time. Using GET to create would break both the no-body rule and the idempotent contract."
+      }
+    },
+    {
+      "id": "p5u1_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Describe what a client sends in an HTTP request.",
+        "sentence": "A client sends a _____ (the verb like GET or POST), a _____ (the address), _____ (metadata like Content-Type), and an optional _____ (the data payload).",
+        "blanks": [
+          "METHOD",
+          "URL",
+          "HEADERS",
+          "BODY"
+        ],
+        "distractors": [
+          "RESPONSE",
+          "STATUS CODE",
+          "COOKIE",
+          "PROTOCOL"
+        ]
+      }
+    },
+    {
+      "id": "p5u1_c8",
+      "type": "connect",
+      "content": {
+        "text": "Every REST Assured test maps directly to this anatomy:",
+        "code": "given()                          // headers, auth, params\n  .header(\"Accept\", \"application/json\")\n.when()                          // method + URL\n  .get(\"/users/1\")\n.then()                          // validate response\n  .statusCode(200);",
+        "note": "REST Assured's DSL is literally \"given this request setup, when I call this method, then I expect this response.\" You now know what each piece means at the HTTP level."
+      }
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "unitId": "p7u9",
+  "title": "Selenium Grid & CI/CD Integration",
+  "phase": 7,
+  "unit": 9,
+  "teaches": [
+    "selenium.grid",
+    "selenium.remote-webdriver",
+    "selenium.docker-grid",
+    "selenium.ci-pipeline"
+  ],
+  "requires": [
+    "selenium.webdriver-setup",
+    "selenium.testng-integration",
+    "selenium.parallel-selenium",
+    "apistrategy.ci-execution"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p7u9_c1",
+      "type": "hook",
+      "content": {
+        "question": "Your laptop runs 5 Chrome instances before it freezes. But you have 200 UI tests. Selenium Grid lets you run tests on 50 machines simultaneously — without installing Chrome on your laptop.",
+        "code": "// Your code runs HERE (laptop)\n// Browsers run THERE (Grid nodes — cloud machines with Chrome/Firefox)\n// Same test code. Massive parallelism."
+      }
+    },
+    {
+      "id": "p7u9_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Run your test on a REMOTE browser instead of local Chrome.",
+        "starterCode": "WebDriver driver = new ChromeDriver(); // runs locally\ndriver.get(\"https://example.com\");\n// How do you point this to a remote Grid server?\n// ChromeDriver() only uses your local machine...",
+        "hint": "Replace ChromeDriver with RemoteWebDriver + URL of the Grid hub.",
+        "expectedOutput": "Use new RemoteWebDriver(hubUrl, capabilities) to connect to Grid",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p7u9_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Selenium Grid is like a taxi dispatch center. You (the test) say \"I need a Chrome browser.\" The Hub (dispatcher) finds an available Node (taxi) with Chrome installed and connects you. You don't care WHICH machine runs your browser — you just drive (run tests). The Hub handles load balancing, queuing, and routing.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p7u9_c4",
+      "type": "code",
+      "content": {
+        "code": "ChromeOptions options = new ChromeOptions();\noptions.addArguments(\"--headless\");\nURL gridUrl = new URL(\"http://grid-hub:4444\");\nWebDriver driver = new RemoteWebDriver(gridUrl, options);\ndriver.get(\"https://example.com\");\nassertEquals(driver.getTitle(), \"Example Domain\");\ndriver.quit();",
+        "highlight": [
+          "3",
+          "4"
+        ],
+        "annotation": "`RemoteWebDriver` sends commands over HTTP to the Grid Hub at port 4444. The Hub routes them to a Node with matching capabilities (Chrome in this case). Your test code is IDENTICAL to local execution — only the driver initialization changes from `new ChromeDriver(options)` to `new RemoteWebDriver(gridUrl, options)`. This makes local↔Grid switching trivial with a config flag or environment variable. Use Allure for CI-integrated reporting. Set a failure threshold (e.g., <5% failures = pass) to prevent flaky tests from blocking deployments."
+      }
+    },
+    {
+      "id": "p7u9_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "URL gridUrl = new URL(\"http://grid-hub:4444\");\nWebDriver driver = new RemoteWebDriver(gridUrl, new ChromeOptions());\ndriver.get(\"https://example.com\");",
+        "modification": "The Grid has 3 nodes, each with max 2 Chrome sessions. You launch 10 tests simultaneously.",
+        "question": "What happens to the extra 4 tests?",
+        "options": [
+          "They fail immediately",
+          "They queue and wait for a free slot",
+          "Grid crashes",
+          "Tests share sessions"
+        ],
+        "correct": 1,
+        "explanation": "Grid 4 queues excess requests. Tests wait until a node slot becomes available. If the queue timeout expires (default 5 min), THEN they fail. Plan capacity: total parallel tests ≤ total Grid node sessions. Use Docker to auto-scale nodes on demand."
+      }
+    },
+    {
+      "id": "p7u9_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Local ChromeDriver vs Docker Selenium Grid",
+        "codeA": "// Local: simple but doesn't scale\nWebDriver driver = new ChromeDriver();\n// Limited by YOUR machine's RAM/CPU\n// Only one Chrome version available",
+        "codeB": "# docker-compose.yml: Grid in 3 lines\nservices:\n  hub: { image: selenium/hub:4.10 }\n  chrome: { image: selenium/node-chrome:4.10,\n    environment: [SE_EVENT_BUS_HOST=hub],\n    deploy: { replicas: 5 } }",
+        "question": "What's the biggest advantage of Docker-based Grid?",
+        "options": [
+          "Faster tests",
+          "Reproducible environment across CI",
+          "Cheaper",
+          "Simpler code"
+        ],
+        "correct": 1,
+        "explanation": "Docker ensures every CI run uses the exact same Chrome version and configuration — no \"works on my machine\" issues. Tests use `RemoteWebDriver(gridUrl, options)` to send commands to the Hub, which routes them to Nodes with matching capabilities. Scaling is just changing `replicas: 5` to `replicas: 20`. If more tests arrive than available sessions, Grid queues them until a slot opens."
+      }
+    },
+    {
+      "id": "p7u9_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How do you integrate Selenium tests into a CI/CD pipeline?",
+        "sentence": "Tests connect to Selenium Grid via _____ with the hub URL, run in parallel using TestNG with ThreadLocal drivers, attach screenshots to _____ reports on failure, and the pipeline gates deployment if pass rate falls below the _____.",
+        "blanks": [
+          "RemoteWebDriver",
+          "Allure",
+          "threshold"
+        ],
+        "distractors": [
+          "ChromeDriver",
+          "JUnit",
+          "timeout"
+        ]
+      }
+    },
+    {
+      "id": "p7u9_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, UI test infrastructure runs on Grid at scale:",
+        "code": "# Pipeline test stage\n- spin up Selenium Grid (10 Chrome nodes)\n- run 200 tests parallel (thread-count=10)\n- collect Allure report + screenshots\n- tear down Grid\n- gate: fail pipeline if pass rate < 95%",
+        "note": "As an SDET-1, you'll own the CI integration for your team's UI tests. This means configuring the Grid, tuning parallelism, maintaining Docker images, and ensuring the pipeline gives fast, reliable feedback. A broken CI pipeline blocks ALL deployments — it's a tier-1 responsibility."
+      }
+    }
+  ]
+}

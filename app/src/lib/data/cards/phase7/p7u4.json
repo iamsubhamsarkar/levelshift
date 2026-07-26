@@ -1,0 +1,119 @@
+{
+  "unitId": "p7u4",
+  "title": "Page Object Model",
+  "phase": 7,
+  "unit": 4,
+  "teaches": [
+    "selenium.page-object-model",
+    "selenium.page-factory",
+    "selenium.base-page"
+  ],
+  "requires": [
+    "selenium.locators",
+    "selenium.explicit-waits",
+    "java.oop",
+    "java.inheritance"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p7u4_c1",
+      "type": "hook",
+      "content": {
+        "question": "You have 200 tests that find the login button with `By.id(\"login-btn\")`. The developer changes the ID to `signin-btn`. How many files do you edit?",
+        "code": "// Test 1: driver.findElement(By.id(\"login-btn\")).click();\n// Test 2: driver.findElement(By.id(\"login-btn\")).click();\n// ... 198 more. One ID change = 200 edits?"
+      }
+    },
+    {
+      "id": "p7u4_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Refactor this test so the locator lives in ONE place.",
+        "starterCode": "@Test void testLogin() {\n    driver.findElement(By.id(\"username\")).sendKeys(\"admin\");\n    driver.findElement(By.id(\"password\")).sendKeys(\"pass123\");\n    driver.findElement(By.id(\"login-btn\")).click();\n}\n@Test void testLoginFail() {\n    driver.findElement(By.id(\"username\")).sendKeys(\"\");\n    driver.findElement(By.id(\"login-btn\")).click();\n}",
+        "hint": "Create a LoginPage class that owns all locators and actions for the login page.",
+        "expectedOutput": "Tests call loginPage.login(\"admin\",\"pass123\") instead of repeating locators",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p7u4_c3",
+      "type": "analogy",
+      "content": {
+        "text": "POM is like a TV remote with labeled buttons. You don't rewire the TV internals to change channels — you press \"Channel Up.\" If the manufacturer changes the signal, they update the remote internally. YOUR fingers press the same button. POM separates WHAT you do (test logic) from HOW (locators and interactions).",
+        "visual": null
+      }
+    },
+    {
+      "id": "p7u4_c4",
+      "type": "code",
+      "content": {
+        "code": "public class LoginPage {\n    @FindBy(id = \"username\") private WebElement usernameField;\n    @FindBy(id = \"password\") private WebElement passwordField;\n    @FindBy(id = \"login-btn\") private WebElement loginButton;\n    public LoginPage(WebDriver driver) {\n        PageFactory.initElements(driver, this);\n    }\n    public void login(String user, String pass) {\n        usernameField.sendKeys(user);\n        passwordField.sendKeys(pass);\n        loginButton.click();\n    }\n}",
+        "highlight": [
+          "2",
+          "3",
+          "4"
+        ],
+        "annotation": "`@FindBy` declares locators. `PageFactory.initElements` connects them to WebDriver. Now tests just call `loginPage.login(\"admin\",\"pass\")`. If the ID changes, you edit ONE line in LoginPage — not 200 test files. Create a BasePage class with shared utilities (wait helpers, click, type). All page classes extend BasePage for code reuse."
+      }
+    },
+    {
+      "id": "p7u4_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "public class LoginPage {\n    @FindBy(id = \"login-btn\") private WebElement loginBtn;\n    public void clickLogin() { loginBtn.click(); }\n}\nLoginPage page = new LoginPage();\npage.clickLogin();",
+        "modification": "We forgot `PageFactory.initElements(driver, this)`.",
+        "question": "What happens when clickLogin() is called?",
+        "options": [
+          "NullPointerException",
+          "Works fine",
+          "NoSuchElementException",
+          "Compile error"
+        ],
+        "correct": 0,
+        "explanation": "Without `PageFactory.initElements()`, @FindBy fields remain NULL. `loginBtn.click()` throws NullPointerException. Always call `PageFactory.initElements(driver, this)` in the constructor."
+      }
+    },
+    {
+      "id": "p7u4_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Without POM vs With POM",
+        "codeA": "// Without: locators scattered everywhere\ndriver.findElement(By.id(\"user\")).sendKeys(\"admin\");\ndriver.findElement(By.id(\"pass\")).sendKeys(\"secret\");\ndriver.findElement(By.id(\"btn\")).click();",
+        "codeB": "// With POM: clean, maintainable\nLoginPage loginPage = new LoginPage(driver);\nloginPage.login(\"admin\", \"secret\");\n// ID changes → edit ONLY LoginPage.java",
+        "question": "What's the main benefit of POM?",
+        "options": [
+          "Tests run faster",
+          "Single point of maintenance",
+          "Fewer files",
+          "Better assertions"
+        ],
+        "correct": 1,
+        "explanation": "POM's primary benefit is single point of maintenance. `@FindBy` declares locators in one page class, and `PageFactory.initElements` connects them to WebDriver. If an ID changes, you edit one line in the page class — not 200 test files. Tests become readable method calls like `loginPage.login()`, and the page class is reusable across test suites."
+      }
+    },
+    {
+      "id": "p7u4_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "How do you structure your Selenium framework?",
+        "options": [
+          "BasePage with shared waits and actions — page classes extend it with @FindBy locators and PageFactory — test classes compose page method calls",
+          "Put all locators in one Constants file and reference them everywhere",
+          "Write all tests inline without page classes for simplicity",
+          "Use only XPath locators in test methods directly"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p7u4_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, SDET teams maintain page object frameworks:",
+        "code": "OrdersPage ordersPage = new OrdersPage(driver);\nordersPage.searchOrder(\"112-345-6789\");\nordersPage.verifyStatus(\"Delivered\");\nordersPage.initiateRefund(\"Wrong item\");",
+        "note": "As an SDET-1, you'll BUILD and MAINTAIN POM frameworks. A well-designed framework lets manual QA engineers write automated tests without knowing Selenium internals — they just call page methods."
+      }
+    }
+  ]
+}

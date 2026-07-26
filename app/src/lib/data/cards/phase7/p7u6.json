@@ -1,0 +1,117 @@
+{
+  "unitId": "p7u6",
+  "title": "Frames, Windows & Alerts",
+  "phase": 7,
+  "unit": 6,
+  "teaches": [
+    "selenium.frames",
+    "selenium.windows",
+    "selenium.alerts"
+  ],
+  "requires": [
+    "selenium.webdriver-setup",
+    "selenium.locators",
+    "selenium.explicit-waits"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p7u6_c1",
+      "type": "hook",
+      "content": {
+        "question": "You can see the element in the browser. Your locator is correct. But Selenium says \"NoSuchElementException.\" You've been staring at this for 30 minutes. The element is INSIDE an iframe. Selenium can't see it.",
+        "code": "// Element is RIGHT THERE in the browser!\ndriver.findElement(By.id(\"payment-field\")); // NoSuchElementException\n// But WHY? The id exists... it's inside an <iframe>"
+      }
+    },
+    {
+      "id": "p7u6_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Click a button that's inside an iframe.",
+        "starterCode": "// HTML: <iframe id=\"ad-frame\"><button id=\"close-ad\">X</button></iframe>\ndriver.findElement(By.id(\"close-ad\")).click(); // Why does this fail?",
+        "hint": "Selenium can only see elements in the CURRENT frame context. You need to switch first.",
+        "expectedOutput": "Must call driver.switchTo().frame() before finding the element",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p7u6_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Frames are like rooms in a house. Selenium starts in the living room (main page). It can see everything in that room but NOT inside bedrooms (iframes). You must WALK INTO the bedroom (`switchTo().frame()`) to interact with things there. And you must walk BACK OUT (`switchTo().defaultContent()`) to interact with the living room again.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p7u6_c4",
+      "type": "code",
+      "content": {
+        "code": "driver.switchTo().frame(\"ad-frame\");     // enter the iframe\ndriver.findElement(By.id(\"close-ad\")).click();\ndriver.switchTo().defaultContent();       // back to main page\n\n// Handling alerts:\nAlert alert = driver.switchTo().alert();\nalert.accept();  // clicks OK",
+        "highlight": [
+          "1",
+          "3"
+        ],
+        "annotation": "`switchTo().frame()` accepts frame id, name, index (0-based), or WebElement. After interacting inside a frame, you MUST switch back with `defaultContent()` — otherwise all subsequent findElement calls search inside the iframe and fail on main-page elements. For alerts, `switchTo().alert()` returns an Alert object with `accept()`, `dismiss()`, `getText()`, and `sendKeys()` methods. Always handle unexpected alerts in your framework's base page."
+      }
+    },
+    {
+      "id": "p7u6_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "driver.switchTo().frame(\"payment-frame\");\ndriver.findElement(By.id(\"card-number\")).sendKeys(\"4111...\");\n// Now try to click the main page's \"Submit\" button:\ndriver.findElement(By.id(\"submit-order\")).click();",
+        "modification": "We're still inside the iframe context when clicking submit-order.",
+        "question": "What happens?",
+        "options": [
+          "Works fine",
+          "NoSuchElementException",
+          "Frame switches automatically",
+          "NullPointerException"
+        ],
+        "correct": 1,
+        "explanation": "After switching to a frame, Selenium ONLY sees that frame's DOM. The \"submit-order\" button is in the main page. You must call `driver.switchTo().defaultContent()` before accessing main-page elements. Forgetting this is the #1 frame-related bug."
+      }
+    },
+    {
+      "id": "p7u6_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Handling new windows vs new tabs",
+        "codeA": "// Store original window\nString original = driver.getWindowHandle();\n// Click link that opens new window\ndriver.findElement(By.id(\"new-window-link\")).click();\n// Switch to new window\nfor (String handle : driver.getWindowHandles()) {\n    if (!handle.equals(original)) driver.switchTo().window(handle);\n}",
+        "codeB": "// After done with new window, close it and return\ndriver.close();  // close current (new) window\ndriver.switchTo().window(original); // back to original",
+        "question": "What happens if you don't switch back to the original window?",
+        "options": [
+          "Tests continue normally",
+          "All subsequent commands fail",
+          "Browser crashes",
+          "Auto-switches back"
+        ],
+        "correct": 1,
+        "explanation": "After `driver.close()`, WebDriver has no active window context — like walking out of a room without going back to the main room. Any command throws `NoSuchWindowException`. You must `switchTo().window(originalHandle)` to re-enter the original frame context, similar to calling `switchTo().defaultContent()` when leaving an iframe."
+      }
+    },
+    {
+      "id": "p7u6_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "How do you handle a page with nested iframes?",
+        "options": [
+          "Switch in order — switchTo().frame(outer) then switchTo().frame(inner) — and use parentFrame() to go up one level or defaultContent() to return to main page",
+          "Call findElement directly since Selenium searches all frames",
+          "Use switchTo().defaultContent() between each frame switch",
+          "Nested iframes are not supported by Selenium WebDriver 4"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p7u6_c8",
+      "type": "connect",
+      "content": {
+        "text": "At Amazon, payment forms and third-party widgets use iframes for security:",
+        "code": "// Switch to payment iframe, enter card details\ndriver.switchTo().frame(\"payment-iframe\");\npaymentPage.enterCard(\"4111111111111111\");\ndriver.switchTo().defaultContent();\ndriver.findElement(By.id(\"place-order\")).click();",
+        "note": "As an SDET-1, you'll encounter iframes for payment processors, ads, embedded widgets, and CAPTCHA frames. Frame-switching bugs are the second most common Selenium issue after synchronization — always check if your element lives inside an iframe."
+      }
+    }
+  ]
+}

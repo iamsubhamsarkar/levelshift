@@ -1,0 +1,122 @@
+{
+  "unitId": "p4u5",
+  "title": "Stacks & Queues",
+  "phase": 4,
+  "unit": 5,
+  "teaches": [
+    "dsa.stack_brackets",
+    "dsa.queue_bfs",
+    "dsa.deque_operations"
+  ],
+  "requires": [
+    "collections.arraylist",
+    "basics.types",
+    "dsa.array_traversal"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p4u5_c1",
+      "type": "hook",
+      "content": {
+        "question": "You're building a code linter. Given the string `\"{[()()]}\"`, how do you verify every bracket is properly matched and nested? You can't just count opens vs closes — `\"([)]\"` has equal counts but is WRONG. What data structure naturally tracks \"the most recently opened bracket that hasn't been closed yet\"?",
+        "code": "// Stack! Last In, First Out.\n// Read \"{\": push '{'. Stack: ['{']\n// Read \"[\": push '['. Stack: ['{', '[']\n// Read \"(\": push '('. Stack: ['{', '[', '(']\n// Read \")\": pop '(' — matches! Stack: ['{', '[']\n// Read \"(\": push '('. Stack: ['{', '[', '(']\n// Read \")\": pop '(' — matches! Stack: ['{', '[']\n// Read \"]\": pop '[' — matches! Stack: ['{']\n// Read \"}\": pop '{' — matches! Stack: []\n// Stack empty at end = VALID!"
+      }
+    },
+    {
+      "id": "p4u5_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Validate if a string of brackets is properly matched. Complete the stack logic.",
+        "starterCode": "import java.util.Stack;\n\npublic class BracketValidator {\n    public static boolean isValid(String s) {\n        Stack<Character> stack = new Stack<>();\n        for (char c : s.toCharArray()) {\n            if (c == '(' || c == '[' || c == '{') {\n                // TODO: Push the corresponding closing bracket\n            } else {\n                // TODO: If stack is empty OR top doesn't match c, return false\n                // TODO: Otherwise pop the top\n            }\n        }\n        // TODO: Return true only if stack is empty\n        return false;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(isValid(\"({[]})\")); // Expected: true\n        System.out.println(isValid(\"([)]\"));   // Expected: false\n        System.out.println(isValid(\"(\"));      // Expected: false\n    }\n}",
+        "hint": "Push the EXPECTED closing bracket. When you encounter a closer, check if it matches what's on top.",
+        "expectedOutput": "true",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p4u5_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A Stack is a stack of plates in a cafeteria — you can only take the top plate (LIFO: Last In, First Out). This makes it perfect for \"undo\" operations and matching nested structures. A Queue is a line at a coffee shop — first person in line gets served first (FIFO: First In, First Out). This makes it perfect for processing items in order, like BFS where you explore nodes level by level. A Deque (Double-Ended Queue) is a train — passengers can board and exit from either end.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p4u5_c4",
+      "type": "code",
+      "content": {
+        "code": "import java.util.*;\n\n// Pattern 1: Stack for bracket validation\npublic static boolean isValidBrackets(String s) {\n    Stack<Character> stack = new Stack<>();\n    for (char c : s.toCharArray()) {\n        if (c == '(') stack.push(')');\n        else if (c == '[') stack.push(']');\n        else if (c == '{') stack.push('}');\n        else if (stack.isEmpty() || stack.pop() != c) return false;\n    }\n    return stack.isEmpty();\n}\n\n// Pattern 2: Queue for BFS (level-order processing)\npublic static List<List<Integer>> processLevels(int[][] graph, int start) {\n    List<List<Integer>> levels = new ArrayList<>();\n    Queue<Integer> queue = new LinkedList<>();\n    boolean[] visited = new boolean[graph.length];\n    queue.offer(start);\n    visited[start] = true;\n\n    while (!queue.isEmpty()) {\n        int levelSize = queue.size();\n        List<Integer> currentLevel = new ArrayList<>();\n        for (int i = 0; i < levelSize; i++) {\n            int node = queue.poll();\n            currentLevel.add(node);\n            for (int neighbor : graph[node]) {\n                if (!visited[neighbor]) {\n                    visited[neighbor] = true;\n                    queue.offer(neighbor);\n                }\n            }\n        }\n        levels.add(currentLevel);\n    }\n    return levels;\n}\n\n// Pattern 3: Deque as both Stack and Queue\npublic static int[] slidingWindowMax(int[] nums, int k) {\n    Deque<Integer> deque = new ArrayDeque<>(); // stores indices\n    int[] result = new int[nums.length - k + 1];\n\n    for (int i = 0; i < nums.length; i++) {\n        // Remove elements outside window from front\n        while (!deque.isEmpty() && deque.peekFirst() < i - k + 1) {\n            deque.pollFirst();\n        }\n        // Remove smaller elements from back (they'll never be max)\n        while (!deque.isEmpty() && nums[deque.peekLast()] < nums[i]) {\n            deque.pollLast();\n        }\n        deque.offerLast(i);\n        if (i >= k - 1) {\n            result[i - k + 1] = nums[deque.peekFirst()];\n        }\n    }\n    return result;\n}",
+        "highlight": [
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "annotation": "The bracket trick — push the EXPECTED closer (e.g., '(' triggers stack.push(')')). Then checking is just stack.pop() != c. Queue BFS uses levelSize = queue.size() to process one level at a time via queue.poll() and queue.offer(). Deque maintains a decreasing-order window using pollFirst/pollLast for O(n) sliding maximum."
+      }
+    },
+    {
+      "id": "p4u5_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "public static boolean isValidBrackets(String s) {\n    Stack<Character> stack = new Stack<>();\n    for (char c : s.toCharArray()) {\n        if (c == '(') stack.push(')');\n        else if (c == '[') stack.push(']');\n        else if (c == '{') stack.push('}');\n        else if (stack.isEmpty() || stack.pop() != c) return false;\n    }\n    return stack.isEmpty();\n}\n// Input: \"(\"",
+        "modification": "What if we change the last line to `return true` instead of `return stack.isEmpty()`?",
+        "question": "What would isValidBrackets(\"(\") return?",
+        "options": [
+          "true — incorrectly!",
+          "false",
+          "Throws EmptyStackException"
+        ],
+        "correct": 0,
+        "explanation": "The input \"(\" triggers stack.push(')'), so the stack contains [')']. The for-loop ends without entering the else-if branch (no closing bracket in the input). If we return true unconditionally, the unclosed opener is never caught. Returning stack.isEmpty() checks that every push from an opener was matched by a pop from a closer — the stack must be empty for all brackets to be balanced."
+      }
+    },
+    {
+      "id": "p4u5_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Stack vs Queue — choosing the right structure",
+        "codeA": "// Stack (LIFO): Undo/bracket matching/DFS\nStack<String> undoHistory = new Stack<>();\nundoHistory.push(\"typed 'Hello'\");\nundoHistory.push(\"typed ' World'\");\nundoHistory.push(\"deleted ' World'\");\n// Undo last action:\nString lastAction = undoHistory.pop(); // \"deleted ' World'\"",
+        "codeB": "// Queue (FIFO): Task processing/BFS/scheduling\nQueue<String> taskQueue = new LinkedList<>();\ntaskQueue.offer(\"Test login API\");\ntaskQueue.offer(\"Test payment API\");\ntaskQueue.offer(\"Test logout API\");\n// Process in order:\nString nextTask = taskQueue.poll(); // \"Test login API\"",
+        "question": "You're processing test cases where dependencies must run first. Which structure?",
+        "options": [
+          "Queue — process in the order added via offer and poll",
+          "Stack — process most recent first via push and pop",
+          "Either works",
+          "Neither — use a List"
+        ],
+        "correct": 0,
+        "explanation": "Queue preserves insertion order — dependencies added first via queue.offer are processed first via queue.poll (FIFO). This is BFS/topological order. Stack would return the LAST pushed item first via stack.pop (LIFO), breaking dependency ordering. Test dependency execution follows a queue pattern."
+      }
+    },
+    {
+      "id": "p4u5_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "How does the bracket validation algorithm use a stack to detect mismatches?",
+        "sentence": "For each opener we call stack._____ with the expected closer; for each closer we check stack._____ and if the stack is _____ at the end, all brackets matched.",
+        "blanks": [
+          "push",
+          "pop",
+          "isEmpty"
+        ],
+        "distractors": [
+          "offer",
+          "peek",
+          "full"
+        ]
+      }
+    },
+    {
+      "id": "p4u5_c8",
+      "type": "connect",
+      "content": {
+        "text": "Stack-based validation appears directly in SDET work:",
+        "code": "// Validating JSON/XML response structure\npublic static boolean isValidJson(String json) {\n    Stack<Character> stack = new Stack<>();\n    boolean inString = false;\n    for (char c : json.toCharArray()) {\n        if (c == '\"' && !inString) inString = true;\n        else if (c == '\"' && inString) inString = false;\n        else if (!inString) {\n            if (c == '{' || c == '[') stack.push(c);\n            else if (c == '}' && (stack.isEmpty() || stack.pop() != '{')) return false;\n            else if (c == ']' && (stack.isEmpty() || stack.pop() != '[')) return false;\n        }\n    }\n    return stack.isEmpty();\n}",
+        "note": "Queue-based BFS is used in test dependency resolution — determining which test suites can run in parallel (no dependencies) vs which must wait. This is the same pattern as build system task scheduling."
+      }
+    }
+  ]
+}

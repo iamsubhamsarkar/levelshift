@@ -1,0 +1,139 @@
+{
+  "unitId": "p3u1",
+  "title": "Exceptions Basics",
+  "phase": 3,
+  "unit": 1,
+  "teaches": [
+    "exceptions.trycatch",
+    "exceptions.hierarchy",
+    "exceptions.checked",
+    "exceptions.unchecked"
+  ],
+  "requires": [
+    "oop.inheritance",
+    "oop.interfaces"
+  ],
+  "estimatedMinutes": 27,
+  "cards": [
+    {
+      "id": "p3u1_c1",
+      "type": "hook",
+      "content": {
+        "question": "This code compiles fine. But one version FORCES you to handle the error, the other doesn't. What's different?",
+        "code": "// Version A — compiles without try/catch\nInteger.parseInt(\"abc\");\n\n// Version B — WON'T compile without try/catch\nnew FileReader(\"missing.txt\");"
+      }
+    },
+    {
+      "id": "p3u1_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Run this code mentally. What happens at runtime?",
+        "starterCode": "public class Main {\n    public static void main(String[] args) {\n        int[] nums = {1, 2, 3};\n        System.out.println(nums[5]);\n        System.out.println(\"Done!\");\n    }\n}",
+        "hint": "Java stops at the crash line — \"Done!\" never prints",
+        "expectedOutput": "ArrayIndexOutOfBoundsException",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p3u1_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Exceptions are like a fire alarm system in a building. When something goes wrong (fire/error), an alarm is THROWN. Someone must CATCH it and handle the situation — or the building evacuates (program crashes). Java has two types: 1) Fire code violations the inspector catches at BUILD time (checked exceptions — you MUST have a plan). 2) Unexpected fires at RUNTIME (unchecked exceptions — no advance plan required by the compiler).",
+        "visual": null
+      }
+    },
+    {
+      "id": "p3u1_c4",
+      "type": "code",
+      "content": {
+        "code": "try {\n    int result = 10 / 0;           // risky code\n} catch (ArithmeticException e) {  // handle specific error\n    System.out.println(\"Can't divide by zero: \" + e.getMessage());\n} finally {\n    System.out.println(\"Always runs — cleanup here\");\n}",
+        "highlight": [
+          "1",
+          "3",
+          "5"
+        ],
+        "annotation": "try = attempt risky code. catch = handle specific exception type. finally = runs ALWAYS (even if exception occurs). The exception hierarchy is Throwable → Error | Exception. RuntimeException (unchecked) extends Exception. IOException, SQLException (checked) also extend Exception. Checked exceptions are verified at COMPILE time — the compiler forces you to catch or declare them with throws. Unchecked exceptions extend RuntimeException and are NOT checked at compile time."
+      }
+    },
+    {
+      "id": "p3u1_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "public static int getValue() {\n    try {\n        return 1;\n    } finally {\n        return 2;\n    }\n}\nSystem.out.println(getValue());",
+        "modification": "What does this print?",
+        "question": "When both try and finally have return statements, which wins?",
+        "options": [
+          "1",
+          "2",
+          "Compile error",
+          "Exception thrown"
+        ],
+        "correct": 1,
+        "explanation": "The finally block runs ALWAYS — even after a return in try. The finally block's return overrides the try block's return. Never put return in finally blocks in real code."
+      }
+    },
+    {
+      "id": "p3u1_c6",
+      "type": "contrast",
+      "content": {
+        "label": "\"throw\" creates an exception, \"throws\" DECLARES one",
+        "codeA": "// throw = actually LAUNCH the exception\npublic void validate(int age) {\n    if (age < 0)\n        throw new IllegalArgumentException(\"Invalid\");\n}",
+        "codeB": "// throws = WARNING LABEL on the method\npublic void readFile(String path)\n        throws IOException {\n    new FileReader(path); // might fail\n}",
+        "question": "Which keyword actually creates the exception object?",
+        "options": [
+          "throw",
+          "throws",
+          "Both",
+          "Neither"
+        ],
+        "correct": 0,
+        "explanation": "throw is the action — it creates and launches an exception, like pulling the fire alarm. throws is a declaration on the method — it tells callers this method MIGHT throw a checked exception, so the caller must catch it or declare it. Think of throw as the alarm being THROWN, throws as the warning sign on the building."
+      }
+    },
+    {
+      "id": "p3u1_c7",
+      "type": "break_it",
+      "content": {
+        "setup": "try {\n    Integer.parseInt(\"abc\");\n} catch (Exception e) {\n    System.out.println(\"A\");\n} catch (NumberFormatException e) {\n    System.out.println(\"B\");\n}",
+        "modification": "What happens when you compile this?",
+        "question": "Can you catch a parent exception BEFORE a child exception?",
+        "options": [
+          "Prints A",
+          "Prints B",
+          "Compile error",
+          "Runtime error"
+        ],
+        "correct": 2,
+        "explanation": "Compile error. In the exception hierarchy, NumberFormatException extends Exception. Catching Exception first makes the second catch unreachable. Java requires specific exception types before general ones — most specific catch first, like catching a specific fire alarm before the building-wide alarm."
+      }
+    },
+    {
+      "id": "p3u1_c8",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain the difference between checked and unchecked exceptions in Java.",
+        "sentence": "Checked exceptions are verified at _____ time and the compiler forces you to _____ them or declare them with _____.",
+        "blanks": [
+          "COMPILE",
+          "catch",
+          "throws"
+        ],
+        "distractors": [
+          "RUNTIME",
+          "throw",
+          "finally"
+        ]
+      }
+    },
+    {
+      "id": "p3u1_c9",
+      "type": "connect",
+      "content": {
+        "text": "In REST Assured tests, exceptions appear everywhere:",
+        "code": "@Test\npublic void testInvalidEndpoint() {\n    try {\n        given().get(\"/invalid\").then().statusCode(200);\n    } catch (AssertionError e) {\n        // Test framework throws when assertion fails\n        System.out.println(\"Expected failure: \" + e.getMessage());\n    }\n}",
+        "note": "REST Assured throws AssertionError (unchecked) for failed assertions. Selenium throws NoSuchElementException (unchecked) when elements aren't found. Understanding the exception hierarchy helps you write better test error handling and custom wait strategies."
+      }
+    }
+  ]
+}

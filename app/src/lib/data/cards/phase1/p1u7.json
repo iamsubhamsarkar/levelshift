@@ -1,0 +1,145 @@
+{
+  "unitId": "p1u7",
+  "title": "Abstract & Interfaces",
+  "phase": 1,
+  "unit": 7,
+  "teaches": [
+    "oop.abstract",
+    "oop.interfaces",
+    "oop.defaultmethods"
+  ],
+  "requires": [
+    "oop.inheritance",
+    "oop.polymorphism"
+  ],
+  "estimatedMinutes": 30,
+  "cards": [
+    {
+      "id": "p1u7_c1",
+      "type": "hook",
+      "content": {
+        "question": "This code forces every Shape to have area(). But you can NEVER create \"new Shape()\". Why would you want that?",
+        "code": "abstract class Shape {\n    abstract double area();  // no body — children MUST implement\n}\n// new Shape(); ← ILLEGAL. Compile error."
+      }
+    },
+    {
+      "id": "p1u7_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create an interface called Searchable with one method: List<String> search(String query). Then make a class GoogleSearch implement it.",
+        "starterCode": "// Define the interface Searchable\n// Then create GoogleSearch that implements it",
+        "hint": "interface Searchable { List<String> search(String query); } — then class GoogleSearch implements Searchable { ... }",
+        "expectedOutput": "GoogleSearch",
+        "solutionCode": "import java.util.*;\n\ninterface Searchable {\n    List<String> search(String query);\n}\n\nclass GoogleSearch implements Searchable {\n    public List<String> search(String query) {\n        return List.of(\"Result for: \" + query);\n    }\n}\n// Test: new GoogleSearch().search(\"java\")"
+      }
+    },
+    {
+      "id": "p1u7_c3",
+      "type": "analogy",
+      "content": {
+        "text": "An interface is a CONTRACT. Like a job description: \"You MUST be able to code in Java, write tests, and do code reviews.\" It doesn't tell you HOW — just WHAT is required. Any class that signs the contract (implements) MUST fulfill every requirement. An abstract class is a PARTIAL blueprint — some rooms are built, some are left empty for you to finish.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p1u7_c4",
+      "type": "code",
+      "content": {
+        "code": "// Abstract class = partial implementation\nabstract class TestBase {\n    WebDriver driver;\n    \n    void setup() {                       // ← concrete (has body)\n        driver = new ChromeDriver();\n    }\n    \n    abstract void runTest();             // ← abstract (NO body, child MUST implement)\n    \n    void teardown() {                    // ← concrete\n        driver.quit();\n    }\n}\n\nclass LoginTest extends TestBase {\n    @Override\n    void runTest() {                     // ← FORCED to implement\n        driver.get(\"https://...\");\n        // test logic\n    }\n}",
+        "highlight": [
+          "9",
+          "17",
+          "18"
+        ],
+        "annotation": "Abstract = \"I provide the skeleton, you fill in the details.\" Children are FORCED to implement abstract methods — compile error if they don't. This guarantees every test has a runTest() method."
+      }
+    },
+    {
+      "id": "p1u7_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "interface Drivable {\n    void start();\n    void stop();\n}\n\nclass Bicycle implements Drivable {\n    public void start() { System.out.println(\"Pedaling\"); }\n    // forgot to implement stop()!\n}",
+        "modification": "Bicycle implements Drivable but only defines start(), not stop().",
+        "question": "What happens?",
+        "options": [
+          "Works fine — stop() is optional",
+          "Compile error — must implement ALL interface methods",
+          "Runtime error"
+        ],
+        "correct": 1,
+        "explanation": "Interfaces are a CONTRACT. If you sign it (implements), you MUST fulfill EVERY method. Missing even ONE = compile error. This is how Java enforces that every implementor has the required capabilities."
+      }
+    },
+    {
+      "id": "p1u7_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Abstract Class vs Interface — when to use which?",
+        "codeA": "abstract class Animal {\n    String name;\n    Animal(String name) { this.name = name; }\n    void breathe() { System.out.println(\"breathing\"); }\n    abstract void speak();\n}",
+        "codeB": "interface Speakable {\n    void speak();\n    default void whisper() {\n        System.out.println(\"(whispering)\");\n    }\n}",
+        "question": "Key difference?",
+        "options": [
+          "Abstract can have fields + constructors. Interface cannot.",
+          "Interface is faster",
+          "No difference in Java 8+",
+          "Abstract is deprecated"
+        ],
+        "correct": 0,
+        "explanation": "Abstract classes have: fields, constructors, both abstract AND concrete methods. Interfaces have: only method signatures + default methods (since Java 8), NO fields (only constants), NO constructors. Use abstract when sharing STATE. Use interface when sharing BEHAVIOR contracts."
+      }
+    },
+    {
+      "id": "p1u7_c7",
+      "type": "code",
+      "content": {
+        "code": "// Interface with default method (Java 8+):\ninterface Retryable {\n    int maxRetries();                    // ← every implementor defines this\n    \n    default void retry(Runnable task) {  // ← shared implementation (free!)\n        for (int i = 0; i < maxRetries(); i++) {\n            try { task.run(); return; }\n            catch (Exception e) {\n                if (i == maxRetries() - 1) throw e;\n            }\n        }\n    }\n}\n\n// Any class gets retry logic for free:\nclass ApiClient implements Retryable {\n    public int maxRetries() { return 3; }\n}",
+        "highlight": [
+          "5",
+          "16",
+          "17"
+        ],
+        "annotation": "Default methods let interfaces provide shared logic WITHOUT forcing an abstract class. Implementors get the behavior for free but can override if needed. This is how modern Java frameworks provide functionality without deep inheritance trees."
+      }
+    },
+    {
+      "id": "p1u7_c8",
+      "type": "break_it",
+      "content": {
+        "setup": "interface A { default void hello() { System.out.println(\"A\"); } }\ninterface B { default void hello() { System.out.println(\"B\"); } }\n\nclass C implements A, B {\n    // Both A and B have hello() — what happens?\n}",
+        "modification": "Class C implements two interfaces with the same default method.",
+        "question": "What happens?",
+        "options": [
+          "Prints A",
+          "Prints B",
+          "Compile error — must override to resolve conflict"
+        ],
+        "correct": 2,
+        "explanation": "Diamond problem! When two interfaces have the same default method, the implementing class MUST override it to resolve the ambiguity. Java won't guess which one you want."
+      }
+    },
+    {
+      "id": "p1u7_c9",
+      "type": "explain_back",
+      "content": {
+        "mode": "pick_best",
+        "prompt": "When would you choose an abstract class over an interface?",
+        "options": [
+          "When you need shared state (fields) and partial implementation",
+          "When a class needs to implement multiple contracts",
+          "When you want unrelated classes to share behavior",
+          "When you only need method signatures with no body"
+        ],
+        "correct": 0
+      }
+    },
+    {
+      "id": "p1u7_c10",
+      "type": "connect",
+      "content": {
+        "text": "In REST Assured (Phase 5), interfaces define test contracts:",
+        "code": "interface ApiTest {\n    RequestSpecification getSpec();\n    void validateResponse(Response response);\n}\n\nclass UserApiTest implements ApiTest {\n    public RequestSpecification getSpec() {\n        return given().baseUri(\"https://api.example.com\")\n                      .header(\"Auth\", \"Bearer ...\");\n    }\n    public void validateResponse(Response r) {\n        r.then().statusCode(200).body(\"id\", notNullValue());\n    }\n}",
+        "note": "Interface = contract for what every API test must provide. Implementations fill in the details per endpoint. This is exactly how you'll structure your framework."
+      }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Scrollbar styling for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d1117;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2d333b;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #484f58;
+  }
+
+  /* Code block base styling */
+  pre, code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* Selection colors */
+  ::selection {
+    background: rgba(88, 166, 255, 0.3);
+    color: #e6edf3;
+  }
+}
+
+@layer components {
+  /* Card base */
+  .card {
+    @apply bg-surface-1 border border-surface-3 rounded-xl p-6;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-accent-blue text-surface-0 font-semibold px-6 py-3 rounded-lg 
+           hover:bg-blue-400 transition-all duration-200 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-2 text-text-primary border border-surface-3 px-4 py-2 rounded-lg
+           hover:bg-surface-3 transition-all duration-200 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply bg-accent-red/20 text-accent-red border border-accent-red/30 px-4 py-2 rounded-lg
+           hover:bg-accent-red/30 transition-all duration-200;
+  }
+
+  /* Option buttons (for multiple choice) */
+  .option-btn {
+    @apply bg-surface-2 border-2 border-surface-3 text-text-primary px-4 py-3 rounded-lg
+           hover:border-accent-blue hover:bg-surface-2/80 transition-all duration-150 
+           cursor-pointer active:scale-95 font-mono text-sm;
+  }
+
+  .option-btn.correct {
+    @apply border-accent-green bg-accent-green/10 text-accent-green;
+  }
+
+  .option-btn.wrong {
+    @apply border-accent-red bg-accent-red/10 text-accent-red animate-shake;
+  }
+
+  /* Code display */
+  .code-block {
+    @apply bg-surface-0 border border-surface-3 rounded-lg p-4 font-mono text-sm
+           overflow-x-auto leading-relaxed;
+  }
+
+  .code-highlight {
+    @apply bg-accent-blue/10 border-l-2 border-accent-blue -mx-4 px-4;
+  }
+
+  /* Progress indicators */
+  .progress-dot {
+    @apply w-2 h-2 rounded-full bg-surface-3 transition-all duration-300;
+  }
+
+  .progress-dot.active {
+    @apply bg-accent-blue w-3;
+  }
+
+  .progress-dot.completed {
+    @apply bg-accent-green;
+  }
+}
