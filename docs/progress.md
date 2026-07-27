@@ -4,54 +4,191 @@
 
 | Field | Value |
 |-------|-------|
-| **Overall Status** | ✅ MVP COMPLETE — 75/98 tasks (77%) |
-| **Current Phase** | Phase J (remaining content) + Phase K (polish) |
-| **Next Action** | `./start.sh` to launch. Then: author Phases 2-7 content, polish, deploy to Netlify |
-| **Blockers** | npm registry (fix: `npm install --registry https://registry.npmjs.org`) |
-| **Last Updated** | 2026-07-23 |
+| **Overall Status** | ✅ COMPLETE — 98/98 tasks done |
+| **Live URL** | Netlify (connected to GitHub repo) |
+| **Repo** | git@github.com:iamsubhamsarkar/levelshift.git (private) |
+| **Last Updated** | 2026-07-26 |
 
 ---
 
-## Documents Created
+## What Is This
 
-| Document | Status | Path |
-|----------|--------|------|
-| requirements.md | ✅ Complete | `/LevelShift/requirements.md` |
-| design.md | ✅ Complete | `/LevelShift/design.md` |
-| tasks.md | ✅ Complete | `/LevelShift/tasks.md` |
-| progress.md | ✅ Complete | `/LevelShift/progress.md` |
+LevelShift is a self-hosted, static SPA for Amazon SDET-1 interview preparation. Card-based micro-learning with gamification, spaced repetition, and punishment mechanics. Built with Svelte 4 + Vite + Tailwind CSS. No backend — all data in localStorage.
 
 ---
 
-## Milestone Tracker
+## Tech Stack
 
-| Milestone | Status | Tasks Done | Notes |
-|-----------|--------|------------|-------|
-| M1: Skeleton (scaffold + data) | ✅ Complete | 15/15 | Svelte + Tailwind + localStorage + stores + data files |
-| M2: Engines (algorithms) | ✅ Complete | 9/9 | SM-2, decay, timeline, scoring, punishment, dependency resolver |
-| M3: Cards (all card types) | ✅ Complete | 13/13 | All 8 card types + deck + animations |
-| M4: Dashboard (widgets) | ✅ Complete | 10/11 | Heatmap, radar, timeline, decay log, mode selector |
-| M5: MVP Ship (code exec + Phase 1) | ⬜ Not started | 0/17 | First playable version |
-| M6: Gamification (rewards/punish) | ⬜ Not started | 0/19 | Full streak/lock/ghost system |
-| M7: Full Content (all 47 units) | ⬜ Not started | 0/6 | Content authoring (ongoing) |
-| M8: Polish (responsive, offline) | ⬜ Not started | 0/8 | Final polish |
+| Component | Choice |
+|-----------|--------|
+| Framework | Svelte 4 + Vite |
+| Styling | Tailwind CSS (dark mode) |
+| Code Execution | Wandbox API (free, no auth) |
+| Hosting | Netlify (free tier, auto-deploy from GitHub) |
+| Data | localStorage (no server, no auth) |
+| Tests | Vitest (90 tests, 6 test files) |
 
 ---
 
-## Decision Log
+## What's Built (Everything)
 
-| Date | Decision | Rationale |
-|------|----------|-----------|
-| 2026-07-23 | Name: LevelShift | Represents role transition (level shift from QA to SDET) |
-| 2026-07-23 | Framework: Svelte + Vite | Lightweight, compiles away, fast, reactive |
-| 2026-07-23 | No backend | localStorage only, Netlify static hosting |
-| 2026-07-23 | Teaching: 8-step pattern | HOOK→FAIL FIRST→ANALOGY→CODE→BREAK IT→CONTRAST→EXPLAIN BACK→CONNECT |
-| 2026-07-23 | Invisible review over explicit review | User never sees "review" label |
-| 2026-07-23 | Rejected: garden/city reward metaphor | Felt lame/childish for developer audience |
-| 2026-07-23 | Accepted: rank decay + radar rust + feature lockout + ghost replay | Data-driven, developer-aesthetic punishment |
-| 2026-07-23 | Course priority: Java → DSA → REST Assured → APIs → Selenium | REST Assured before Selenium for pure coding interview value |
-| 2026-07-23 | Card-based UI, no scrolling | Short attention span design (reels-damaged brain) |
-| 2026-07-23 | Dynamic timeline with 1.5x miss penalty | Makes cost of skipping visible and mathematical |
+### Content
+- **48 units across 7 phases, 412 cards total**
+- Phase 1: Java Core (8 units) — OOP from variables to integration
+- Phase 2: Collections & Generics (5 units)
+- Phase 3: Exceptions + Java 8 (5 units)
+- Phase 4: DSA Essentials (6 units)
+- Phase 5: REST Assured (10 units)
+- Phase 6: API Testing Strategy (5 units)
+- Phase 7: Selenium WebDriver (9 units)
+
+### Card Types (8-step teaching methodology)
+1. HOOK — curiosity trigger, never a definition
+2. FAIL_FIRST — code challenge before teaching (with model answer + Wandbox execution)
+3. ANALOGY — real-world mapping
+4. CODE — shortest working example with annotation
+5. BREAK_IT — predict behavior (multiple choice)
+6. CONTRAST — side-by-side comparison (multiple choice)
+7. EXPLAIN_BACK — fill-in-the-blanks (60%) or pick-best-answer (40%)
+8. CONNECT — where concept appears in future frameworks
+
+### Components (25 Svelte components)
+- Dashboard, CourseMap, LearnView, CardDeck, CardRenderer
+- HookCard, FailFirstCard, AnalogyCard, CodeCard, BreakItCard, ContrastCard, ExplainBackCard, ConnectCard
+- Heatmap, Radar, Timeline, DecayLog, GhostReplay
+- ReadinessReport, WeeklyReport, QuickChallenge, Settings, Onboarding
+- Card (base wrapper)
+
+### Engines (7 modules)
+- `spaced-rep.js` — SM-2 algorithm
+- `decay.js` — exponential memory decay
+- `timeline.js` — dynamic completion calculator
+- `scoring.js` — XP, streaks, readiness, interview credits
+- `punishment.js` — feature locks, heatmap colors, consequences, ghost replay, streak freeze
+- `dependency.js` — invisible review (concept dependency resolver, daily puzzle)
+- `gamification.js` — orchestrator (runs on app load, processes missed days)
+
+### Features
+- ✅ Ghost replay (compare current vs personal best)
+- ✅ Readiness report (exportable HTML)
+- ✅ Streak freeze (earn/spend, auto-apply)
+- ✅ Red heatmap squares (3+ consecutive misses)
+- ✅ Feature locking (interview mode, prove mode)
+- ✅ Weekly shift report modal
+- ✅ Course Map (free navigation to any phase/unit)
+- ✅ Mobile responsive
+- ✅ Service worker (offline content caching)
+- ✅ Sound effects toggle (Web Audio API)
+- ✅ Onboarding walkthrough (4 steps)
+- ✅ Card navigation gating (must complete current card before Next unlocks)
+- ✅ Card state persistence (answers saved when navigating back/forward)
+- ✅ Code execution via Wandbox API (Java 22)
+- ✅ Export/Import JSON backup
+
+---
+
+## Key Decisions Made
+
+| Decision | Rationale |
+|----------|-----------|
+| Wandbox API (not Piston) | Piston went whitelist-only Feb 2026. Wandbox is free, no auth, Java 22. |
+| No unit locking in Course Map | User wanted free navigation to any phase/unit |
+| fill_blank + pick_best (not typing) | User is lazy/short-attention-span — tapping > typing |
+| 60% fill_blank, 40% pick_best | Weighted toward keyword recall over multiple choice |
+| Content audit: quiz only tests taught concepts | Every blank answer must appear word-for-word in a prior CODE/ANALOGY card |
+| Card gating within units | Can't skip to card 6 without completing card 5 (but can go backward freely) |
+| Non-interactive cards auto-complete | Hook, Analogy, Code, Connect unlock Next immediately on view |
+| Netlify hosting (not GitHub Pages) | Simpler, supports SPA redirects natively, free tier |
+| `netlify.toml` in repo root | Netlify only reads config from root, not subdirectories |
+
+---
+
+## File Structure
+
+```
+LevelShift/
+├── netlify.toml                    # Netlify build config (MUST be in root)
+├── start.sh                        # Local dev launch script
+├── .gitignore
+├── docs/
+│   ├── requirements.md
+│   ├── design.md
+│   ├── tasks.md
+│   └── progress.md                 # ← THIS FILE
+└── app/
+    ├── package.json
+    ├── vite.config.js
+    ├── tailwind.config.js
+    ├── build-content.js            # Markdown → JSON compiler
+    ├── content/                    # Source markdown (7 phase dirs)
+    │   ├── phase1-java-core/
+    │   ├── phase2-collections/
+    │   ├── phase3-exceptions-java8/
+    │   ├── phase4-dsa/
+    │   ├── phase5-rest-assured/
+    │   ├── phase6-api-strategy/
+    │   └── phase7-selenium/
+    ├── public/
+    │   ├── favicon.svg
+    │   └── sw.js                   # Service worker
+    └── src/
+        ├── App.svelte              # Root + hash router
+        ├── main.js                 # Entry + SW registration
+        ├── app.css                 # Tailwind + custom styles
+        └── lib/
+            ├── components/         # 25 Svelte components
+            ├── engines/            # 7 algorithm modules + __tests__/
+            ├── stores/             # progress.js, session.js
+            ├── utils/              # storage.js, dates.js, code-runner.js, sounds.js
+            └── data/
+                ├── phases.json     # All 7 phases + 48 unit metadata
+                ├── concepts.json   # 100+ concepts with dependency graph
+                └── cards/          # Built JSON (48 unit files)
+```
+
+---
+
+## How To Work On This
+
+```bash
+# Start dev server
+cd LevelShift && ./start.sh
+# Or manually:
+cd app && npm install --registry https://registry.npmjs.org && npm run dev
+
+# Rebuild content after editing markdown
+cd app && node build-content.js
+
+# Run tests
+cd app && npm test
+
+# Production build
+cd app && npm run build
+# Output: app/dist/
+```
+
+---
+
+## Known Issues / Gotchas
+
+1. **npm registry**: Corporate .npmrc may interfere. Use `--registry https://registry.npmjs.org` if npm install fails.
+2. **Wandbox API**: Free but no SLA. If it goes down, app falls back to offline mode (show answer + self-rate).
+3. **`netlify.toml` location**: MUST be in repo root, not inside `app/`. Netlify ignores it otherwise.
+4. **Vite base path**: Must be `/` for Netlify. Do NOT add `base: '/levelshift/'` — that's only for GitHub Pages subpath hosting.
+5. **Content edits**: Edit markdown in `app/content/`, then run `node build-content.js` to regenerate JSON. Don't edit JSON directly.
+6. **Card state**: Session store (`session.js`) tracks `cardStates` and `highestUnlocked` for navigation gating. Non-interactive cards auto-complete via `CardRenderer.svelte` onMount.
+
+---
+
+## Potential Future Work
+
+- [ ] More content (practice problems, mock interviews)
+- [ ] Dark/light theme toggle
+- [ ] AI-powered hints (free LLM API)
+- [ ] Notification reminders (Push API)
+- [ ] PWA install prompt
+- [ ] Analytics (anonymous usage tracking)
+- [ ] Community features (if ever multi-user)
 
 ---
 
@@ -59,92 +196,36 @@
 
 ### Session 1 — 2026-07-23
 
-**What happened:**
-- Discussed and agreed on full platform concept
-- Defined all requirements (80 items across 10 categories)
-- Designed technical architecture (Svelte, localStorage, SM-2, dependency graph)
-- Broke down implementation into 80+ tasks across 11 phases
-- Estimated 8-10 days of focused development effort
+Built entire platform from scratch in one day:
+- Designed requirements, architecture, task breakdown
+- Built all scaffolding, data layer, engines, card components, dashboard
+- Authored Phase 1 content (8 units)
+- Code execution client (Piston API)
 
-**Key discussions:**
-1. Course content → SDET-1 topics in priority order (Java, DSA, REST Assured, APIs, Selenium)
-2. Teaching methodology → 8-step pattern (productive failure + contrast + explain back)
-3. Invisible review → dependency-based exercises, no "review" label ever
-4. Reward/punishment → radar rust, feature lockout, ghost replay, decay log, heatmap
-5. Dynamic timeline → synced with consistency, 1.5x penalty for misses
-6. UI/UX → card-based, dark mode, instant feedback, short attention span optimized
+### Session 2 — 2026-07-23 (continued)
 
-**Artifacts produced:**
-- `/LevelShift/requirements.md`
-- `/LevelShift/design.md`
-- `/LevelShift/tasks.md`
-- `/LevelShift/progress.md`
+- Fixed Dashboard Svelte compilation error (`class:` directive with `/`)
+- Completed all remaining 23 tasks:
+  - Gamification (ghost replay, readiness report, streak freeze, punishment triggers, weekly report)
+  - Content authoring (Phases 2-7, 40 units, 332 cards)
+  - Unit tests (90 tests, all passing)
+  - Polish (mobile responsive, service worker, meta tags, onboarding, sound effects)
+- Fixed bug: `getHeatmapColor` future-date logic was inverted
+- Switched code execution from dead Piston API to Wandbox API
+- Fixed "Show Model Answer" button (added solutionCode to content + always-visible button)
 
-**Next session should:**
-1. Fix npm install (either reset .npmrc or use --registry flag)
-2. Run `npm install` and verify `npm run dev` works
-3. Start Phase D: Build all card components
-4. Start Phase E: Dashboard components (Heatmap, Radar, Timeline)
+### Session 3 — 2026-07-25/26
 
----
-
-### Session 1b — 2026-07-23 (Build)
-
-**What was built:**
-
-Phase A (Scaffolding):
-- ✅ Svelte + Vite project created (manual, npm auth blocked)
-- ✅ Tailwind CSS configured with full dark theme palette
-- ✅ Custom animations (fade-in, slide-up, shake, fly-away, xp-tick)
-- ✅ Netlify deployment config (netlify.toml)
-- ✅ index.html with font loading (Inter + JetBrains Mono)
-- ✅ App.svelte with hash-based routing (dashboard/learn/challenge/report)
-- ✅ Dashboard.svelte (placeholder with real store bindings)
-- ✅ Base CSS components (cards, buttons, code blocks, option buttons)
-- ✅ SVG favicon
-
-Phase B (Data Layer):
-- ✅ localStorage wrapper with export/import/migration (storage.js)
-- ✅ Date utilities (dates.js)
-- ✅ Main progress store with all user state (progress.js)
-- ✅ Session store for ephemeral learning state (session.js)
-- ✅ phases.json — all 7 phases, 47 units, with metadata
-- ✅ concepts.json — 100+ concepts with full dependency graph + categories
-
-Phase C (Core Engines):
-- ✅ SM-2 spaced repetition engine (spaced-rep.js)
-- ✅ Memory decay calculator with exponential decay (decay.js)
-- ✅ Dynamic timeline calculator with miss penalties (timeline.js)
-- ✅ Scoring engine — XP, streaks, readiness, milestones (scoring.js)
-- ✅ Punishment state machine — feature locks, consequences, ghost replay (punishment.js)
-- ✅ Dependency resolver — invisible review selection, daily puzzle generation (dependency.js)
-- ✅ Code execution client — Piston API integration (code-runner.js)
-
-**Blocker noted:** npm registry points to Amazon CodeArtifact with expired token. To fix:
-```bash
-# Option 1: Temporarily override registry
-cd app && npm install --registry https://registry.npmjs.org
-
-# Option 2: Reset .npmrc
-echo "registry=https://registry.npmjs.org" > ~/.npmrc
-cd app && npm install
-```
-
----
-
-## Quick Reference
-
-**To resume building, start with:**
-```bash
-# Phase A — Scaffolding
-npx sv create levelshift   # Svelte project
-cd levelshift
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-# Set up dark mode, routes, base styles
-# Deploy to Netlify
-```
-
-**MVP target:** Phase 1 content (8 units, ~80 cards) fully playable with code execution + dashboard with streak tracking.
-
-**Content can be authored in parallel** — while engines and UI are being built, content for Phase 1 units can be written in markdown and converted later.
+- **EXPLAIN_BACK redesign**: Replaced typing-based Q&A with fill-in-the-blanks (60%) and pick-best-answer (40%)
+- **Content quality audit**: Found 83 issues where quiz cards tested untaught concepts. Fixed ALL:
+  - Enriched CODE annotations and ANALOGY text to explicitly state concepts before quiz
+  - Converted all 48 legacy EXPLAIN_BACK cards to interactive format
+  - Rewrote CONTRAST/BREAK_IT explanations to use only previously taught terms
+- **Navigation fixes**:
+  - Card gating: must complete current card before Next unlocks
+  - Card state persistence: answers saved when navigating back/forward
+  - Non-interactive cards auto-complete on view
+- **Course Map**: New full-course navigation screen (all phases/units freely accessible)
+- **Netlify deployment fixed**: Moved `netlify.toml` to repo root, removed GitHub Pages config
+- **GitHub repo**: Connected, pushed, deployed live
+- Model answers shortened (was 400-600 chars → now 100-150 chars)
