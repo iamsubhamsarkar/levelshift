@@ -1,0 +1,135 @@
+{
+  "unitId": "p8u10",
+  "title": "Framework Project",
+  "phase": 8,
+  "unit": 10,
+  "teaches": [
+    "playwright.config",
+    "playwright.reporters",
+    "playwright.ci",
+    "playwright.parallel",
+    "typescript.project_structure"
+  ],
+  "requires": [
+    "playwright.fixtures",
+    "playwright.multi_page",
+    "playwright.visual"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u10_c1",
+      "type": "hook",
+      "content": {
+        "question": "Same tests take 30 minutes locally. In CI, 200 tests finish in 2 minutes across 4 shards. How?",
+        "code": "# .github/workflows/playwright.yml\nname: Playwright Tests\non: [push]\njobs:\n  test:\n    strategy:\n      matrix:\n        shard: [1/4, 2/4, 3/4, 4/4]  # 4 parallel machines\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n      - run: npm ci\n      - run: npx playwright install --with-deps\n      - run: npx playwright test --shard=${{ matrix.shard }}\n      - uses: actions/upload-artifact@v4\n        with:\n          name: report-${{ matrix.shard }}\n          path: playwright-report/\n# Result: 200 tests ÷ 4 shards = ~50 tests per machine = 2 min total"
+      }
+    },
+    {
+      "id": "p8u10_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create a playwright.config.ts that configures: 3 parallel workers, a 30-second test timeout, baseURL from an environment variable (defaulting to localhost:3000), and two projects — one for Chromium desktop and one for Mobile Safari.",
+        "starterCode": "import { defineConfig } from '@playwright/test';\n\nexport default defineConfig({\n  // TODO: Set workers to 3\n  // TODO: Set timeout to 30 seconds\n  // TODO: Set baseURL from process.env.BASE_URL or 'http://localhost:3000'\n  // TODO: Define two projects: 'Desktop Chrome' and 'Mobile Safari'\n});",
+        "hint": "Use `devices['Desktop Chrome']` and `devices['iPhone 13']` from @playwright/test for device emulation projects.",
+        "expectedOutput": "The config should have `workers: 3`, `timeout: 30_000`, `use: { baseURL: process.env.BASE_URL || 'http://localhost:3000' }`, and a `projects` array with `{ name: 'Desktop Chrome', use: { ...devices['Desktop Chrome'] } }` and `{ name: 'Mobile Safari', use: { ...devices['iPhone 13'] } }`.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u10_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Think of a Playwright framework project like designing a restaurant franchise. A single test file is like one restaurant — it can function alone. But a framework is the franchise blueprint: the standard kitchen layout (project structure), the approved suppliers (dependencies in tsconfig), the quality checklist every location follows (reporters), the franchise-wide menu (shared fixtures), and the expansion plan (CI pipeline). You're not writing tests anymore — you're building the system that makes tests reliable, maintainable, and scalable. The config file is your franchise manual: it dictates how every location (project) operates, what equipment they use (browsers), and how many chefs work simultaneously (parallel workers).",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u10_c4",
+      "type": "code",
+      "content": {
+        "code": "// playwright.config.ts — production-grade configuration\nimport { defineConfig, devices } from '@playwright/test';\n\n// Type-safe environment configuration\ntype Environment = 'local' | 'staging' | 'production';\nconst env = (process.env.TEST_ENV || 'local') as Environment;\n\nconst baseURLs: Record<Environment, string> = {\n  local: 'http://localhost:3000',\n  staging: 'https://staging.myapp.com',\n  production: 'https://myapp.com',\n};\n\nexport default defineConfig({\n  testDir: './tests',\n  outputDir: './test-results',\n  timeout: 60_000,\n  retries: env === 'local' ? 0 : 2,\n  workers: env === 'local' ? undefined : 4, // undefined = half CPU cores\n  fullyParallel: true,\n\n  reporter: [\n    ['html', { open: 'never' }],\n    ['json', { outputFile: 'results.json' }],\n    ['github'],  // Annotations in GitHub Actions\n  ],\n\n  use: {\n    baseURL: baseURLs[env],\n    trace: 'on-first-retry',\n    screenshot: 'only-on-failure',\n    video: 'on-first-retry',\n  },\n\n  projects: [\n    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },\n    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },\n    { name: 'mobile', use: { ...devices['iPhone 13'] } },\n    {\n      name: 'api',\n      testDir: './tests/api',\n      use: { baseURL: baseURLs[env].replace('myapp', 'api.myapp') },\n    },\n  ],\n});",
+        "highlight": [
+          "5",
+          "6",
+          "8",
+          "9",
+          "10",
+          "11",
+          "19",
+          "20",
+          "23",
+          "24",
+          "25",
+          "26",
+          "38",
+          "39",
+          "40"
+        ],
+        "annotation": "Lines 5-11 show type-safe environment config using Record — the compiler ensures every environment has a URL. Lines 19-20 show conditional config (retries only in CI, workers scale to hardware). Lines 23-26 configure multiple reporters simultaneously — HTML for local review, JSON for parsing, GitHub for PR annotations. Lines 38-40 show projects — each is an independent test suite with its own browser/device config. The API project (lines 41-44) has its own testDir and baseURL, separating API tests from UI tests architecturally."
+      }
+    },
+    {
+      "id": "p8u10_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "// playwright.config.ts\nimport { defineConfig } from '@playwright/test';\n\nexport default defineConfig({\n  workers: 4,\n  fullyParallel: true,\n  use: {\n    baseURL: 'http://localhost:3000',\n  },\n  projects: [\n    { name: 'chromium', use: { channel: 'chrome' } },\n    { name: 'firefox', use: { channel: undefined } },\n  ],\n});\n\n// tests/dashboard.spec.ts\nimport { test } from '@playwright/test';\n\ntest('load dashboard', async ({ page }) => {\n  await page.goto('/dashboard'); // uses baseURL\n  await page.locator('#chart').waitFor();\n});",
+        "modification": "Change `fullyParallel: true` to `fullyParallel: false` while keeping `workers: 4`.",
+        "question": "What changes when fullyParallel is false but workers is 4?",
+        "options": [
+          "Tests within the same file run sequentially but different files can run in parallel across 4 workers",
+          "All tests run sequentially regardless of worker count",
+          "Tests still run in parallel but the order is reversed"
+        ],
+        "correct": 0,
+        "explanation": "`fullyParallel: true` means every individual test can run on any available worker independently. `fullyParallel: false` means tests within the same spec file run sequentially (in order), but different spec files can still be distributed across workers. With 4 workers and 10 spec files, up to 4 files run simultaneously, but within each file, tests execute one-by-one. This matters when tests in a file share state via hooks or have ordering dependencies. It's the difference between \"parallelize everything\" and \"parallelize at the file level only.\""
+      }
+    },
+    {
+      "id": "p8u10_c6",
+      "type": "contrast",
+      "content": {
+        "label": "tsconfig paths (module aliases) vs Relative imports",
+        "codeA": "// tsconfig.json with path aliases\n{\n  \"compilerOptions\": {\n    \"baseUrl\": \".\",\n    \"paths\": {\n      \"@pages/*\": [\"tests/pages/*\"],\n      \"@fixtures/*\": [\"tests/fixtures/*\"],\n      \"@utils/*\": [\"tests/utils/*\"]\n    }\n  }\n}\n\n// Usage in test file:\nimport { LoginPage } from '@pages/login.page';\nimport { test } from '@fixtures/auth.fixture';\nimport { generateUser } from '@utils/data.factory';",
+        "codeB": "// Without path aliases — relative imports\n// File: tests/e2e/checkout/payment.spec.ts\n\nimport { LoginPage } from '../../pages/login.page';\nimport { test } from '../../fixtures/auth.fixture';\nimport { generateUser } from '../../utils/data.factory';\n\n// Move the file? All imports break.\n// Deeper nesting? More ../../../ chaos.\n// New team member? Good luck navigating.",
+        "question": "What problem do TypeScript path aliases solve in a test framework?",
+        "options": [
+          "They make tests run faster by caching module resolution",
+          "They eliminate fragile relative paths so imports don't break when files move and deeply nested tests stay readable",
+          "They enable tree-shaking to reduce bundle size in production",
+          "They are required by Playwright's test runner for fixture resolution"
+        ],
+        "correct": 1,
+        "explanation": "Path aliases (`@pages/*`, `@fixtures/*`) map to absolute paths from the project root. This means `@pages/login.page` always resolves to `tests/pages/login.page` regardless of where the importing file lives. Move a test file from `tests/e2e/` to `tests/e2e/checkout/nested/`? All imports still work. No `../../` counting. No broken imports. The tradeoff: you need tsconfig.json configured, and your IDE needs to understand the aliases (most do automatically). For a large test framework with 50+ files across nested directories, aliases are essential for maintainability."
+      }
+    },
+    {
+      "id": "p8u10_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how Playwright's sharding and parallel execution work together in CI.",
+        "sentence": "Sharding splits the test suite across multiple _____, while workers control parallelism _____ each machine, and fullyParallel determines if tests within a _____ can interleave.",
+        "blanks": [
+          "CI machines",
+          "within",
+          "file"
+        ],
+        "distractors": [
+          "browsers",
+          "between",
+          "project"
+        ]
+      }
+    },
+    {
+      "id": "p8u10_c8",
+      "type": "connect",
+      "content": {
+        "text": "This unit completes the Playwright phase. You now have everything needed to build production test frameworks — from locators (Unit 2) through Page Objects (Unit 5), async patterns (Unit 6), API testing (Unit 7), fixtures (Unit 8), advanced patterns (Unit 9), to full framework architecture here. The skills compound — your TypeScript journey from basic types to generics to utility types to project configuration mirrors real SDET career growth.",
+        "code": "// The complete framework structure you can now build:\n// tests/\n// ├── fixtures/\n// │   ├── auth.fixture.ts        (Unit 8: custom fixtures)\n// │   └── api.fixture.ts         (Unit 7+8: API + fixtures)\n// ├── pages/\n// │   ├── login.page.ts          (Unit 5: Page Objects)\n// │   └── dashboard.page.ts      (Unit 5: POM)\n// ├── e2e/\n// │   ├── checkout.spec.ts       (Unit 6: async waits)\n// │   ├── admin.spec.ts          (Unit 9: multi-context)\n// │   └── visual.spec.ts         (Unit 9: screenshots)\n// ├── api/\n// │   └── users.api.spec.ts      (Unit 7: API testing)\n// ├── utils/\n// │   └── data.factory.ts        (TS generics + utility types)\n// ├── playwright.config.ts       (This unit: config)\n// └── tsconfig.json              (This unit: project setup)\n\nimport { defineConfig } from '@playwright/test';\n\nexport default defineConfig({\n  projects: [\n    { name: 'setup', testMatch: /global\\.setup\\.ts/ },\n    { name: 'chromium', dependencies: ['setup'], use: { channel: 'chrome' } },\n    { name: 'api', testDir: './tests/api' },\n  ],\n});",
+        "note": "You're not just writing tests anymore — you're architecting test infrastructure. This is the difference between a manual tester who automates and an SDET who builds scalable quality systems. Take this structure into your portfolio projects."
+      }
+    }
+  ]
+}

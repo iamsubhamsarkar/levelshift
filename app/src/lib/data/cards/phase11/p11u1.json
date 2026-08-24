@@ -1,0 +1,130 @@
+{
+  "unitId": "p11u1",
+  "title": "Conversation Memory — Trim & Summarize Context",
+  "phase": 11,
+  "unit": 1,
+  "teaches": [
+    "agentic.build_memory",
+    "agentic.build_context_mgmt"
+  ],
+  "requires": [
+    "agentic.build_loop",
+    "agentic.memory_kinds",
+    "agentic.context_strategies"
+  ],
+  "estimatedMinutes": 21,
+  "cards": [
+    {
+      "id": "p11u1_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "A reminder as you continue building ATLAS.",
+        "why": "These steps are grounded in the Phase 9 theory plus standard Groq/NIM + Python tooling. The concepts are stable; the exact API calls, library names, and model IDs are not.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "Understand this: verify the specific API calls and model names against the current provider docs (Groq, NVIDIA NIM) and library docs when you actually build — they change fast. If a call or model ID is rejected, check the provider's current docs first; that is expected, not an error in the lesson.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 3 and Ch 12"
+      }
+    },
+    {
+      "id": "p11u1_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Give ATLAS a session that remembers the conversation across turns.",
+        "why": "The model is stateless — memory is an illusion YOU create by re-sending history. A small session object holds it outside the model. (Learned in Phase 9, Ch 2 and Ch 9.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "class Session:\n    def __init__(self, system_prompt):\n        self.messages = [{\"role\": \"system\", \"content\": system_prompt}]\n\n    def user(self, text):\n        self.messages.append({\"role\": \"user\", \"content\": text})\n\n    def assistant(self, text):\n        self.messages.append({\"role\": \"assistant\", \"content\": text})\n\nsession = Session(\"You are ATLAS, a concise assistant.\")",
+        "verify": "The file saves. The session's messages list IS the conversation — the entire memory, carried on every call.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 9"
+      }
+    },
+    {
+      "id": "p11u1_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Have a two-turn conversation that proves memory works.",
+        "why": "A follow-up like \"what did I just ask?\" only works if you resend the earlier turns. (Learned in Phase 9, Ch 2, section 2.2.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "session.user(\"My favorite language is Java.\")\nreply = ask(session.messages); session.assistant(reply); print(reply)\n\nsession.user(\"What is my favorite language?\")\nreply = ask(session.messages); session.assistant(reply); print(reply)",
+        "verify": "The second answer correctly says \"Java\" — because you resent the whole history. Remove the first two lines and it can no longer know; that proves the memory lives in the messages you send, not in the model.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 2, Ch 9"
+      }
+    },
+    {
+      "id": "p11u1_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Add truncation (a sliding window) to keep the conversation from overflowing.",
+        "why": "Long conversations overflow the finite context \"desk\" and cost more each turn. Truncation is the simplest fix — keep the system prompt plus the most recent messages. (Learned in Phase 9, Ch 9, section 9.3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "def trimmed(messages, keep_recent=6):\n    system = messages[0:1]              # always keep the system prompt\n    recent = messages[1:][-keep_recent:]  # keep only the last N turns\n    return system + recent\n# Use ask(trimmed(session.messages)) for very long chats.",
+        "verify": "On a long conversation, only the system prompt plus the last few turns are sent. Confirm by printing len(trimmed(session.messages)) — it stays bounded no matter how long the chat grows.",
+        "troubleshoot": "Truncation risks forgetting an important EARLY fact. If early context matters, prefer summarization (next step) over dropping messages.",
+        "reference": "Phase 9, Ch 9"
+      }
+    },
+    {
+      "id": "p11u1_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Add summarization — compress old turns into a short summary instead of dropping them.",
+        "why": "Summarization preserves the gist of early messages while using far fewer tokens — the standard 2026 technique for long-running agents. (Learned in Phase 9, Ch 9, section 9.3.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "def summarize_old(messages, keep_recent=4):\n    system = messages[0]\n    old = messages[1:-keep_recent]\n    recent = messages[-keep_recent:]\n    if len(old) < 2:\n        return messages\n    summary = ask([\n        {\"role\": \"system\", \"content\": \"Summarize this conversation so far in 2-3 sentences, keeping key facts.\"},\n        {\"role\": \"user\", \"content\": str(old)},\n    ])\n    return [system, {\"role\": \"system\", \"content\": f\"Summary so far: {summary}\"}] + recent",
+        "verify": "After many turns, the old messages collapse into one short \"Summary so far:\" line, and ATLAS still recalls key facts (like \"Java\") from the summary rather than the raw transcript.",
+        "troubleshoot": "If the summary drops a detail that later matters, tighten the summarizer prompt (\"keep names, preferences, and decisions\"). Summarize WITH the goal in mind.",
+        "reference": "Phase 9, Ch 9"
+      }
+    },
+    {
+      "id": "p11u1_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "Add a tiny profile (key-value) memory that persists across runs.",
+        "why": "Not every memory needs machinery — a small store of facts, loaded into the system prompt each run, covers a lot. (Learned in Phase 9, Ch 9, section 9.4.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "import json, os\n\ndef load_profile(path=\"profile.json\"):\n    return json.load(open(path)) if os.path.exists(path) else {}\n\ndef save_profile(profile, path=\"profile.json\"):\n    json.dump(profile, open(path, \"w\"))\n\nprofile = load_profile()\nprofile[\"favorite_language\"] = \"Java\"\nsave_profile(profile)\n# At the start of a run, inject it:\n# Session(\"You are ATLAS. Known facts about the user: \" + json.dumps(profile))",
+        "verify": "A profile.json file appears with the stored fact. Start a brand-new run and ATLAS already knows your favorite language — memory that survives ACROSS runs, not just within one.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 9"
+      }
+    },
+    {
+      "id": "p11u1_c7",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — ATLAS now remembers.",
+        "why": "You have both within-run working memory and across-run persistent memory — the distinction from Chapter 7 made real.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — the session carries conversation history; truncation bounds long chats; summarization preserves early facts cheaply; a profile.json persists facts across runs. You understand the universal shape: store outside the model, retrieve the relevant slice, place it on the desk. Next unit adds retrieval by MEANING with embeddings.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 9"
+      }
+    }
+  ]
+}

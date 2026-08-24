@@ -1,0 +1,130 @@
+{
+  "unitId": "p12u7",
+  "title": "CAPSTONE — Run Everywhere, Document, Ship",
+  "phase": 12,
+  "unit": 7,
+  "teaches": [
+    "agentic.build_capstone"
+  ],
+  "requires": [
+    "agentic.build_reliability",
+    "agentic.build_service",
+    "agentic.production",
+    "agentic.universal_recipe"
+  ],
+  "estimatedMinutes": 21,
+  "cards": [
+    {
+      "id": "p12u7_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Run the full ATLAS system end to end and read its trace.",
+        "why": "The capstone proves the whole system works together: agentic RAG, a sub-agent, guardrails, approval, tracing, and reliability — one coherent agent. (Learned in Phase 9, Ch 17-18.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "if __name__ == \"__main__\":\n    answer, trace = guarded_run(\n        \"Research our current project's deadline from my notes, \"\n        \"then tell me how many days remain if today is March 1.\"\n    )\n    print(answer)\n    print(\"TRACE:\", trace.summary())",
+        "verify": "ATLAS runs the multi-hop research through the sub-agent, stays grounded and cited, passes guardrails, records a full trace, and answers. Reading the trace, you can account for every step it took.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17-18"
+      }
+    },
+    {
+      "id": "p12u7_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Run the EXACT same build on your OTHER operating system.",
+        "why": "Cross-platform is a first-class goal — the venv-based build runs on both Windows and Ubuntu 24.04 with only the activation command differing. (Learned across all build phases.)",
+        "commands": {
+          "windows": "python -m venv .venv\n.venv\\Scripts\\Activate.ps1\npip install -r requirements.txt\npython atlas.py",
+          "ubuntu": "python3 -m venv .venv\nsource .venv/bin/activate\npip install -r requirements.txt\npython3 atlas.py"
+        },
+        "code": null,
+        "verify": "ATLAS produces the same behavior on the second OS. If you have both machines, confirm it there; if not, confirm the commands match what you have been using and that a requirements.txt captures your dependencies.",
+        "troubleshoot": "If a dependency is missing on the second OS, run `pip freeze > requirements.txt` on the working machine and install from it on the other. That file is your portable dependency contract.",
+        "reference": "All build phases"
+      }
+    },
+    {
+      "id": "p12u7_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Freeze your dependencies into requirements.txt.",
+        "why": "A pinned dependency list makes the build reproducible on any machine — the same discipline as pinning versions in any project. (Learned in Phase 9, Ch 17, section 17.6.)",
+        "commands": {
+          "windows": "pip freeze > requirements.txt",
+          "ubuntu": "pip freeze > requirements.txt"
+        },
+        "code": null,
+        "verify": "requirements.txt lists openai, python-dotenv, pydantic, fastapi, uvicorn, and any others you used, with pinned versions. Anyone can now recreate your environment.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u7_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Run the production-readiness checklist against ATLAS.",
+        "why": "Before calling an agent \"ready,\" you should be able to say yes across reliability, cost/latency, safety/observability, and quality/operations. (Learned in Phase 9, Ch 17, section 17.8.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# Tick each honestly for ATLAS:\n# RELIABILITY: retries+backoff? timeouts? provider fallback? step/output caps? idempotent actions?\n# COST/LATENCY: right-sized model? tight prompts? concise tool results? tokens tracked?\n# SAFETY/OBSERVABILITY: input/output/action guardrails? injection defense + least privilege?\n#                       human approval on dangerous tools? tracing on every run? no secrets in logs?\n# QUALITY/OPERATIONS: an eval suite with a threshold gate? .env secrets (never in code)?",
+        "verify": "You can answer YES (or \"consciously deferred, and here's why\") to each item. ATLAS meets the core of a production-readiness bar.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u7_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Write a short README describing ATLAS with the six-question universal recipe.",
+        "why": "Any agent is defined by six questions — goal, tools, knowledge, architecture, guardrails, interface. Writing them down is how you understand and hand off any agent. (Learned in Phase 9, Ch 18, section 18.1.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# README.md — answer the six questions for ATLAS:\n# 1. GOAL: research/ops assistant that answers from my documents and runs safe tools.\n# 2. TOOLS: search_docs, word_count, reverse_text, research (sub-agent), delete_file (gated).\n# 3. KNOWLEDGE: my docs via RAG (chunk -> embed -> retrieve -> grounded answer + citation).\n# 4. ARCHITECTURE: single ReAct agent + a research sub-agent (supervisor topology).\n# 5. GUARDRAILS: input/output/action layers; injection defense; human approval on delete.\n# 6. INTERFACE: a FastAPI /ask endpoint (and the CLI).",
+        "verify": "A README.md exists answering all six questions for ATLAS. You can now describe — and someone else can understand — exactly what your agent is and does.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 18"
+      }
+    },
+    {
+      "id": "p12u7_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "(Optional) Deploy the service, and reflect on the three enduring habits.",
+        "why": "Deployment options — a container, serverless, a managed platform, or the Spring/JVM path — are a config change because you stayed provider-agnostic. And three habits outlast every tool. (Learned in Phase 9, Ch 17-18.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# Optional deploy: containerize service.py (a small Dockerfile) or run it on a\n# managed platform. Keep it stateless; store sessions externally; keep secrets\n# in a manager, never in the image.\n#\n# Reflect (write it down):\n#  DECIDE WELL   — did I use the least agentic thing that worked at each step?\n#  CONSTRAIN SAFELY — least privilege, guardrails, human approval where it matters?\n#  MEASURE HONESTLY — do I have evals + traces, not just a good feeling?",
+        "verify": "You either deployed the service or wrote your deploy plan, AND you wrote a short reflection on decide-well / constrain-safely / measure-honestly for ATLAS.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17-18"
+      }
+    },
+    {
+      "id": "p12u7_c7",
+      "type": "build_step",
+      "content": {
+        "goal": "CAPSTONE COMPLETE — you built a real agentic AI system, 0 to 100.",
+        "why": "You started with a single LLM call and ended with a deployed, evaluated, guardrailed, multi-capability agent — exercising all four core competencies: orchestration, tool integration, memory/knowledge, and error handling.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — ATLAS runs end to end on your machine (and the same build works on both OSes); dependencies are frozen in requirements.txt; it passes the production-readiness checklist; a README answers the six-question recipe; you reflected on the three enduring habits. You have turned the theory of Phase 9 into working skill. That was the whole point.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 1-18"
+      }
+    }
+  ]
+}

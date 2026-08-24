@@ -1,0 +1,105 @@
+{
+  "unitId": "p9u10",
+  "title": "Embeddings and Semantic Search",
+  "phase": 9,
+  "unit": 10,
+  "teaches": [
+    "agentic.embeddings",
+    "agentic.semantic_search",
+    "agentic.vector_store"
+  ],
+  "requires": [
+    "agentic.persistent_memory"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p9u10_c1",
+      "type": "theory",
+      "content": {
+        "heading": "10.0  Finding information by meaning",
+        "body": "To find information by MEANING rather than by exact words, we need one new idea: the embedding. Embeddings are the quiet engine beneath semantic memory (Chapter 9) and beneath retrieval-augmented generation (Chapter 11, the most common real-world agent pattern).\n\nThis chapter explains embeddings and semantic search in plain terms. It is conceptual throughout — no math beyond an intuition, and nothing to run.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Embeddings are the engine beneath semantic memory and RAG — the most common real-world agent pattern."
+      }
+    },
+    {
+      "id": "p9u10_c2",
+      "type": "theory",
+      "content": {
+        "heading": "10.1  The problem with searching by words",
+        "body": "Traditional search matches WORDS. If you search a help center for \"reset password\" but the article says \"recover your login credentials,\" a pure keyword search may miss it — the words differ even though the MEANING is the same. Humans see instantly that the two phrases are about the same thing. Keyword search does not.\n\nFor agents that must answer questions from a body of documents, this is a serious limitation. Users ask in their own words; the answer may be phrased entirely differently. We need a way to search by MEANING. That is exactly what embeddings provide.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Users ask in their own words; the answer may be phrased differently. We need to search by MEANING."
+      }
+    },
+    {
+      "id": "p9u10_c3",
+      "type": "theory",
+      "content": {
+        "heading": "10.2  What an embedding is",
+        "body": "An EMBEDDING is a way of turning a piece of text into a list of numbers that captures its MEANING. That list of numbers is called a \"vector\" — you can think of it as coordinates that place the text somewhere in a vast \"map of meaning.\"\n\nThe crucial property: texts with SIMILAR MEANING land CLOSE TOGETHER on this map, and texts with different meanings land far apart — regardless of the exact words used.",
+        "snippet": "\"How do I reset my password?\"    ->  [ 0.02, -0.41, 0.13, ... ]\n\"I forgot my login credentials\"  ->  [ 0.03, -0.39, 0.15, ... ]   (close!)\n\"What's the capital of France?\"   ->  [ -0.5,  0.22, -0.8, ... ]   (far away)",
+        "snippetExplanation": "What this shows: The first two sentences mean almost the same thing, so their number-lists are nearly the same — they sit near each other on the map. The third is about something entirely different, so its numbers are very different. The specific values are not meant to be read by a person; what matters is that closeness of numbers corresponds to closeness of meaning. You obtain these vectors from a special kind of model called an \"embedding model\" (distinct from the chat models of earlier chapters, though several providers, including NVIDIA NIM, offer them). You hand it text; it hands back the vector.",
+        "callout": "An embedding turns text into a position on a \"map of meaning.\" Closeness of numbers = closeness of meaning."
+      }
+    },
+    {
+      "id": "p9u10_c4",
+      "type": "theory",
+      "content": {
+        "heading": "10.3  Measuring closeness",
+        "body": "If meaning is position on a map, then \"how similar are these two texts?\" becomes \"how close are their two points?\" There is a standard way to measure this closeness between vectors, commonly called \"cosine similarity.\" You do not need the formula; you need the intuition: a similarity near 1 means \"these mean almost the same thing,\" and a similarity near 0 means \"these are basically unrelated.\"\n\nSo to find the documents most relevant to a question, you turn the question into a vector, then look for the stored document-vectors CLOSEST to it. The closest ones are, by construction, the ones most similar in meaning. That is semantic search in a nutshell.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Similarity near 1 = nearly the same meaning; near 0 = unrelated. Closest vectors = most relevant documents."
+      }
+    },
+    {
+      "id": "p9u10_c5",
+      "type": "theory",
+      "content": {
+        "heading": "10.4  Semantic search, step by step",
+        "body": "Putting it together, semantic search over a collection of texts works in two phases.\n\nAhead of time (done once, or whenever the collection changes): turn every stored text into its embedding vector, and keep the texts alongside their vectors.\n\nWhen a question comes in: turn the question into its embedding vector; compare it against the stored vectors and find the closest few; those closest texts are your search results — ranked by meaning, not by matching words.\n\nNotice what this buys you: someone can ask \"how do I recover access to my account?\" and retrieve an article titled \"Resetting a forgotten password,\" even though they share almost no words. The system matched on MEANING. This is a genuine leap beyond keyword search, and it is what makes document question-answering work (Chapter 11).",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Semantic search: embed everything ahead of time, embed the question at query time, return the closest few."
+      }
+    },
+    {
+      "id": "p9u10_c6",
+      "type": "theory",
+      "content": {
+        "heading": "10.5  Where the vectors live — vector stores",
+        "body": "When you have only a handful of texts, you can compare against all of them one by one. But real collections have thousands or millions of items, and comparing against every one for every question would be slow. A VECTOR STORE (or vector database) is a system built to store many vectors and find the closest ones to a query quickly and at scale.\n\nIn 2026 you have several kinds of choices, and you do not need to memorize them — just recognize the landscape. DEDICATED vector databases built specifically for this purpose. EXISTING databases extended with vector abilities — notably PostgreSQL with a vector add-on. For a developer coming from a relational background, this often feels most natural: it is your familiar database with an extra column that holds a vector and an operation that finds \"nearest\" rows.\n\nWhatever the choice, they all offer the same two essential operations: store a vector (along with its text and any metadata like source or date), and find the closest vectors to a given query vector. The store is just the efficient filing cabinet for meaning.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "A vector store is the efficient filing cabinet for meaning: store a vector, find the closest ones — fast, at scale."
+      }
+    },
+    {
+      "id": "p9u10_c7",
+      "type": "theory",
+      "content": {
+        "heading": "10.6  Important subtleties",
+        "body": "A few points that matter in practice and prevent confusion.\n\nTHE SAME EMBEDDING MODEL MUST BE USED FOR BOTH SIDES. The stored documents and the incoming question must be embedded by the SAME model. Vectors from different embedding models live on different \"maps\" and cannot be meaningfully compared. This is a common beginner mistake.\n\nEMBEDDINGS CAPTURE MEANING, NOT TRUTH. Two false statements about the same topic will still be \"close.\" Embeddings tell you what a text is ABOUT, not whether it is correct.\n\nGRANULARITY MATTERS. Embedding a whole 50-page document as one vector blurs its meaning into mush; embedding tiny fragments loses context. Choosing the right size of text to embed is a real design decision — and it is central to the next chapter (there it is called \"chunking\").\n\nTHEY ALSO POWER OTHER THINGS. Beyond search, embeddings underpin clustering, recommendations, deduplication, and — as you saw in Chapter 9 — semantic memory. Any time you need \"find things similar in meaning,\" embeddings are the tool.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Same model on both sides. Meaning, not truth. Granularity matters. These three subtleties trip up beginners."
+      }
+    },
+    {
+      "id": "p9u10_c8",
+      "type": "theory",
+      "content": {
+        "heading": "Check your understanding",
+        "body": "For reflection, not coding.\n\n1. Why can a keyword search miss a relevant document, and how does searching by meaning fix that? Give your own example of two phrases that mean the same thing but share few words.\n\n2. In plain words, what is an embedding, and what does it mean for two texts to be \"close\" on the map of meaning?\n\n3. Describe semantic search as a two-phase process (ahead of time, and at query time).\n\n4. Why must the documents and the question be embedded by the SAME embedding model?\n\n5. \"Embeddings capture meaning, not truth.\" Explain what this means and why it matters for a system that answers questions.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Next chapter: RAG — combining semantic search with an LLM to answer questions using YOUR documents."
+      }
+    }
+  ]
+}

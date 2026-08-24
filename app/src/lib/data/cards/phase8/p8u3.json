@@ -1,0 +1,124 @@
+{
+  "unitId": "p8u3",
+  "title": "Assertions & TypeScript Types",
+  "phase": 8,
+  "unit": 3,
+  "teaches": [
+    "playwright.assertions",
+    "typescript.interfaces",
+    "typescript.unions",
+    "playwright.expect"
+  ],
+  "requires": [
+    "playwright.test_structure",
+    "typescript.async_await",
+    "playwright.locators"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u3_c1",
+      "type": "hook",
+      "content": {
+        "question": "This line auto-retries for 5 seconds, polling every 100ms, with zero sleep statements. How does it know when to stop?",
+        "code": "await expect(page.locator('.todo-list li')).toHaveCount(5);\n// No Thread.sleep(). No explicit waits. No retry loops.\n// It just... works. But HOW?"
+      }
+    },
+    {
+      "id": "p8u3_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write a test that adds 3 todo items and then asserts that exactly 3 items are visible in the list. Also define a TypeScript interface for a TodoItem with title (string) and completed (boolean) properties.",
+        "starterCode": "import { test, expect } from '@playwright/test';\n\n// Define an interface for a TodoItem\ninterface TodoItem {\n  // Add properties here\n}\n\ntest('should display 3 items after adding them', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc');\n  \n  const todos: TodoItem[] = [\n    // Add 3 todo items using your interface\n  ];\n\n  for (const todo of todos) {\n    // Add each todo\n  }\n\n  // Assert exactly 3 items exist\n});",
+        "hint": "An interface defines the SHAPE of data — what properties exist and what types they hold. Use `toHaveCount(3)` for asserting element count.",
+        "expectedOutput": "The interface should have `title: string` and `completed: boolean`. The test loops through todos, fills the input and presses Enter for each, then uses `await expect(page.locator('.todo-list li')).toHaveCount(3)` which auto-retries until the count matches or times out.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u3_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Think of TypeScript interfaces like a form template at a doctor's office. The form says \"Name: _____ (text), Age: _____ (number), Smoker: _____ (yes/no)\" — it defines what information is needed and what format each field accepts. If you try to write your age in the name field, the receptionist rejects it. Similarly, if you try to put a string where a number belongs, TypeScript rejects it at compile time. Playwright assertions are like a patient waiting room with a pager — `expect(locator).toBeVisible()` doesn't check once and give up. It keeps buzzing every 100ms: \"visible yet? visible yet? visible yet?\" for up to 5 seconds. Only if the element NEVER appears does it finally declare failure. No manual `sleep()` needed.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u3_c4",
+      "type": "code",
+      "content": {
+        "code": "import { test, expect } from '@playwright/test';\n\n// Interface defines the shape of test data\ninterface UserCredentials {\n  email: string;\n  password: string;\n  role: 'admin' | 'viewer' | 'editor'; // Union type — only these 3 values allowed\n}\n\nconst testUser: UserCredentials = {\n  email: 'qa@company.com',\n  password: 'Test123!',\n  role: 'admin',\n};\n\ntest('admin user sees dashboard', async ({ page }) => {\n  await page.goto('/login');\n  await page.getByLabel('Email').fill(testUser.email);\n  await page.getByLabel('Password').fill(testUser.password);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n\n  // Auto-retrying assertions — no manual waits needed\n  await expect(page).toHaveURL(/.*dashboard/);\n  await expect(page.getByRole('heading')).toHaveText('Admin Dashboard');\n  await expect(page.getByRole('navigation')).toBeVisible();\n});",
+        "highlight": [
+          "4",
+          "7",
+          "10",
+          "23",
+          "24"
+        ],
+        "annotation": "Line 4 — `interface` defines the contract for user data; any object claiming to be `UserCredentials` MUST have all three fields with correct types. Line 7 — union type `'admin' | 'viewer' | 'editor'` restricts to ONLY these values; `role: 'superuser'` would be a compile error. Line 10 — TypeScript validates `testUser` matches the interface at compile time. Lines 23-24 — `toHaveURL` and `toHaveText` auto-retry until they pass or timeout. The test doesn't need `page.waitForNavigation()` because the assertion itself handles waiting."
+      }
+    },
+    {
+      "id": "p8u3_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { test, expect } from '@playwright/test';\n\ninterface Product {\n  name: string;\n  price: number;\n  inStock: boolean;\n}\n\ntest('product displays correctly', async ({ page }) => {\n  const product: Product = {\n    name: 'Wireless Mouse',\n    price: 29.99,\n    inStock: true,\n  };\n\n  await page.goto('/products/wireless-mouse');\n  await expect(page.getByRole('heading')).toHaveText(product.name);\n  await expect(page.getByTestId('price')).toHaveText(`$${product.price}`);\n});",
+        "modification": "Change the `product` declaration to `const product: Product = { name: 'Wireless Mouse', price: '29.99', inStock: true };` (price as a string instead of number)",
+        "question": "What happens when you assign a string to a property typed as number?",
+        "options": [
+          "Runtime error when the test runs in the browser",
+          "TypeScript compile error — Type 'string' is not assignable to type 'number",
+          "The test passes because '29.99' can be coerced to a number"
+        ],
+        "correct": 1,
+        "explanation": "TypeScript catches this at compile time with error TS2322. The interface declares `price: number` but you're assigning `'29.99'` (a string). TypeScript doesn't care that the string LOOKS like a number — types must match exactly. This is the whole point of interfaces in test automation — they catch data errors before tests even run. Imagine a data-driven test with 500 entries; finding a type mismatch at compile time saves hours of debugging mysterious test failures."
+      }
+    },
+    {
+      "id": "p8u3_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Hard assertions vs Soft assertions — When tests should stop vs continue",
+        "codeA": "// Hard assertions (default) — STOPS on first failure\ntest('checkout flow', async ({ page }) => {\n  await page.goto('/checkout');\n\n  // If this fails, test STOPS here. Lines below never run.\n  await expect(page.getByText('Your Cart')).toBeVisible();\n  await expect(page.getByTestId('item-count')).toHaveText('3');\n  await expect(page.getByTestId('total')).toHaveText('$89.97');\n});",
+        "codeB": "// Soft assertions — CONTINUES after failure, reports all at end\ntest('checkout flow', async ({ page }) => {\n  await page.goto('/checkout');\n\n  // Collects ALL failures, reports them together at the end\n  await expect.soft(page.getByText('Your Cart')).toBeVisible();\n  await expect.soft(page.getByTestId('item-count')).toHaveText('3');\n  await expect.soft(page.getByTestId('total')).toHaveText('$89.97');\n});",
+        "question": "You're testing a registration form with 10 required field validations. You want to know ALL fields that fail validation in one test run, not just the first one. Which approach do you use?",
+        "options": [
+          "Hard assertions — fail fast to save time",
+          "Soft assertions — collect all failures to see the full picture",
+          "A mix — hard for critical steps then soft for validations",
+          "It doesn't matter — both report the same information"
+        ],
+        "correct": 2,
+        "explanation": "The best practice is to use hard assertions for critical navigation/setup steps (if the page doesn't load, nothing else matters) and soft assertions for validation checks where you want the complete picture. If you use only hard assertions, you'd need 10 test runs to find all 10 broken validations. Soft assertions let you see all failures in one run — crucial for regression testing where you need to know the full scope of breakage quickly."
+      }
+    },
+    {
+      "id": "p8u3_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how TypeScript interfaces and Playwright assertions work together to create reliable tests.",
+        "sentence": "An _____ defines the shape of test data at compile time, a _____ assertion auto-retries until it passes or times out, and a _____ type restricts a variable to only specific allowed values.",
+        "blanks": [
+          "interface",
+          "Playwright (expect)",
+          "union"
+        ],
+        "distractors": [
+          "class",
+          "manual (sleep-based)",
+          "generic"
+        ]
+      }
+    },
+    {
+      "id": "p8u3_c8",
+      "type": "connect",
+      "content": {
+        "text": "You now know how to FIND elements (Unit 2) and VERIFY them (Unit 3). Next, you'll learn to INTERACT — clicking buttons, filling forms, selecting dropdowns. The interfaces you learned here will structure the form data you submit, and assertions will verify the results of those interactions.",
+        "code": "// Coming in Unit 4 — form interactions with typed data\nimport { test, expect } from '@playwright/test';\n\ninterface RegistrationForm {\n  firstName: string;\n  lastName: string;\n  email: string;\n  age: number;\n  plan: 'free' | 'pro' | 'enterprise';\n}\n\ntest('complete registration form', async ({ page }) => {\n  const formData: RegistrationForm = {\n    firstName: 'Alice', lastName: 'Tester',\n    email: 'alice@qa.dev', age: 28, plan: 'pro',\n  };\n  \n  await page.goto('/register');\n  await page.getByLabel('First Name').fill(formData.firstName);\n  // More interactions coming in Unit 4...\n});",
+        "note": "Interfaces become increasingly powerful as your test suites grow. A single `UserCredentials` interface used across 200 tests means if the API changes a field name, TypeScript tells you exactly which 200 places need updating — instantly, at compile time, before a single test runs."
+      }
+    }
+  ]
+}

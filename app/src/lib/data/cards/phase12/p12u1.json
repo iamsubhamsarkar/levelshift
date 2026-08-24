@@ -1,0 +1,130 @@
+{
+  "unitId": "p12u1",
+  "title": "Build an Eval Set — Measure a Pass Rate",
+  "phase": 12,
+  "unit": 1,
+  "teaches": [
+    "agentic.build_eval",
+    "agentic.build_pass_rate"
+  ],
+  "requires": [
+    "agentic.build_multi_hop",
+    "agentic.eval_mindset",
+    "agentic.pass_rate"
+  ],
+  "estimatedMinutes": 21,
+  "cards": [
+    {
+      "id": "p12u1_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "A reminder as you finish and ship ATLAS.",
+        "why": "These steps are grounded in the Phase 9 theory plus standard Groq/NIM + Python tooling. The concepts are stable; the exact API calls, library names, and model IDs are not.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "Understand this: verify the specific API calls and model names against the current provider docs (Groq, NVIDIA NIM) and library docs when you actually build — they change fast. If a call or model ID is rejected, check the provider's current docs first; that is expected, not an error in the lesson.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 3 and Ch 17"
+      }
+    },
+    {
+      "id": "p12u1_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Create an eval file with a handful of cases. Add evals.py.",
+        "why": "Define success BEFORE you build. A small dataset of inputs with expected results is your regression safety net. (Learned in Phase 9, Ch 15, section 15.2.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# evals.py\nCASES = [\n    {\"input\": \"Users cannot log in at all.\", \"expect_severity\": \"BLOCKER\"},\n    {\"input\": \"The footer link is the wrong shade of blue.\", \"expect_severity\": \"TRIVIAL\"},\n    {\"input\": \"Checkout fails for some users intermittently.\", \"expect_severity\": \"MAJOR\"},\n]",
+        "verify": "evals.py holds a few hand-picked cases with expected outcomes. Start small (10-50 is ideal); you will grow it from real failures over time.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 15"
+      }
+    },
+    {
+      "id": "p12u1_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Write a rule-based scorer for the classifier.",
+        "why": "When output is a fixed choice, you CAN assert precisely — this is ordinary assertion, the cheapest and most reliable scorer. (Learned in Phase 9, Ch 15, section 15.4.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "from atlas import classify_safe\n\ndef score_case(case):\n    try:\n        result = classify_safe(case[\"input\"])\n        return result.severity == case[\"expect_severity\"]\n    except Exception:\n        return False",
+        "verify": "score_case returns True/False for a single case by comparing the model's severity to the expected one. Structured output (Phase 10) made this a plain assertion.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 15"
+      }
+    },
+    {
+      "id": "p12u1_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Run each case MULTIPLE times and measure a pass rate.",
+        "why": "Because agents are non-deterministic, \"it worked once\" proves nothing. A pass rate across repeated runs reveals flakiness. (Learned in Phase 9, Ch 15, section 15.6.)",
+        "commands": {
+          "windows": "python evals.py",
+          "ubuntu": "python3 evals.py"
+        },
+        "code": "def pass_rate(case, runs=5):\n    passes = sum(1 for _ in range(runs) if score_case(case))\n    return passes / runs\n\nif __name__ == \"__main__\":\n    for c in CASES:\n        rate = pass_rate(c)\n        flag = \"OK\" if rate == 1.0 else (\"FLAKY\" if rate >= 0.5 else \"FAILING\")\n        print(f\"{rate:.0%}  {flag}  {c['input'][:40]}\")",
+        "verify": "Each case prints a pass rate over 5 runs. A case at 100% is robust; one at 60% is FLAKY and needs a tighter prompt, lower temperature, or better constraints. You are now quantifying reliability, not guessing.",
+        "troubleshoot": "If everything is flaky, confirm temperature is 0 for classification and the allowed severities are named clearly in the prompt. Flakiness is a signal to tighten the spec.",
+        "reference": "Phase 9, Ch 15"
+      }
+    },
+    {
+      "id": "p12u1_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Add a threshold gate and print an overall verdict.",
+        "why": "A threshold is your CI gate — block a change if quality drops below the bar. (Learned in Phase 9, Ch 15, section 15.8.)",
+        "commands": {
+          "windows": "python evals.py",
+          "ubuntu": "python3 evals.py"
+        },
+        "code": "def suite_passes(threshold=0.8):\n    rates = [pass_rate(c) for c in CASES]\n    overall = sum(rates) / len(rates)\n    print(f\"suite average: {overall:.0%} (threshold {threshold:.0%})\")\n    return overall >= threshold\n\nif __name__ == \"__main__\":\n    ok = suite_passes()\n    print(\"GATE:\", \"PASS\" if ok else \"FAIL\")",
+        "verify": "The suite prints an average and a PASS/FAIL gate. Now you can change a prompt or swap Groq to NIM, re-run, and see with EVIDENCE whether quality held.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 15"
+      }
+    },
+    {
+      "id": "p12u1_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "Grow the dataset from a real failure.",
+        "why": "Every genuine failure becomes a new case, so it can never silently return — the flywheel that compounds quality. (Learned in Phase 9, Ch 15, section 15.8.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# When you find ATLAS mis-classifying something, add it to CASES with the\n# correct expected value, e.g.:\n#   {\"input\": \"Data is silently corrupted on save.\", \"expect_severity\": \"BLOCKER\"},\n# Re-run the suite; the regression is now permanently guarded.",
+        "verify": "You added at least one case drawn from a real mistake. Re-running the suite now checks it every time.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 15"
+      }
+    },
+    {
+      "id": "p12u1_c7",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — you can measure whether ATLAS works.",
+        "why": "Evaluation is the discipline that separates engineering from wishful thinking, and it lets you change things without fear.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — a small eval dataset exists; a rule-based scorer grades cases; each case is run multiple times for a pass rate; a threshold gate gives a PASS/FAIL verdict; you grow the set from real failures. Next unit adds tracing so you can SEE every step in production.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 15"
+      }
+    }
+  ]
+}

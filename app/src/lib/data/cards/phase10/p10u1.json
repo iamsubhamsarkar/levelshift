@@ -1,0 +1,144 @@
+{
+  "unitId": "p10u1",
+  "title": "Environment Setup — Python, venv & Keys",
+  "phase": 10,
+  "unit": 1,
+  "teaches": [
+    "agentic.setup_env",
+    "agentic.providers"
+  ],
+  "requires": [
+    "agentic.agent_definition"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p10u1_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Read this before you start building.",
+        "why": "The concepts in these build phases are stable and faithful to the Phase 9 theory. But the exact API calls, library names, model IDs, and endpoints move fast.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "Understand this: treat the specific API calls and model names in these steps as things to verify against the current provider docs (Groq, NVIDIA NIM) and library docs when you actually build. The build steps are grounded in the theory plus standard Groq/NIM + Python tooling; the CONCEPTS are what endure, while the exact syntax and model IDs change over time. If a call fails or a model name is rejected, check the provider's current docs first — that is normal, not a mistake in your work.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 3 (providers change) and Ch 12 (frameworks churn)"
+      }
+    },
+    {
+      "id": "p10u1_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Confirm you have Python 3.10+ installed.",
+        "why": "Every agent tool and library we use is Python-first. (Learned in Phase 9, Ch 2-3.)",
+        "commands": {
+          "windows": "python --version",
+          "ubuntu": "python3 --version"
+        },
+        "code": null,
+        "verify": "You see \"Python 3.10\" or higher. If the command isn't found, install Python from python.org (Windows) or run: sudo apt update && sudo apt install python3 python3-venv (Ubuntu 24.04).",
+        "troubleshoot": "On Windows, if `python` opens the Microsoft Store, use `py --version` instead, or install from python.org and re-open your terminal.",
+        "reference": "Phase 9, Ch 2"
+      }
+    },
+    {
+      "id": "p10u1_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Create a project folder and move into it.",
+        "why": "One isolated folder keeps this whole build (ATLAS) self-contained.",
+        "commands": {
+          "windows": "mkdir agentic-ai-lab\ncd agentic-ai-lab",
+          "ubuntu": "mkdir agentic-ai-lab\ncd agentic-ai-lab"
+        },
+        "code": null,
+        "verify": "Your terminal's current directory is now agentic-ai-lab.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 2"
+      }
+    },
+    {
+      "id": "p10u1_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Create and activate a Python virtual environment (venv).",
+        "why": "A venv isolates this project's dependencies so they never collide with other projects — the universal 2026 baseline. (Learned in Phase 9, Ch 3.)",
+        "commands": {
+          "windows": "python -m venv .venv\n.venv\\Scripts\\Activate.ps1",
+          "ubuntu": "python3 -m venv .venv\nsource .venv/bin/activate"
+        },
+        "code": null,
+        "verify": "Your terminal prompt now shows (.venv) at the start of the line.",
+        "troubleshoot": "If activation is blocked on Windows PowerShell, run: Set-ExecutionPolicy -Scope Process RemoteSigned  — then try the activate command again.",
+        "reference": "Phase 9, Ch 3"
+      }
+    },
+    {
+      "id": "p10u1_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Install the two libraries we'll start with.",
+        "why": "The openai library speaks the OpenAI-compatible protocol used by Groq AND NVIDIA NIM, so one client talks to both. python-dotenv loads your secret keys safely.",
+        "commands": {
+          "windows": "pip install openai python-dotenv",
+          "ubuntu": "pip install openai python-dotenv"
+        },
+        "code": null,
+        "verify": "The install finishes without errors. Run `pip list` and you see openai and python-dotenv listed.",
+        "troubleshoot": "If a corporate network blocks the default index, add: --index-url https://pypi.org/simple",
+        "reference": "Phase 9, Ch 3"
+      }
+    },
+    {
+      "id": "p10u1_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "Get a free Groq API key and note a current model name.",
+        "why": "Groq serves strong open models very fast — ideal for the many quick calls inside an agent loop. (Learned in Phase 9, Ch 2-3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "You have signed up at console.groq.com, created an API key (it starts with gsk_), and copied a current model name from their model list. Keep the key private — treat it like a password.",
+        "troubleshoot": "If you'd rather use NVIDIA NIM as your provider, sign up at build.nvidia.com instead and copy that key + its OpenAI-compatible base URL. The rest of the build works the same because both speak the same protocol.",
+        "reference": "Phase 9, Ch 3"
+      }
+    },
+    {
+      "id": "p10u1_c7",
+      "type": "build_step",
+      "content": {
+        "goal": "Store your key safely in a .env file (never in code).",
+        "why": "Secrets in code get leaked. A .env file, ignored by git, keeps them out of your source. (Learned in Phase 9, Ch 3.)",
+        "commands": {
+          "windows": "notepad .env",
+          "ubuntu": "nano .env"
+        },
+        "code": "GROQ_API_KEY=gsk_your_real_key_here\nGROQ_BASE_URL=https://api.groq.com/openai/v1\nGROQ_MODEL=llama-3.3-70b-versatile",
+        "verify": "A file named .env exists in agentic-ai-lab and contains your real key. Also create a .gitignore containing a line \".env\" so it is never committed.",
+        "troubleshoot": "Make sure the file is exactly \".env\" (no .txt). On Windows, in Notepad's Save dialog set \"Save as type\" to \"All Files\".",
+        "reference": "Phase 9, Ch 3"
+      }
+    },
+    {
+      "id": "p10u1_c8",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — confirm your environment is ready.",
+        "why": "Before writing any agent code, verify the foundation works on YOUR machine and OS.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — Python 3.10+ responds; (.venv) shows in your prompt; `pip list` shows openai + python-dotenv; a private .env holds your key. If all four pass, you're ready for Unit 2 (your first LLM call).",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 3"
+      }
+    }
+  ]
+}

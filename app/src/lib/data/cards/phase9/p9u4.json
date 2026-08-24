@@ -1,0 +1,106 @@
+{
+  "unitId": "p9u4",
+  "title": "Prompting as a Discipline",
+  "phase": 9,
+  "unit": 4,
+  "teaches": [
+    "agentic.prompt_spec",
+    "agentic.system_prompt",
+    "agentic.prompt_techniques",
+    "agentic.prompt_management"
+  ],
+  "requires": [
+    "agentic.messages_roles"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p9u4_c1",
+      "type": "theory",
+      "content": {
+        "heading": "4.0  Using the channel well",
+        "body": "You now know how to talk to a model (Chapter 3) and the powerful role of the system message. This chapter is about using that channel WELL. Prompting — the craft of shaping what you send so the model reliably produces what you need — is the first genuine skill of agentic AI. In 2026 it is treated as real engineering, not lucky phrasing.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Prompting is real engineering, not lucky phrasing."
+      }
+    },
+    {
+      "id": "p9u4_c2",
+      "type": "theory",
+      "content": {
+        "heading": "4.1  A prompt is a specification in plain language",
+        "body": "Think of a prompt as a very high-level specification written in ordinary language, and think of the model as a fuzzy, fast interpreter of that spec. The clearer and more precise your spec, the more consistent the interpreter's output. A vague spec yields vague, variable results; a tight spec yields tight, repeatable ones.\n\nFor a Java developer, the analogy is sharp: writing a prompt is like writing a method's contract — its inputs, its expected output, its constraints — but for an interpreter that is powerful yet imprecise. You would never expect a junior developer to implement a method correctly from a one-word description; you should not expect a model to either.\n\nYou have four levers to shape behavior: the SYSTEM prompt (the role, rules, and output format); the USER prompt (the specific task or input); EXAMPLES (showing rather than telling); and the DIALS from Chapter 3 (chiefly temperature). This chapter is mostly about the first three.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "A prompt is a specification for a fuzzy interpreter. Precision drives reliability."
+      }
+    },
+    {
+      "id": "p9u4_c3",
+      "type": "theory",
+      "content": {
+        "heading": "4.2  The system prompt — defining the model's job",
+        "body": "The system message sets WHO the model is and the RULES it must follow. Because it frames every message that follows, it has outsized influence. A strong system prompt usually covers: ROLE (who the model is acting as); TASK (what it should do); CONSTRAINTS (what it must and must not do); FORMAT (exactly how the answer should be shaped); and TONE (how verbose or terse, how formal).\n\nCompare a weak and a strong system prompt for the same job. Weak: \"You help with bugs.\" Strong: \"You are a senior QA triage engineer. Given a bug report, classify its severity as exactly one of: BLOCKER, MAJOR, MINOR, TRIVIAL. If unsure, choose the higher severity. Reply with only the severity word and nothing else.\"\n\nThe strong version does three things the weak one does not. It gives the model a clear ROLE. It NAMES the allowed answers (a fixed set, like an enumeration in Java), which shrinks the room for error. And it forbids extra chatter (\"only the severity word\"), which is what makes the answer usable by other software. That last point — constraining the OUTPUT — is the seed of the next chapter.\n\nThe overarching principle: BE EXPLICIT ABOUT THE OUTPUT. The model cannot read your mind. If you want one word, say so. Ambiguity is the enemy of reliability.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Be explicit about the output. Name the allowed answers; forbid extra chatter."
+      }
+    },
+    {
+      "id": "p9u4_c4",
+      "type": "theory",
+      "content": {
+        "heading": "4.3  Techniques that reliably improve results",
+        "body": "A handful of techniques do most of the heavy lifting. Understanding what each one IS matters more than memorizing recipes.\n\nZERO-SHOT — just ask. For simple, common tasks, a clear instruction is enough: \"Translate 'Good morning' into French.\" No examples needed.\n\nFEW-SHOT — show a few examples. Provide two to five example input-and-output pairs, then the real input. The model imitates the pattern it sees. This is the most reliable way to lock in a format or a subtle behavior. Think of the examples as sample rows that define the behavior — a little like how example-based test cases pin down what a method should do.\n\nCHAIN-OF-THOUGHT — let it reason before answering. For tasks that need step-by-step thinking (math, logic, multi-part problems), asking the model to work through its reasoning before giving the final answer improves accuracy. A caution: this produces a lot of extra text; when you need a clean, machine-usable answer, you must separate the reasoning from the final result (a theme of Chapter 5).\n\nROLE / PERSONA — bias the behavior. Telling the model it is \"a meticulous auditor\" genuinely nudges it toward caution and detail.\n\nDELIMITERS — mark where data begins and ends. Wrapping user-supplied text in clear markers helps the model tell your INSTRUCTIONS apart from the DATA it should act on. This also reduces a security risk we will meet in Chapter 16 (prompt injection).\n\nDECOMPOSITION — break big asks into small ones. A chain of small, precise requests beats one giant vague request. This same idea scales all the way up into agent loops (Chapter 7) and multi-agent systems (Chapter 14).",
+        "snippet": "Classify the sentiment as POSITIVE or NEGATIVE.\n\"I love this.\"        -> POSITIVE\n\"This is awful.\"      -> NEGATIVE\n\"Best purchase ever.\" ->",
+        "snippetExplanation": "What this shows (few-shot): By demonstrating the exact input-to-output mapping a couple of times, you teach the model the pattern far more effectively than describing it. It will complete the last line with POSITIVE.",
+        "callout": "Show, don't just tell. Few-shot examples lock in a format better than any description."
+      }
+    },
+    {
+      "id": "p9u4_c5",
+      "type": "theory",
+      "content": {
+        "heading": "4.4  What makes output unreliable (anti-patterns)",
+        "body": "Just as important as the good techniques is knowing what quietly wrecks reliability.\n\nPadding you then have to strip. If the model prefaces answers with \"Sure! Here's what you asked for:\", and you did not want that, forbid it explicitly. Asking for too many things in one breath — split the request. Contradictory instructions (\"be extremely brief\" AND \"explain in depth\"). Relying on the model for things it is bad at — exact math, counting, live facts — those belong to tools (Chapter 6), not to clever phrasing. Burying the key instruction in the middle of a wall of text — models pay the most attention to the START and the END, so put critical constraints there. Skipping examples on a format-sensitive task — when shape matters, show it.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Models attend most to the START and the END. Put critical constraints there, never buried in the middle."
+      }
+    },
+    {
+      "id": "p9u4_c6",
+      "type": "theory",
+      "content": {
+        "heading": "4.5  Prompting for agents (a preview)",
+        "body": "Later, when the system prompt is instructing not just a chatbot but an AGENT, it takes on a recurring set of ingredients. You do not need to master these yet; seeing them now plants the seed: a ROLE for the agent (\"you are a research assistant\"); guidance on WHEN TO USE TOOLS versus answer directly; a clear STOPPING CONDITION (how the agent knows the task is done); SAFETY CONSTRAINTS (what it must never do); and a description of the desired FINAL ANSWER.\n\nA recurring instruction you will meet again reads roughly: \"Think about what information you need. If a tool can provide it, use the tool — do not guess facts you can look up. When you have enough, give a clear final answer and stop.\" That single paragraph encodes several lessons from this book at once.\n\nOne practical note connecting back to Chapter 2: an agent's system prompt is re-sent on EVERY step of its loop. So keeping it tight is not just tidy — it directly saves tokens (cost) and leaves more room on the \"desk\" (context) for the actual work.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "An agent's system prompt is re-sent on every loop step — keeping it tight saves cost and context on every step."
+      }
+    },
+    {
+      "id": "p9u4_c7",
+      "type": "theory",
+      "content": {
+        "heading": "4.6  Prompts are artifacts to manage, not throwaway strings",
+        "body": "In a real system, prompts are not casual text scattered through the code. A change to a prompt can change the system's behavior as surely as a change to code. So mature teams treat prompts as first-class, managed artifacts: keep them organized in one place rather than sprinkled everywhere (much as you would not scatter SQL literals throughout an application); fill in the changing parts from variables, keeping the stable wording fixed; and VERSION them, so a behavior change can be traced to a specific prompt change and, if needed, rolled back.\n\nThis \"prompts are code\" mindset connects directly to evaluation (Chapter 15): because output is non-deterministic, \"it worked once\" proves nothing. You keep a small set of example inputs with expected results and re-check the prompt against all of them whenever you change it — the same instinct that makes you keep a test suite for ordinary code.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Prompts are code. Organize them, fill variables into stable wording, and version them."
+      }
+    },
+    {
+      "id": "p9u4_c8",
+      "type": "theory",
+      "content": {
+        "heading": "Check your understanding",
+        "body": "For reflection, not coding.\n\n1. Explain the analogy \"a prompt is a specification for a fuzzy interpreter.\" What follows from it about how precise you should be?\n\n2. Rewrite this weak system prompt in your head into a strong one: \"You sort customer messages.\" Name at least three things you would add.\n\n3. What is few-shot prompting, and why does showing examples often work better than describing the rule?\n\n4. Why should exact arithmetic and today's stock price NOT be handled by clever prompting? Where should they be handled instead?\n\n5. Give two reasons a team would version-control its prompts the way it version-controls code.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Next chapter: structured output — the pivotal skill that turns a chatbot into a component your software can use."
+      }
+    }
+  ]
+}

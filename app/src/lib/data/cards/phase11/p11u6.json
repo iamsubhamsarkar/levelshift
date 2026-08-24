@@ -1,0 +1,98 @@
+{
+  "unitId": "p11u6",
+  "title": "MCP — Consume and Expose a Tool",
+  "phase": 11,
+  "unit": 6,
+  "teaches": [
+    "agentic.build_mcp",
+    "agentic.build_mcp_security"
+  ],
+  "requires": [
+    "agentic.build_framework",
+    "agentic.mcp",
+    "agentic.mcp_architecture"
+  ],
+  "estimatedMinutes": 15,
+  "cards": [
+    {
+      "id": "p11u6_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Install the MCP tooling for Python.",
+        "why": "MCP is \"USB-C for AI tools\" — build a tool once as a server, and any MCP-aware agent can use it. (Learned in Phase 9, Ch 13, section 13.1.)",
+        "commands": {
+          "windows": "pip install mcp",
+          "ubuntu": "pip install mcp"
+        },
+        "code": null,
+        "verify": "The mcp package installs without error. Run `pip list` and confirm it appears.",
+        "troubleshoot": "If the package name differs in your environment, check the current MCP Python SDK docs. The roles — host, client, server — are what matter and do not change.",
+        "reference": "Phase 9, Ch 13"
+      }
+    },
+    {
+      "id": "p11u6_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Write a tiny MCP SERVER that exposes one tool. Create mcp_server.py.",
+        "why": "A server EXPOSES capabilities over the standard protocol. This wraps your word-count logic so it is reusable across any MCP host. (Learned in Phase 9, Ch 13, section 13.3.)",
+        "commands": {
+          "windows": "python mcp_server.py",
+          "ubuntu": "python3 mcp_server.py"
+        },
+        "code": "# mcp_server.py — an MCP server exposing one tool (illustrative; adapt to SDK version)\nfrom mcp.server.fastmcp import FastMCP\n\nmcp = FastMCP(\"atlas-tools\")\n\n@mcp.tool()\ndef get_word_count(text: str) -> dict:\n    \"\"\"Count the words in a piece of text.\"\"\"\n    return {\"word_count\": len(text.split())}\n\nif __name__ == \"__main__\":\n    mcp.run()",
+        "verify": "The server starts and waits, announcing it offers a get_word_count tool. This same server could be consumed by ANY MCP host — your agent, a coding assistant, a chat app.",
+        "troubleshoot": "If FastMCP's import path differs, consult the SDK's current quickstart. The concept — a server publishes tools with described inputs — is stable.",
+        "reference": "Phase 9, Ch 13"
+      }
+    },
+    {
+      "id": "p11u6_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Point an MCP-aware host at your server so its tool appears to the agent.",
+        "why": "The reassuring truth: the agent loop is UNCHANGED. A client asks the server what tools it offers and forwards the model's requests. (Learned in Phase 9, Ch 13, section 13.4.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# In an MCP-capable host (many frameworks/assistants in 2026 support MCP),\n# register the server by how to start it, e.g. a config entry like:\n# {\n#   \"mcpServers\": {\n#     \"atlas-tools\": { \"command\": \"python\", \"args\": [\"mcp_server.py\"] }\n#   }\n# }",
+        "verify": "The host lists get_word_count among its available tools, sourced from your server — with no changes to the agent's think-act-observe loop. To the model, the remote tool looks exactly like a local one.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 13"
+      }
+    },
+    {
+      "id": "p11u6_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Apply MCP security — trust and least privilege.",
+        "why": "MCP does not remove Chapter 6's safety work — it EXPANDS it, because capabilities can now come from parties you did not write. (Learned in Phase 9, Ch 13, section 13.6.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# Security checklist for any MCP server you connect:\n#  - TRUST: only connect to servers you wrote or have reviewed (supply-chain risk).\n#  - UNTRUSTED TEXT: treat tool descriptions AND results as untrusted — a malicious\n#    server can hide instructions in them (indirect prompt injection, Ch 16).\n#  - LEAST PRIVILEGE: give each server the narrowest access it needs.\n#  - AUTH: never expose a network-reachable server with powerful tools unprotected.",
+        "verify": "You can state, for your own server, why it is safe to trust (you wrote it), and you understand that a third-party server's descriptions and results must be treated as untrusted input.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 13, Ch 16"
+      }
+    },
+    {
+      "id": "p11u6_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — you understand tool interoperability via MCP.",
+        "why": "You have built a reusable tool server and connected it, seeing that the loop is unchanged.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — an MCP server exposes get_word_count; an MCP host can discover and call it; the agent loop is unchanged by the switch to MCP tools; you can articulate the security stance (trust, untrusted text, least privilege). Next unit adds a specialist SUB-AGENT that the coordinator calls like a tool.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 13"
+      }
+    }
+  ]
+}

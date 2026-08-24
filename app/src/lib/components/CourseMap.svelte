@@ -36,8 +36,8 @@
     return { completed, total: phase.units.length, percentage: Math.round((completed / phase.units.length) * 100) };
   }
 
-  const phaseEmojis = ['☕', '📦', '⚡', '🧮', '🔗', '🎯', '🌐'];
-  const phaseColors = ['accent-blue', 'accent-purple', 'accent-yellow', 'accent-green', 'accent-blue', 'accent-purple', 'accent-green'];
+  const phaseEmojis = ['☕', '📦', '⚡', '🧮', '🔗', '🎯', '🌐', '🎭', '🧠', '🤖', '🔧', '🚀'];
+  const phaseColors = ['accent-blue', 'accent-purple', 'accent-yellow', 'accent-green', 'accent-blue', 'accent-purple', 'accent-green', 'accent-green', 'accent-blue', 'accent-purple', 'accent-yellow', 'accent-green'];
 </script>
 
 <div class="min-h-screen bg-surface-0">

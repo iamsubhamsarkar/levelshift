@@ -14,7 +14,9 @@
     break_it: '⚡',
     contrast: '🔍',
     explain_back: '🎤',
-    connect: '🔗'
+    connect: '🔗',
+    theory: '📖',
+    build_step: '🛠️'
   };
 </script>
 

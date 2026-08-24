@@ -1,0 +1,114 @@
+{
+  "unitId": "p12u6",
+  "title": "Reliability — Retries, Timeouts & Provider Fallback",
+  "phase": 12,
+  "unit": 6,
+  "teaches": [
+    "agentic.build_reliability",
+    "agentic.build_fallback"
+  ],
+  "requires": [
+    "agentic.build_service",
+    "agentic.reliability",
+    "agentic.cost_latency"
+  ],
+  "estimatedMinutes": 18,
+  "cards": [
+    {
+      "id": "p12u6_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Set a timeout on every model call so nothing hangs forever.",
+        "why": "A remote model call can hang; a timeout bounds it. This is basic resilient-service discipline. (Learned in Phase 9, Ch 17, section 17.5.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# Give the client a request timeout:\nclient = OpenAI(\n    api_key=os.environ[\"GROQ_API_KEY\"],\n    base_url=os.environ[\"GROQ_BASE_URL\"],\n    timeout=30,   # seconds\n)",
+        "verify": "A call that would otherwise hang now fails after ~30s with a timeout error, which your retry logic can catch — rather than freezing the whole request.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u6_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Retry only TRANSIENT failures with growing backoff.",
+        "why": "Retry timeouts, 429 rate limits, and 5xx errors with a growing wait — but never retry a 401 or 400, which will never succeed. (Learned in Phase 9, Ch 17, section 17.5, and Ch 3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "import time\n\nTRANSIENT = (429, 500, 502, 503, 504)\n\ndef call_with_retry(make_call, retries=3):\n    for attempt in range(retries):\n        try:\n            return make_call()\n        except Exception as e:\n            status = getattr(e, \"status_code\", None)\n            transient = status in TRANSIENT or \"timeout\" in str(e).lower()\n            if not transient or attempt == retries - 1:\n                raise                      # don't retry 401/400 or the last attempt\n            wait = 2 ** attempt            # 1s, 2s, 4s\n            print(f\"[retry] transient {e} — waiting {wait}s\")\n            time.sleep(wait)",
+        "verify": "A simulated 429 triggers backoff-and-retry; a simulated 401 (bad key) fails immediately without wasting retries. Only transient errors are retried.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u6_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Add a provider FALLBACK — if Groq fails, switch to NVIDIA NIM.",
+        "why": "Because you coded against the common interface (Chapter 3), failing over from one provider to another is straightforward — the payoff of provider-agnosticism. (Learned in Phase 9, Ch 17, section 17.5.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "primary = OpenAI(api_key=os.environ[\"GROQ_API_KEY\"],\n                 base_url=os.environ[\"GROQ_BASE_URL\"], timeout=30)\nbackup = OpenAI(api_key=os.environ.get(\"NIM_API_KEY\", \"\"),\n                base_url=os.environ.get(\"NIM_BASE_URL\", \"\"), timeout=30)\n\ndef robust_chat(messages, **kw):\n    try:\n        return call_with_retry(lambda: primary.chat.completions.create(\n            model=os.environ[\"GROQ_MODEL\"], messages=messages, **kw))\n    except Exception as e:\n        print(f\"[fallback] primary failed ({e}); switching to NIM\")\n        return backup.chat.completions.create(\n            model=os.environ.get(\"NIM_MODEL\", \"\"), messages=messages, **kw)",
+        "verify": "If the primary provider is unreachable or exhausted, ATLAS transparently switches to the backup and still answers. On a healthy primary, the backup is never touched.",
+        "troubleshoot": "Fill in NIM credentials in .env for a real fallback. If you have only one provider, a smaller model, a cached answer, or a safe canned reply are valid fallbacks too.",
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u6_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Cap steps and output length so one request cannot run away with your budget.",
+        "why": "Caps protect cost and prevent runaway loops — a single request must not exhaust your quota. (Learned in Phase 9, Ch 17, section 17.3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# You already have max_steps in run_agent. Also cap output length per call:\n#   robust_chat(messages, max_tokens=500, temperature=0)\n# And keep the system prompt tight — it is re-sent every step, so every\n# trimmed token is saved on every step (Chapters 2, 4).",
+        "verify": "A task cannot exceed your step cap, and no single reply can balloon in length. Your trace's total-tokens count stays bounded per request.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u6_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Make dangerous actions idempotent (safe to retry).",
+        "why": "Since a request may be retried, a retried \"delete\" or \"send payment\" must not happen twice — use an idempotency key. (Learned in Phase 9, Ch 17, section 17.5.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "DONE_ACTIONS = set()   # in production: a persistent store\n\ndef idempotent(action_key, do_it):\n    if action_key in DONE_ACTIONS:\n        return {\"status\": \"already done\", \"key\": action_key}\n    result = do_it()\n    DONE_ACTIONS.add(action_key)\n    return result\n# Wrap consequential tools so a retry with the same key does not repeat the effect.",
+        "verify": "Calling a consequential action twice with the same key performs it only once — the second call reports \"already done.\" Retries are now safe.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u6_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — ATLAS is reliable.",
+        "why": "You have the resilient-service playbook applied to an LLM dependency.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — every model call has a timeout; transient failures retry with backoff (but 401/400 do not); a provider fallback (Groq to NIM) keeps ATLAS answering; steps and output length are capped; consequential actions are idempotent. Next unit is the CAPSTONE: run the full system on both OSes and write a README.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    }
+  ]
+}

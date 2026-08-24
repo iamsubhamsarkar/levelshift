@@ -1,0 +1,98 @@
+{
+  "unitId": "p11u4",
+  "title": "Agentic RAG — Retrieval as a Tool",
+  "phase": 11,
+  "unit": 4,
+  "teaches": [
+    "agentic.build_agentic_rag",
+    "agentic.build_grounding"
+  ],
+  "requires": [
+    "agentic.build_rag",
+    "agentic.agentic_rag",
+    "agentic.tool_calling"
+  ],
+  "estimatedMinutes": 15,
+  "cards": [
+    {
+      "id": "p11u4_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Wrap retrieval as a tool the agent can call.",
+        "why": "In basic RAG, retrieval is a fixed pipeline. In agentic RAG, retrieval becomes a TOOL the agent chooses to use — deciding WHEN and WHAT to search. (Learned in Phase 9, Ch 11, section 11.6.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "def search_docs(query: str) -> dict:\n    \"\"\"Search the user's documents for relevant passages.\"\"\"\n    chunks = retrieve(query, k=3)\n    return {\"results\": [{\"source\": c[\"source\"], \"text\": c[\"text\"]} for c in chunks]}\n\nTOOL_IMPLS[\"search_docs\"] = search_docs\nTOOLS.append({\n    \"type\": \"function\",\n    \"function\": {\n        \"name\": \"search_docs\",\n        \"description\": \"Search the user's own documents for relevant passages. \"\n                       \"Use this whenever the question is about the user's notes, handbook, or files.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"query\": {\"type\": \"string\", \"description\": \"What to search for.\"}},\n            \"required\": [\"query\"],\n        },\n    },\n})",
+        "verify": "The file saves. ATLAS now has search_docs alongside its other tools — retrieval is a capability the agent can reach for, not a fixed step.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u4_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Update the system prompt so the agent grounds and cites when it uses search_docs.",
+        "why": "The grounding discipline still applies — answer only from retrieved context and cite sources — but now the agent decides when to retrieve. (Learned in Phase 9, Ch 11, section 11.4.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "ATLAS_SYSTEM = (\n    \"You are ATLAS. Think, then use tools when they help; do not guess facts you can look up. \"\n    \"When you use search_docs, answer using ONLY the returned passages and cite their source. \"\n    \"If the documents do not contain the answer, say so. \"\n    \"When you have enough to answer, give a final answer and stop.\"\n)\n# Pass ATLAS_SYSTEM as the system message in run_agent().",
+        "verify": "The file saves. The agent's instructions now combine tool-use guidance with the grounding rule.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u4_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Ask a question that makes the agent CHOOSE to retrieve.",
+        "why": "Agentic RAG shines on questions where the agent decides retrieval is needed — versus answering directly. (Learned in Phase 9, Ch 11, section 11.6.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "if __name__ == \"__main__\":\n    print(run_agent(\"According to my notes, what are the office hours?\"))",
+        "verify": "In the trace you see ATLAS call search_docs, receive passages, then answer with a citation. Ask a general-knowledge question instead (\"what is 2+2?\") and it should answer WITHOUT retrieving — that judgment is the point of agentic RAG.",
+        "troubleshoot": "If it retrieves for everything, tighten the tool description (\"only for the user's own documents\"). If it never retrieves, make the description clearer about when to use it.",
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u4_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Enable MULTI-HOP retrieval — search, read, then search again with a refined query.",
+        "why": "The loop lets the agent realize it needs more, and search again — something a fixed pipeline cannot do. (Learned in Phase 9, Ch 11, section 11.6, and Ch 7.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "if __name__ == \"__main__\":\n    print(run_agent(\n        \"Find in my notes what product we discussed, then search for that product's refund policy.\"\n    ))",
+        "verify": "The trace shows TWO search_docs calls — the second query built from what the first returned. That is multi-hop retrieval, the loop of Chapter 7 applied to search.",
+        "troubleshoot": "If it stops after one search, remind it in the goal that it may search more than once. Your step limit (Unit 5) still bounds the total work.",
+        "reference": "Phase 9, Ch 7, Ch 11"
+      }
+    },
+    {
+      "id": "p11u4_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — retrieval is now an agent capability.",
+        "why": "You have turned a fixed RAG pipeline into agentic RAG — the most common powerful real-world pattern.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — search_docs is a tool; the agent decides when to use it; answers from documents are grounded and cited; multi-hop questions trigger more than one search; general questions skip retrieval. Next unit refactors ATLAS onto a framework and compares it to your raw build.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "unitId": "p8u4",
+  "title": "Actions & Interactions",
+  "phase": 8,
+  "unit": 4,
+  "teaches": [
+    "playwright.actions",
+    "playwright.fill",
+    "playwright.click",
+    "typescript.functions",
+    "typescript.arrow_functions"
+  ],
+  "requires": [
+    "playwright.assertions",
+    "playwright.locators",
+    "typescript.interfaces"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u4_c1",
+      "type": "hook",
+      "content": {
+        "question": "It finds the field by LABEL, not by ID or CSS class. Blind users navigate forms by label. So does Playwright. Why does that matter for test stability?",
+        "code": "await page.getByLabel('Email').fill('test@example.com');\n// Not page.fill('#email-input', '...')\n// Not page.fill('[data-cy=\"email\"]', '...')\n// The LABEL. The thing humans actually read."
+      }
+    },
+    {
+      "id": "p8u4_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write a test that fills out a contact form with Name, Email, Message fields, selects a \"Priority\" dropdown option of \"High\", checks a \"Send copy to me\" checkbox, and clicks Submit. Use typed test data.",
+        "starterCode": "import { test, expect } from '@playwright/test';\n\ninterface ContactForm {\n  // Define the shape\n}\n\ntest('submit contact form', async ({ page }) => {\n  await page.goto('/contact');\n  \n  const formData: ContactForm = {\n    // Fill in test data\n  };\n\n  // Fill the form fields\n  \n  // Select dropdown option\n  \n  // Check the checkbox\n  \n  // Click submit\n  \n  // Assert success message\n});",
+        "hint": "Use `getByLabel()` for form fields, `selectOption()` for dropdowns, `check()` for checkboxes, and `getByRole('button')` for the submit button.",
+        "expectedOutput": "Interface has name (string), email (string), message (string), priority ('low' | 'medium' | 'high'), sendCopy (boolean). The test uses `page.getByLabel('Name').fill(formData.name)`, `page.getByLabel('Priority').selectOption(formData.priority)`, `page.getByLabel('Send copy to me').check()`, and `page.getByRole('button', { name: 'Submit' }).click()`.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u4_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Playwright actions are like a very precise robot arm on an assembly line. When you say `fill('hello')`, it doesn't just type — it first clears the field, focuses it, then types each character with realistic timing. When you say `click()`, it scrolls the element into view, waits for it to be actionable (visible, enabled, not covered by another element), then clicks the exact center. Compare this to a human QA tester: they don't just slam the keyboard — they look at the field, move to it, clear any existing text, then type. Playwright mimics this human-like sequence automatically. Arrow functions in TypeScript are like shorthand instructions to this robot: instead of saying \"Dear Robot, please perform the following function...\", you just say \"do this → that.\"",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u4_c4",
+      "type": "code",
+      "content": {
+        "code": "import { test, expect } from '@playwright/test';\n\n// Arrow function — concise helper for repetitive actions\nconst fillField = async (page, label: string, value: string): Promise<void> => {\n  await page.getByLabel(label).fill(value);\n};\n\n// Function type — defines what shape a function must have\ntype FormAction = (page: any, data: string) => Promise<void>;\n\ntest('complete checkout form', async ({ page }) => {\n  await page.goto('/checkout');\n\n  // Direct actions\n  await page.getByLabel('Card Number').fill('4111111111111111');\n  await page.getByLabel('Expiry').fill('12/28');\n  await page.getByLabel('CVV').fill('123');\n\n  // Dropdown selection\n  await page.getByLabel('Country').selectOption('United States');\n\n  // Checkbox\n  await page.getByLabel('Save card for future').check();\n\n  // Click with role\n  await page.getByRole('button', { name: 'Pay Now' }).click();\n\n  // Verify success\n  await expect(page.getByText('Payment successful')).toBeVisible();\n});",
+        "highlight": [
+          "4",
+          "9",
+          "15",
+          "20",
+          "23"
+        ],
+        "annotation": "Line 4 — arrow function `async (page, label, value) => {}` is a concise way to write reusable helpers. The `: Promise<void>` return type says \"this function is async and returns nothing.\" Line 9 — `type FormAction` defines the SIGNATURE any function must match to be a FormAction. Line 15 — `fill()` clears existing text then types. Line 20 — `selectOption()` works with value, label, or index. Line 23 — `check()` is idempotent — if already checked, it does nothing (unlike `click()` which would UNCHECK it)."
+      }
+    },
+    {
+      "id": "p8u4_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { test, expect } from '@playwright/test';\n\ntest('toggle checkbox correctly', async ({ page }) => {\n  await page.goto('/settings');\n  \n  const newsletter = page.getByLabel('Subscribe to newsletter');\n  \n  // Check the box\n  await newsletter.check();\n  await expect(newsletter).toBeChecked();\n  \n  // Uncheck the box\n  await newsletter.uncheck();\n  await expect(newsletter).not.toBeChecked();\n});",
+        "modification": "Replace `await newsletter.uncheck();` with `await newsletter.click();` and keep the assertion as `await expect(newsletter).not.toBeChecked();`",
+        "question": "If the checkbox was already checked and you use click() instead of uncheck(), what happens?",
+        "options": [
+          "click() and uncheck() do exactly the same thing",
+          "click() toggles the state so it unchecks — test passes",
+          "click() ignores the current state and always checks — test fails"
+        ],
+        "correct": 1,
+        "explanation": "`click()` toggles a checkbox — if checked, it unchecks; if unchecked, it checks. In this case it works the same as `uncheck()`. BUT here's the danger: `uncheck()` is idempotent (safe to call even if already unchecked), while `click()` always toggles. If a previous step failed and the checkbox was never checked, `click()` would CHECK it (opposite of intent) while `uncheck()` would safely do nothing. Always use `check()`/`uncheck()` for checkboxes — they express INTENT, not just mechanics."
+      }
+    },
+    {
+      "id": "p8u4_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Arrow functions vs Traditional functions — Syntax and behavior in test helpers",
+        "codeA": "// Traditional function declaration\nasync function loginUser(\n  page: any,\n  email: string,\n  password: string\n): Promise<void> {\n  await page.getByLabel('Email').fill(email);\n  await page.getByLabel('Password').fill(password);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n}\n\n// Has its own 'this' context, can be hoisted",
+        "codeB": "// Arrow function expression\nconst loginUser = async (\n  page: any,\n  email: string,\n  password: string\n): Promise<void> => {\n  await page.getByLabel('Email').fill(email);\n  await page.getByLabel('Password').fill(password);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n};\n\n// Inherits 'this' from surrounding scope, NOT hoisted",
+        "question": "You need a helper function that other test files import. You call it BEFORE its declaration in the file. Which syntax works?",
+        "options": [
+          "Arrow function — it's always better",
+          "Traditional function — it gets hoisted above its usage",
+          "Both work — JavaScript handles ordering automatically",
+          "Neither — you must always declare before use"
+        ],
+        "correct": 1,
+        "explanation": "Traditional function declarations are \"hoisted\" — JavaScript moves them to the top of their scope during compilation, so you can call them before the line they appear on. Arrow functions stored in `const` are NOT hoisted — calling `loginUser()` before the `const loginUser = ...` line throws a ReferenceError. In practice for test helpers, arrow functions are preferred for inline callbacks and short utilities, while traditional functions work better for standalone helpers that need flexible placement. Most Playwright test suites use arrow functions for page object methods and callbacks."
+      }
+    },
+    {
+      "id": "p8u4_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how Playwright actions and TypeScript functions work together for form automation.",
+        "sentence": "The _____ method clears existing text before typing new content, an _____ function uses => syntax and inherits the surrounding scope, and the _____ parameter syntax lets you omit arguments that aren't always needed.",
+        "blanks": [
+          "fill()",
+          "arrow",
+          "optional (?)"
+        ],
+        "distractors": [
+          "type()",
+          "traditional",
+          "required (!)"
+        ]
+      }
+    },
+    {
+      "id": "p8u4_c8",
+      "type": "connect",
+      "content": {
+        "text": "You can now find elements, verify them, and interact with them. But as your test suite grows, you'll notice repeated code — every test that needs login repeats the same 5 lines. Unit 5 introduces the Page Object Model pattern, using TypeScript classes to encapsulate page interactions into reusable, maintainable objects.",
+        "code": "// Coming in Unit 5 — Page Object Model eliminates repetition\nimport { test } from '@playwright/test';\nimport { LoginPage } from './pages/LoginPage';\nimport { DashboardPage } from './pages/DashboardPage';\n\ntest('admin accesses dashboard', async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  const dashboard = await loginPage.loginAs('admin@test.com', 'Pass123!');\n  \n  // One line does what used to take 5 lines of fill/click/wait\n  await dashboard.expectWelcomeMessage('Welcome, Admin');\n});",
+        "note": "The arrow functions and action methods you learned here will become the building blocks of Page Object methods. Every `fill()`, `click()`, `check()` you just practiced will be wrapped inside class methods with descriptive names like `submitPayment()` or `selectShippingMethod()` — making tests read like plain English."
+      }
+    }
+  ]
+}

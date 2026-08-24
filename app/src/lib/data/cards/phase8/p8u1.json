@@ -1,0 +1,119 @@
+{
+  "unitId": "p8u1",
+  "title": "TypeScript & Playwright Setup",
+  "phase": 8,
+  "unit": 1,
+  "teaches": [
+    "typescript.types",
+    "typescript.const_let",
+    "playwright.setup",
+    "playwright.test_runner"
+  ],
+  "requires": [],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u1_c1",
+      "type": "hook",
+      "content": {
+        "question": "This replaced 50 lines of Selenium WebDriver setup, waits, and teardown. Three lines. What language is this?",
+        "code": "import { test, expect } from '@playwright/test';\n\ntest('search engine works', async ({ page }) => {\n  await page.goto('https://google.com');\n  await page.getByLabel('Search').fill('Playwright testing');\n  await page.getByLabel('Google Search').first().click();\n});"
+      }
+    },
+    {
+      "id": "p8u1_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Without looking anything up, try to initialize a new Playwright project and run the example tests. What commands would you use?",
+        "starterCode": "# Step 1: Create a new directory and navigate into it\nmkdir my-first-playwright-project\ncd my-first-playwright-project\n\n# Step 2: Initialize the project (fill in the command)\nnpm init playwright@latest\n\n# Step 3: Run the tests (fill in the command)\nnpx playwright test",
+        "hint": "Playwright has its own CLI initializer — you don't need to manually install packages or configure files.",
+        "expectedOutput": "Running `npm init playwright@latest` scaffolds the project with config, example tests, and installs browsers. `npx playwright test` runs all tests in headless mode. You should see passing tests in the terminal output.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u1_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Setting up Playwright is like moving into a new apartment that comes fully furnished. When you run `npm init playwright@latest`, you get the testing framework (furniture), browser engines (utilities), config file (lease agreement), and example tests (instruction manual) — all ready to use immediately. Compare this to Selenium where you'd need to separately buy furniture (download drivers), call utility companies (configure browser paths), write your own manual (create config from scratch), and hope everything fits together. TypeScript is the building code that ensures everything is structurally sound — it catches mistakes at design time, not when the building is already built.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u1_c4",
+      "type": "code",
+      "content": {
+        "code": "// playwright.config.ts is auto-generated — let's understand the key parts\nimport { defineConfig } from '@playwright/test';\n\n// const = cannot be reassigned (like a permanent label)\nconst BASE_URL: string = 'https://demo.playwright.dev';\nconst TIMEOUT: number = 30000;\nconst IS_CI: boolean = !!process.env.CI;\n\n// let = can be reassigned (like a sticky note you can move)\nlet retryCount: number = IS_CI ? 2 : 0;\n\nexport default defineConfig({\n  testDir: './tests',\n  timeout: TIMEOUT,\n  retries: retryCount,\n  use: { baseURL: BASE_URL },\n});",
+        "highlight": [
+          "5",
+          "6",
+          "7",
+          "10"
+        ],
+        "annotation": "Lines 5-7 show `const` with type annotations — once assigned, BASE_URL will always be that string, TIMEOUT will always be that number, IS_CI will always be that boolean. Line 10 shows `let` — retryCount can change based on conditions. TypeScript enforces these types at compile time. Try assigning `TIMEOUT = 'fast'` and TypeScript will scream before you ever run a test."
+      }
+    },
+    {
+      "id": "p8u1_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "const browserName: string = 'chromium';\nconst headless: boolean = true;\nlet timeout: number = 5000;\n\n// This works fine\ntimeout = 10000;",
+        "modification": "Change line 1 to `const browserName: string = 'chromium';` then add `browserName = 'firefox';` on a new line after it.",
+        "question": "What happens when you try to reassign a const variable?",
+        "options": [
+          "TypeScript compiler error — cannot assign to a const variable",
+          "It silently changes to firefox at runtime",
+          "It throws a runtime error when the test executes"
+        ],
+        "correct": 0,
+        "explanation": "`const` creates an immutable binding. TypeScript catches this at compile time with error TS2588 — 'Cannot assign to browserName because it is a constant.' This is caught BEFORE any test runs. This is why TypeScript is powerful for SDETs — bugs are caught while writing code, not during flaky test runs at 3 AM."
+      }
+    },
+    {
+      "id": "p8u1_c6",
+      "type": "contrast",
+      "content": {
+        "label": "const vs let — When to use which in test automation",
+        "codeA": "// Using const for test configuration\nconst LOGIN_URL: string = 'https://app.com/login';\nconst MAX_RETRIES: number = 3;\nconst ADMIN_EMAIL: string = 'admin@test.com';\n\n// These NEVER change during a test run",
+        "codeB": "// Using let for values that change during test flow\nlet currentPage: string = 'login';\nlet attemptCount: number = 0;\nlet isLoggedIn: boolean = false;\n\n// These change as the test progresses\nattemptCount = attemptCount + 1;\nisLoggedIn = true;\ncurrentPage = 'dashboard';",
+        "question": "You're storing a test user's password that stays the same across all tests. Which declaration should you use?",
+        "options": [
+          "let because passwords are sensitive",
+          "const because the value never changes during execution",
+          "var because it needs global scope",
+          "Either works — it's just style preference"
+        ],
+        "correct": 1,
+        "explanation": "Use `const` for any value that shouldn't change during test execution — URLs, credentials, selectors, timeouts, config values. Use `let` only when the value MUST change (counters, state trackers, loop variables). This isn't just style — it's a safety net. If someone accidentally tries to reassign your test URL mid-test, TypeScript will catch it immediately. In SDET work, predictable values should be `const`."
+      }
+    },
+    {
+      "id": "p8u1_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how TypeScript types and const/let work together in a Playwright project setup.",
+        "sentence": "A _____ declaration prevents reassignment while a _____ annotation like _____ ensures only that data type can be stored in the variable.",
+        "blanks": [
+          "const",
+          "type",
+          "string | number | boolean"
+        ],
+        "distractors": [
+          "var",
+          "class",
+          "interface | object | array"
+        ]
+      }
+    },
+    {
+      "id": "p8u1_c8",
+      "type": "connect",
+      "content": {
+        "text": "Now that you have a Playwright project running with TypeScript basics, Unit 2 will teach you how to write your first real test — finding elements on the page using selectors. The `const` and type knowledge you just learned will be essential for storing locators and building reliable selectors.",
+        "code": "// Coming in Unit 2 — your first real test with typed selectors\nimport { test, expect } from '@playwright/test';\n\ntest('login page has correct elements', async ({ page }) => {\n  const loginUrl: string = 'https://demo.playwright.dev/todomvc';\n  await page.goto(loginUrl);\n  \n  // You'll learn what getByRole, getByText mean next\n  const heading = page.getByRole('heading', { name: 'todos' });\n  await expect(heading).toBeVisible();\n});",
+        "note": "Every Playwright test you write from now on will use const for fixed values and type annotations for clarity. This foundation makes your tests self-documenting — a teammate can read `const timeout: number = 5000` and instantly know what it is, what type it holds, and that it won't change."
+      }
+    }
+  ]
+}

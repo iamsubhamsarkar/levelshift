@@ -1,0 +1,96 @@
+{
+  "unitId": "p11u8",
+  "title": "CHECKPOINT — Multi-Hop with RAG + Sub-Agent",
+  "phase": 11,
+  "unit": 8,
+  "teaches": [
+    "agentic.build_multi_hop"
+  ],
+  "requires": [
+    "agentic.build_multi_agent",
+    "agentic.build_agentic_rag"
+  ],
+  "estimatedMinutes": 15,
+  "cards": [
+    {
+      "id": "p11u8_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Prepare a multi-hop scenario in your documents.",
+        "why": "A multi-hop question forces the system to retrieve one fact, then use it to retrieve or compute another — exercising RAG and the sub-agent together. (Learned in Phase 9, Ch 11 and Ch 14.)",
+        "commands": {
+          "windows": "notepad docs\\project.txt",
+          "ubuntu": "nano docs/project.txt"
+        },
+        "code": null,
+        "verify": "docs/project.txt contains two linked facts, for example: a line naming a project (\"The current project is codenamed Falcon.\") and a separate line about that project (\"Falcon's deadline is March 15.\"). The link between them requires two hops to resolve.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u8_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Re-index so the new document is searchable.",
+        "why": "A stale index serves outdated facts. Re-index whenever documents change. (Learned in Phase 9, Ch 11, section 11.7.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": null,
+        "verify": "build_index() reports a higher chunk count that now includes project.txt. The new facts are retrievable.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u8_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Ask the multi-hop question and watch the full system work.",
+        "why": "This is the phase capstone: the supervisor delegates research, which does multi-hop retrieval, and the answer is grounded and cited. (Learned in Phase 9, Ch 7, Ch 11, Ch 14.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "if __name__ == \"__main__\":\n    print(run_agent(\n        \"What is the deadline of our current project? \"\n        \"First find the project's codename in my notes, then find that project's deadline.\"\n    ))",
+        "verify": "ATLAS resolves it in two hops — first retrieving the codename (Falcon), then retrieving Falcon's deadline (March 15) — and answers with a citation. The trace shows more than one retrieval, driven by the loop.",
+        "troubleshoot": "If it answers only the first hop, remind it in the goal to use the first result to search again. The step limit and global budget keep it safe if it over-searches.",
+        "reference": "Phase 9, Ch 7, Ch 11, Ch 14"
+      }
+    },
+    {
+      "id": "p11u8_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Verify honesty — ask something the documents cannot answer.",
+        "why": "Grounding must hold even under the full multi-agent system: no context, no invented answer. (Learned in Phase 9, Ch 11, section 11.4.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "if __name__ == \"__main__\":\n    print(run_agent(\"According to my notes, what is the project's budget?\"))",
+        "verify": "If the budget is not in your docs, ATLAS says it doesn't know rather than fabricating a number. Grounding holds end-to-end.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u8_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "PHASE 11 CHECKPOINT — ATLAS has knowledge, structure, and a teammate.",
+        "why": "You have added memory, embeddings, a real RAG pipeline, agentic RAG, a framework option, MCP, and a specialist sub-agent — all on the same ATLAS.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — a multi-hop question is resolved by RAG + the research sub-agent together; answers are grounded and cited; unanswerable questions get an honest \"I don't know\"; step limits and a global budget keep the system bounded. Save atlas.py. Phase 12 makes ATLAS trustworthy and shippable: evaluation, tracing, guardrails, human approval, an API service, and reliability.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 8-14"
+      }
+    }
+  ]
+}

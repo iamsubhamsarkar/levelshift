@@ -1,0 +1,124 @@
+{
+  "unitId": "p8u5",
+  "title": "Page Object Model",
+  "phase": 8,
+  "unit": 5,
+  "teaches": [
+    "playwright.pom",
+    "typescript.classes",
+    "typescript.constructors",
+    "playwright.page_abstraction"
+  ],
+  "requires": [
+    "playwright.actions",
+    "typescript.functions",
+    "playwright.assertions"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u5_c1",
+      "type": "hook",
+      "content": {
+        "question": "Same test. 75% less code. What changed?",
+        "code": "// BEFORE — 20 lines of raw selectors repeated in every test\ntest('user logs in and sees dashboard', async ({ page }) => {\n  await page.goto('https://app.example.com/login');\n  await page.getByLabel('Email address').fill('admin@test.com');\n  await page.getByLabel('Password').fill('SecurePass123!');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page).toHaveURL(/.*dashboard/);\n  await expect(page.getByRole('heading')).toHaveText('Welcome back, Admin');\n  await page.getByRole('link', { name: 'Settings' }).click();\n  await expect(page).toHaveURL(/.*settings/);\n  await page.getByLabel('Display Name').fill('Admin User');\n  await page.getByRole('button', { name: 'Save' }).click();\n  await expect(page.getByText('Settings saved')).toBeVisible();\n});\n\n// AFTER — 5 lines using Page Objects\ntest('user logs in and updates settings', async ({ page }) => {\n  const login = new LoginPage(page);\n  const dashboard = await login.loginAs('admin@test.com', 'SecurePass123!');\n  const settings = await dashboard.navigateToSettings();\n  await settings.updateDisplayName('Admin User');\n  await settings.expectSaveConfirmation();\n});"
+      }
+    },
+    {
+      "id": "p8u5_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create a `LoginPage` class with a constructor that accepts a Playwright Page object, a `goto()` method, and a `login(email, password)` method that fills the form and clicks submit. Use proper TypeScript access modifiers.",
+        "starterCode": "import { type Page, type Locator } from '@playwright/test';\n\nclass LoginPage {\n  // Declare private page property\n  // Declare readonly locators\n\n  constructor(/* what goes here? */) {\n    // Initialize page and locators\n  }\n\n  async goto(): Promise<void> {\n    // Navigate to login page\n  }\n\n  async login(email: string, password: string): Promise<void> {\n    // Fill email, fill password, click submit\n  }\n}",
+        "hint": "The constructor receives a `Page` object and stores it as a private property. Locators can be initialized in the constructor using `this.page.getByLabel(...)` and stored as `readonly` properties.",
+        "expectedOutput": "The class should have `private readonly page: Page` and readonly Locator properties for email, password, and submit button. The constructor takes `page: Page` and initializes all locators. `goto()` calls `this.page.goto('/login')`. `login()` fills both fields and clicks submit using the stored locators.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u5_c3",
+      "type": "analogy",
+      "content": {
+        "text": "A Page Object Model is like the remote control for a TV. Without a remote (without POM), you'd walk to the TV every time, find the right button on the panel, press it, walk back — and every family member would need to know where each button is on that specific TV model. The remote (POM) gives you labeled buttons: \"Volume Up\", \"Channel 3\", \"Mute\". You don't know or care HOW the TV processes the signal — you just press the meaningful button. If the TV manufacturer moves the physical buttons (devs change CSS classes), you get a new remote (update one class) and every family member (every test) keeps working without relearning anything. The class constructor is like the remote's battery compartment — it sets up everything the remote needs to function.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u5_c4",
+      "type": "code",
+      "content": {
+        "code": "import { type Page, type Locator, expect } from '@playwright/test';\n\nexport class LoginPage {\n  private readonly page: Page;\n  private readonly emailInput: Locator;\n  private readonly passwordInput: Locator;\n  private readonly submitButton: Locator;\n  private readonly errorMessage: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.emailInput = page.getByLabel('Email address');\n    this.passwordInput = page.getByLabel('Password');\n    this.submitButton = page.getByRole('button', { name: 'Sign in' });\n    this.errorMessage = page.getByRole('alert');\n  }\n\n  async goto(): Promise<void> {\n    await this.page.goto('/login');\n  }\n\n  async loginAs(email: string, password: string): Promise<DashboardPage> {\n    await this.emailInput.fill(email);\n    await this.passwordInput.fill(password);\n    await this.submitButton.click();\n    await expect(this.page).toHaveURL(/.*dashboard/);\n    return new DashboardPage(this.page);\n  }\n\n  async expectError(message: string): Promise<void> {\n    await expect(this.errorMessage).toHaveText(message);\n  }\n}",
+        "highlight": [
+          "3",
+          "4",
+          "10",
+          "23",
+          "28"
+        ],
+        "annotation": "Line 3 — `export class` makes it importable by test files. Line 4 — `private readonly` means only this class can access `page`, and it can never be reassigned after construction. Line 10 — the constructor is called once with `new LoginPage(page)` and sets up all locators eagerly (they don't query the DOM until used). Line 23 — `loginAs()` returns a `DashboardPage` object, enabling method chaining that models real navigation flow. Line 28 — returning a new page object tells the test \"after login, you're now on the dashboard\" — the type system enforces correct page transitions."
+      }
+    },
+    {
+      "id": "p8u5_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { type Page, type Locator, expect } from '@playwright/test';\n\nexport class ProductPage {\n  private readonly page: Page;\n  public readonly addToCartBtn: Locator;\n  private readonly cartCount: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.addToCartBtn = page.getByRole('button', { name: 'Add to Cart' });\n    this.cartCount = page.getByTestId('cart-count');\n  }\n\n  async addToCart(): Promise<void> {\n    await this.addToCartBtn.click();\n  }\n\n  async getCartCount(): Promise<string> {\n    return await this.cartCount.textContent() ?? '0';\n  }\n}",
+        "modification": "Change `private readonly cartCount: Locator` to `private cartCount: Locator` (remove `readonly`), then add `this.cartCount = page.getByTestId('wrong-id');` inside the `addToCart()` method.",
+        "question": "What happens when you remove readonly and accidentally reassign a locator inside a method?",
+        "options": [
+          "TypeScript error — readonly prevents reassignment",
+          "No error — cartCount silently points to wrong element and getCartCount() returns wrong data forever after addToCart() is called",
+          "Runtime crash — locators cannot be reassigned"
+        ],
+        "correct": 1,
+        "explanation": "Without `readonly`, TypeScript allows the reassignment. After `addToCart()` runs, `this.cartCount` permanently points to `'wrong-id'` instead of `'cart-count'`. Every subsequent call to `getCartCount()` queries the wrong element — and the bug is incredibly hard to trace because the test might pass or fail depending on whether `addToCart()` was called first. `readonly` prevents this entire category of bugs. It's not just about intent — it's a safety net against accidental mutations in complex page objects that multiple tests share."
+      }
+    },
+    {
+      "id": "p8u5_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Flat test vs Page Object Model — Maintainability at scale",
+        "codeA": "// Flat test — selectors scattered across 50 test files\ntest('login success', async ({ page }) => {\n  await page.goto('/login');\n  await page.getByLabel('Email address').fill('user@test.com');\n  await page.getByLabel('Password').fill('Pass123!');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page).toHaveURL(/.*dashboard/);\n});\n\ntest('login failure', async ({ page }) => {\n  await page.goto('/login');\n  await page.getByLabel('Email address').fill('wrong@test.com');\n  await page.getByLabel('Password').fill('bad');\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await expect(page.getByRole('alert')).toHaveText('Invalid credentials');\n});",
+        "codeB": "// Page Object — selectors defined ONCE, used everywhere\ntest('login success', async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.goto();\n  const dashboard = await loginPage.loginAs('user@test.com', 'Pass123!');\n  await dashboard.expectLoaded();\n});\n\ntest('login failure', async ({ page }) => {\n  const loginPage = new LoginPage(page);\n  await loginPage.goto();\n  await loginPage.loginAs('wrong@test.com', 'bad');\n  await loginPage.expectError('Invalid credentials');\n});",
+        "question": "The devs change the login button text from \"Sign in\" to \"Log in\". With 50 test files using flat tests, how many places need updating vs using POM?",
+        "options": [
+          "50 files vs 50 files — same effort either way",
+          "50 files vs 1 file (the LoginPage class)",
+          "50 files vs 0 files — POM auto-updates",
+          "1 file vs 1 file — find-and-replace handles both"
+        ],
+        "correct": 1,
+        "explanation": "With POM, the selector `getByRole('button', { name: 'Sign in' })` exists in exactly ONE place — the LoginPage constructor. Change it there and all 50 test files work immediately. With flat tests, you'd need to find and update every single file that references that button. This is the core value of POM — it creates a single source of truth for page structure. When the UI changes (and it WILL change), you update one class, not your entire test suite."
+      }
+    },
+    {
+      "id": "p8u5_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how TypeScript classes and the Page Object Model pattern improve test maintenance.",
+        "sentence": "A _____ stores the Page object and creates Locators once in the _____, and the _____ keyword prevents properties from being accidentally reassigned after initialization.",
+        "blanks": [
+          "constructor",
+          "constructor",
+          "readonly"
+        ],
+        "distractors": [
+          "function",
+          "method",
+          "private"
+        ]
+      }
+    },
+    {
+      "id": "p8u5_c8",
+      "type": "connect",
+      "content": {
+        "text": "The Page Object Model is the foundation of professional test architecture. In real SDET work, you'll build entire frameworks with page objects for every page, component objects for reusable widgets, and fixture extensions that provide pre-built page objects. Future units will cover advanced patterns like fixtures, test hooks, parallel execution, and API testing — all built on top of the POM foundation.",
+        "code": "// Where POM leads — Playwright fixtures that auto-provide page objects\nimport { test as base } from '@playwright/test';\nimport { LoginPage } from './pages/LoginPage';\nimport { DashboardPage } from './pages/DashboardPage';\n\n// Custom fixture extends base test with typed page objects\ntype MyFixtures = {\n  loginPage: LoginPage;\n  dashboardPage: DashboardPage;\n};\n\nexport const test = base.extend<MyFixtures>({\n  loginPage: async ({ page }, use) => {\n    const loginPage = new LoginPage(page);\n    await loginPage.goto();\n    await use(loginPage);\n  },\n  dashboardPage: async ({ page }, use) => {\n    await use(new DashboardPage(page));\n  },\n});\n\n// Now tests get page objects automatically — zero setup per test\ntest('quick test', async ({ loginPage, dashboardPage }) => {\n  const dash = await loginPage.loginAs('admin@co.com', 'pass');\n  await dash.expectWelcomeMessage('Admin');\n});",
+        "note": "You've now completed the foundational Playwright + TypeScript units. You can write structured tests, find elements accessibly, assert outcomes, interact with forms, and organize code into maintainable page objects. The next phases will build on this — adding API testing, visual regression, CI/CD integration, and advanced TypeScript patterns like generics and decorators."
+      }
+    }
+  ]
+}

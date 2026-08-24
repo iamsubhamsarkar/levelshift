@@ -1,0 +1,114 @@
+{
+  "unitId": "p10u3",
+  "title": "Reliable Structured Output — Validated JSON",
+  "phase": 10,
+  "unit": 3,
+  "teaches": [
+    "agentic.build_structured",
+    "agentic.build_validation"
+  ],
+  "requires": [
+    "agentic.first_call",
+    "agentic.structured_output",
+    "agentic.output_reliability"
+  ],
+  "estimatedMinutes": 18,
+  "cards": [
+    {
+      "id": "p10u3_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Ask the model for JSON in the prompt (Level 1). Add a classify() function to atlas.py.",
+        "why": "This is Level 1 from the theory — just ask. It often works, but it is fragile. You will feel that fragility, then fix it. (Learned in Phase 9, Ch 5, section 5.3.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "import json\n\ndef classify_level1(text):\n    reply = ask([\n        {\"role\": \"system\", \"content\":\n         \"Classify the bug report's severity as one of BLOCKER, MAJOR, MINOR, TRIVIAL. \"\n         \"Reply with ONLY a JSON object: {\\\"severity\\\": \\\"...\\\", \\\"component\\\": \\\"...\\\"}\"},\n        {\"role\": \"user\", \"content\": text},\n    ])\n    return reply\n\nprint(classify_level1(\"Users cannot log in at all since this morning.\"))",
+        "verify": "You get JSON-looking text back, likely {\"severity\": \"BLOCKER\", ...}. Note it is still a STRING, and the model may wrap it in prose or code fences on some runs.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 5"
+      }
+    },
+    {
+      "id": "p10u3_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Force valid JSON at the provider level (Level 2). Update ask() to accept a json_mode flag.",
+        "why": "Most OpenAI-compatible providers can GUARANTEE syntactically valid JSON, removing stray prose and broken syntax. This is Level 2. (Learned in Phase 9, Ch 5, section 5.3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "def ask(messages, temperature=0, json_mode=False):\n    kwargs = {\"model\": MODEL, \"messages\": messages, \"temperature\": temperature}\n    if json_mode:\n        kwargs[\"response_format\"] = {\"type\": \"json_object\"}\n    response = client.chat.completions.create(**kwargs)\n    return response.choices[0].message.content",
+        "verify": "The file saves. Calling ask(..., json_mode=True) will now return only valid JSON text — no prose, no fences.",
+        "troubleshoot": "If your provider rejects response_format, it may not support JSON mode for that model. Fall back to a strong Level-1 prompt (\"reply with ONLY JSON\") and rely on the Level-3 validation in the next step to catch problems.",
+        "reference": "Phase 9, Ch 5"
+      }
+    },
+    {
+      "id": "p10u3_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Define the exact shape you expect and VALIDATE against it (Level 3). Install pydantic.",
+        "why": "Level 2 guarantees valid JSON, not the RIGHT fields and types. A schema closes that gap — the professional default. Pydantic plays the role your Java validation annotations play. (Learned in Phase 9, Ch 5, section 5.3.)",
+        "commands": {
+          "windows": "pip install pydantic",
+          "ubuntu": "pip install pydantic"
+        },
+        "code": null,
+        "verify": "pydantic installs without error. Run `pip list` and confirm it appears.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 5"
+      }
+    },
+    {
+      "id": "p10u3_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Add a schema and a validating classify() to atlas.py.",
+        "why": "Now the output is BOTH valid JSON AND the exact structure you require. Anything malformed is rejected, not silently trusted. (Learned in Phase 9, Ch 5.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "from pydantic import BaseModel, field_validator\n\nALLOWED = {\"BLOCKER\", \"MAJOR\", \"MINOR\", \"TRIVIAL\"}\n\nclass Triage(BaseModel):\n    severity: str\n    component: str\n\n    @field_validator(\"severity\")\n    @classmethod\n    def known_severity(cls, v):\n        if v not in ALLOWED:\n            raise ValueError(f\"severity must be one of {ALLOWED}\")\n        return v\n\ndef classify(text):\n    raw = ask([\n        {\"role\": \"system\", \"content\":\n         \"Classify severity as one of BLOCKER, MAJOR, MINOR, TRIVIAL and name the component. \"\n         \"Reply with ONLY a JSON object with keys 'severity' and 'component'.\"},\n        {\"role\": \"user\", \"content\": text},\n    ], json_mode=True)\n    return Triage.model_validate_json(raw)\n\nprint(classify(\"Users cannot log in at all since this morning.\"))",
+        "verify": "You get a validated Triage object, e.g. severity='BLOCKER' component='login'. If the model returned a bad severity, pydantic raises a clear ValidationError instead of letting garbage through.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 5"
+      }
+    },
+    {
+      "id": "p10u3_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Add self-correction — feed a validation error back to the model and retry.",
+        "why": "A fallible generator wrapped in a checking loop is the deepest recurring shape in agentic engineering. This previews reflection (Ch 7). (Learned in Phase 9, Ch 5, section 5.4.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "def classify_safe(text, max_retries=2):\n    messages = [\n        {\"role\": \"system\", \"content\":\n         \"Classify severity as one of BLOCKER, MAJOR, MINOR, TRIVIAL and name the component. \"\n         \"Reply with ONLY a JSON object with keys 'severity' and 'component'.\"},\n        {\"role\": \"user\", \"content\": text},\n    ]\n    for attempt in range(max_retries + 1):\n        raw = ask(messages, json_mode=True)\n        try:\n            return Triage.model_validate_json(raw)\n        except Exception as e:\n            if attempt == max_retries:\n                raise\n            messages.append({\"role\": \"assistant\", \"content\": raw})\n            messages.append({\"role\": \"user\",\n                             \"content\": f\"That failed validation: {e}. Please correct it.\"})",
+        "verify": "classify_safe() returns a valid Triage even if the first attempt was malformed — you can see it recover by printing each attempt. On a well-behaved model it succeeds on the first try.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 5"
+      }
+    },
+    {
+      "id": "p10u3_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — you can get data, not just prose, from the model.",
+        "why": "Structured output is the bridge to tools. Confirm it works before Unit 4 gives the model a tool.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — classify() returns a typed, validated object; bad output raises a clear error; classify_safe() recovers from a malformed first attempt. You now understand that tool use (next unit) is this same structured-output skill with a dedicated channel.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 5"
+      }
+    }
+  ]
+}

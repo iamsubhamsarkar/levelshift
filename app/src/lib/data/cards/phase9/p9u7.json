@@ -1,0 +1,118 @@
+{
+  "unitId": "p9u7",
+  "title": "The Agent Loop — ReAct and Reasoning",
+  "phase": 9,
+  "unit": 7,
+  "teaches": [
+    "agentic.agent_loop",
+    "agentic.react",
+    "agentic.loop_safeguards",
+    "agentic.planning_reflection"
+  ],
+  "requires": [
+    "agentic.tool_calling",
+    "agentic.tool_cycle"
+  ],
+  "estimatedMinutes": 27,
+  "cards": [
+    {
+      "id": "p9u7_c1",
+      "type": "theory",
+      "content": {
+        "heading": "7.0  The conceptual heart of the book",
+        "body": "In Chapter 6 you saw one round of tool use. This chapter adds the LOOP — and the loop is what makes an agent an agent. Here everything from the first six chapters finally assembles into the true \"AGENT = LLM + TOOLS + LOOP + GOAL.\"\n\nYou will understand how an agent thinks and acts repeatedly, recovers from errors, knows when to stop, and how richer patterns like planning and self-reflection make it smarter. This is the conceptual heart of the book.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "AGENT = LLM + TOOLS + LOOP + GOAL. This chapter assembles all of it."
+      }
+    },
+    {
+      "id": "p9u7_c2",
+      "type": "theory",
+      "content": {
+        "heading": "7.1  From one round to a loop",
+        "body": "Recall the single round from Chapter 6: user, then the assistant asks for a tool, then a tool result, then the assistant answers. The limitation was that this handles exactly ONE round of tools. Real tasks often need the model to look at a result and then decide to use another tool, perhaps several times. The fix is simple in concept: put that cycle inside a loop that keeps running as long as the model keeps asking for tools, and stops when it finally produces an answer.",
+        "snippet": "repeat:\n    ask the model what to do next (giving it the tools)\n    IF the model asked for one or more tools:\n        run them, add the results to the conversation\n        loop again — now the model can see those results\n    ELSE (the model gave a final answer):\n        stop and return that answer",
+        "snippetExplanation": "What this shows: This is the entire agent loop expressed as a rule. The only two outcomes each time around are \"the model wants a tool\" (so we run it and go again) or \"the model is done\" (so we stop). Everything else in this chapter is about making this loop ROBUST — so it doesn't run forever or crash — and SMART — so it makes good decisions.",
+        "callout": "Each time around the loop, only two things can happen: the model wants a tool, or the model is done."
+      }
+    },
+    {
+      "id": "p9u7_c3",
+      "type": "theory",
+      "content": {
+        "heading": "7.2  What ReAct is",
+        "body": "ReAct is shorthand for \"Reasoning and Acting.\" It is the foundational agent pattern, and by 2026 it is the default way people think about agents. The idea is to interleave the model's REASONING with its ACTIONS and the OBSERVATIONS that come back, in a loop.",
+        "snippet": "Thought:      \"To answer this, I need Tokyo's weather for tomorrow.\"\nAction:       look up the weather for Tokyo, tomorrow\nObservation:  rain, 80% chance\nThought:      \"80% rain means an umbrella. I now have enough to answer.\"\nAnswer:       \"Yes, pack an umbrella — 80% chance of rain in Tokyo.\"",
+        "snippetExplanation": "What this shows: The agent does not blindly chain tool calls. It THINKS between actions — and that thinking measurably improves its choices. Recall from Chapter 2 that the tokens a model generates influence what it generates next; letting it \"reason out loud\" before acting steers it toward better actions and a better final answer. In modern practice, the \"Action\" is a real tool request through the mechanism you learned in Chapter 6, and the model's reasoning may be visible or internal. You do not need to force the model to print a rigid \"Thought/Action\" script; the principle — reason, then act, then observe, repeat — is what matters.",
+        "callout": "Reason, then act, then observe, repeat. That interleaving is the essence of ReAct."
+      }
+    },
+    {
+      "id": "p9u7_c4",
+      "type": "theory",
+      "content": {
+        "heading": "7.3  Three things that make the loop trustworthy",
+        "body": "A loop that \"usually works\" is a demo. A loop you can rely on has three safeguards built in. These are among the most practically important ideas in the book.\n\nA STEP LIMIT. Without a cap on how many times it may loop, a confused agent can spin forever — wasting time and money and never finishing. Every real agent has a maximum number of steps. When it is reached, the agent stops and reports that it could not finish, rather than looping endlessly. (You can also cap total cost or wall-clock time.)\n\nERROR RECOVERY — \"errors as observations.\" When a tool fails, the agent should NOT crash. Instead, the failure is handed back to the model as just another observation: \"that tool call failed because the city was not found.\" The model then SEES the error and can adapt — fix an argument, try a different tool, or ask the user for clarification. Treating errors as information the model can react to is what makes agents resilient rather than brittle.\n\nA CLEAR STOPPING CONDITION. The agent must know when it is done. The natural signal is \"the model produced an answer instead of asking for a tool.\" This is reinforced in the system prompt (\"when you have enough information, give a final answer and stop\"). Ambiguity about stopping is a top cause of failure — the agent either quits too early or wanders on pointlessly.\n\nTogether these three turn a fragile script into something dependable. Whenever you evaluate an agent design, silently check: does it have a limit, does it recover from errors, and does it know when to stop?",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "A step limit, errors-as-observations, and a clear stopping condition — the three safeguards that turn a demo into a dependable agent."
+      }
+    },
+    {
+      "id": "p9u7_c5",
+      "type": "theory",
+      "content": {
+        "heading": "7.4  How agents typically fail (and the fixes)",
+        "body": "Knowing the common failure modes is what lets you design around them.\n\nLOOPING / NOT STOPPING. The agent calls tools endlessly, or repeats the same call. Fixes: the step limit; detecting a repeated identical call and breaking; a firmer \"stop when done\" instruction; clearer tool results so the model isn't confused about progress.\n\nWRONG TOOL OR WRONG ARGUMENTS. It picks the wrong tool or invents a bad argument. Fixes: sharper tool descriptions (Chapter 6); constrained inputs; fewer, more distinct tools; validating arguments so the model receives a corrective error and can try again.\n\nGUESSING INSTEAD OF USING A TOOL. It answers a factual question from memory (and hallucinates) instead of looking it up. Fixes: an explicit instruction \"do not guess facts you can look up\"; low temperature; a tool description that clearly states when to use it.\n\nLOSING THE GOAL ON LONG TASKS. After many steps, the agent drifts from the original task. Fixes: keep the goal in front of it; periodically restate it; summarize old steps to save room (Chapter 9); use planning (7.5) to anchor the work.\n\nRUNNING OUT OF ROOM. Long loops overflow the context \"desk\" from Chapter 2 and cost more each step. Fixes: keep tool results concise; trim or summarize old messages (Chapter 9).\n\nNone of these are exotic. They are the mundane ways a loop-around-a-text-predictor goes wrong — and each has a sensible, understandable fix.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Every classic agent failure — looping, wrong tool, guessing, drift, overflow — has a sensible, understandable fix."
+      }
+    },
+    {
+      "id": "p9u7_c6",
+      "type": "theory",
+      "content": {
+        "heading": "7.5  A smarter shape — plan-and-execute",
+        "body": "Plain ReAct decides one step at a time. For complex, multi-part tasks, deciding purely step-by-step can lead to wandering. PLAN-AND-EXECUTE adds an explicit planning phase up front.\n\nFirst, PLAN: ask the model to break the goal into an ordered list of smaller steps. Second, EXECUTE: work through the steps one by one (often each step is itself a little ReAct loop). Third, RE-PLAN (optional): after each step, let the model adjust the remaining plan based on what it just learned.\n\nThe value of a plan is ANCHORING. It keeps a long task on track and — a nice bonus — gives you (and possibly a human approver) a chance to see the intended steps before anything happens.\n\nWhen to use which? For short or medium tasks with a few tool calls, plain ReAct is simpler and cheaper. For long, clearly multi-part tasks where drift is a risk, planning helps. And always remember the guiding rule from Chapter 1: do not add the overhead of planning unless the task genuinely needs it.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "A plan anchors a long task against drift — but do not add planning unless the task genuinely needs it."
+      }
+    },
+    {
+      "id": "p9u7_c7",
+      "type": "theory",
+      "content": {
+        "heading": "7.6  Reflection — the agent critiques itself",
+        "body": "Reflection means the agent evaluates its own work and improves it, in a small loop: produce a draft, critique the draft (\"does this fully answer the goal? what is missing or wrong?\"), and if there are flaws, revise and repeat — up to a limit. This measurably improves quality on writing, coding, and reasoning tasks, at the cost of extra model calls.\n\nYou have already seen a miniature version of this in Chapter 5: the self-correcting loop that fixed invalid output by feeding the validation error back to the model. Reflection is that same shape, generalized from \"fix the format\" to \"improve the quality.\" It is especially powerful when the critique can be grounded in something objective — for instance, an agent writing code can RUN A TEST and use the pass/fail result as its critique. (Your testing background applies directly: an objective check beats the model grading its own homework.)\n\nUse reflection when quality matters more than speed or cost. Skip it for fast, simple tasks where a single pass is fine.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Reflection generalizes Chapter 5's self-correction from \"fix the format\" to \"improve the quality.\" An objective critique beats self-grading."
+      }
+    },
+    {
+      "id": "p9u7_c8",
+      "type": "theory",
+      "content": {
+        "heading": "7.7  What the agent remembers during a run",
+        "body": "While an agent runs, the growing list of messages — its thoughts, tool requests, and observations — serves as its WORKING MEMORY for that single task. It is how the agent keeps track of what it has already learned and done within the run.\n\nBut when the run ends, that working memory is gone. Start the agent again on a new task and it begins fresh, remembering nothing of the previous run. To make an agent remember across runs — past conversations, a user's preferences, facts it learned yesterday — you need PERSISTENT memory, stored outside the loop and deliberately fed back in. That, along with retrieving relevant knowledge from large collections of documents, is the subject of Chapters 9 through 11.\n\nFor now, hold the distinction clearly: the loop gives you memory WITHIN a run; memory ACROSS runs is a separate, intentional system.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "The loop gives memory WITHIN a run. Memory ACROSS runs is a separate, deliberate system."
+      }
+    },
+    {
+      "id": "p9u7_c9",
+      "type": "theory",
+      "content": {
+        "heading": "Check your understanding",
+        "body": "For reflection, not coding.\n\n1. State the agent loop as a simple rule. What are the only two things that can happen each time around?\n\n2. What does ReAct add over blindly chaining tool calls, and why does letting the model \"reason before acting\" help?\n\n3. Name the three safeguards that make an agent loop trustworthy, and explain what each one prevents.\n\n4. Explain \"errors as observations.\" Why does it make an agent more resilient than simply crashing on a failure?\n\n5. When would you choose plan-and-execute over plain ReAct — and when would adding a plan be needless overhead?\n\n6. How is reflection related to the self-correction loop from Chapter 5, and why is an objective critique (like running a test) better than the model grading itself?",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "You now hold the core of agentic AI. Everything after this is about STRUCTURE, SCALE, and TRUST."
+      }
+    }
+  ]
+}

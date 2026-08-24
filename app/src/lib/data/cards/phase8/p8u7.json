@@ -1,0 +1,126 @@
+{
+  "unitId": "p8u7",
+  "title": "API Testing in Playwright",
+  "phase": 8,
+  "unit": 7,
+  "teaches": [
+    "playwright.api_request",
+    "playwright.api_mock",
+    "typescript.generics",
+    "playwright.route"
+  ],
+  "requires": [
+    "playwright.auto_wait",
+    "typescript.promises",
+    "typescript.interfaces"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u7_c1",
+      "type": "hook",
+      "content": {
+        "question": "API + UI in one test. No Postman needed. Can you create a user via API and verify it shows up in the UI — in 5 lines?",
+        "code": "import { test, expect } from '@playwright/test';\n\ntest('create user via API, verify in UI', async ({ page, request }) => {\n  // API: Create user\n  const res = await request.post('/api/users', { data: { name: 'Alice', role: 'admin' } });\n  expect(res.ok()).toBeTruthy();\n\n  // UI: Verify user appears in dashboard\n  await page.goto('/admin/users');\n  await expect(page.locator('text=Alice')).toBeVisible();\n});"
+      }
+    },
+    {
+      "id": "p8u7_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write a test that GETs a list of products from `/api/products`, verifies the response status is 200, and checks that the response body contains at least 3 products. Type the response using a generic.",
+        "starterCode": "import { test, expect } from '@playwright/test';\n\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\ntest('fetch products from API', async ({ request }) => {\n  // TODO: Make a GET request to '/api/products'\n  // TODO: Assert status is 200\n  // TODO: Parse body as Product[] and assert length >= 3\n});",
+        "hint": "Use `request.get()`, then `response.json()` and cast with `as Product[]` or use a generic helper.",
+        "expectedOutput": "The test should call `const response = await request.get('/api/products')`, assert `expect(response.status()).toBe(200)`, then parse with `const products: Product[] = await response.json()` and assert `expect(products.length).toBeGreaterThanOrEqual(3)`.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u7_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Think of Playwright's API testing like being both the customer and the restaurant inspector. As a customer (UI testing), you sit at the table and verify the food arrives correctly. As an inspector (API testing), you go into the kitchen and check the ingredients directly. Playwright's `request` context lets you do both in the same visit — you can call the kitchen (API) to place an order, then sit at the table (UI) to verify it shows up on the menu board. And `route()` is like replacing the real kitchen with a mock one: you intercept orders and serve predetermined responses, letting you test the dining room (frontend) without needing a working kitchen (backend).",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u7_c4",
+      "type": "code",
+      "content": {
+        "code": "import { test, expect, APIRequestContext } from '@playwright/test';\n\n// Generic helper to type API responses\nasync function getJson<T>(request: APIRequestContext, url: string): Promise<T> {\n  const response = await request.get(url);\n  expect(response.ok()).toBeTruthy();\n  return response.json() as Promise<T>;\n}\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\ntest('full CRUD lifecycle', async ({ request }) => {\n  // CREATE\n  const created = await request.post('/api/users', {\n    data: { name: 'Bob', email: 'bob@test.com' }\n  });\n  expect(created.status()).toBe(201);\n  const { id } = await created.json();\n\n  // READ\n  const user = await getJson<User>(request, `/api/users/${id}`);\n  expect(user.name).toBe('Bob');\n\n  // UPDATE\n  const updated = await request.put(`/api/users/${id}`, {\n    data: { name: 'Robert' }\n  });\n  expect(updated.ok()).toBeTruthy();\n\n  // DELETE\n  const deleted = await request.delete(`/api/users/${id}`);\n  expect(deleted.status()).toBe(204);\n});",
+        "highlight": [
+          "4",
+          "5",
+          "6",
+          "7",
+          "18",
+          "19",
+          "20"
+        ],
+        "annotation": "Lines 4-7 show a generic helper function — `getJson<T>` accepts a type parameter and returns `Promise<T>`, giving you fully-typed API responses. The `<T>` is a TypeScript generic: it's a placeholder type that gets filled in when you call the function (line 26 fills it with `User`). Lines 18-20 show how `request.post` works — the `data` option automatically serializes to JSON and sets Content-Type headers."
+      }
+    },
+    {
+      "id": "p8u7_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { test, expect } from '@playwright/test';\n\ntest('mock slow API response', async ({ page }) => {\n  await page.route('**/api/dashboard', route => route.fulfill({\n    status: 200,\n    contentType: 'application/json',\n    body: JSON.stringify({ widgets: ['sales', 'traffic', 'users'] }),\n  }));\n\n  await page.goto('/dashboard');\n  await expect(page.locator('.widget')).toHaveCount(3);\n});",
+        "modification": "Change `route.fulfill(...)` to `route.abort()` — this simulates a network failure instead of a successful response.",
+        "question": "What happens when the API route is aborted instead of fulfilled?",
+        "options": [
+          "The page shows an error state because the fetch to /api/dashboard fails with a network error",
+          "The test times out because the page keeps retrying the request indefinitely",
+          "The route.abort() throws an error because you can only abort navigation requests"
+        ],
+        "correct": 0,
+        "explanation": "`route.abort()` simulates a network-level failure (like ERR_FAILED). The frontend's fetch call will reject with a TypeError ('Failed to fetch'), and a well-built app will show an error state. This is a powerful testing pattern — you can verify error handling without needing a real server failure. If the app doesn't handle errors gracefully, the `.widget` count assertion would fail because no widgets rendered."
+      }
+    },
+    {
+      "id": "p8u7_c6",
+      "type": "contrast",
+      "content": {
+        "label": "Real API calls vs Mocked API routes",
+        "codeA": "// Real API call — hits actual backend\ntest('real API test', async ({ request }) => {\n  const response = await request.get('https://api.example.com/users');\n  const users: User[] = await response.json();\n  expect(users).toHaveLength(5);\n  expect(users[0]).toHaveProperty('email');\n});",
+        "codeB": "// Mocked route — intercepts browser's network\ntest('mocked API test', async ({ page }) => {\n  await page.route('**/api/users', route => route.fulfill({\n    status: 200,\n    body: JSON.stringify([\n      { id: 1, name: 'Mock User', email: 'mock@test.com' }\n    ]),\n  }));\n  await page.goto('/users');\n  await expect(page.locator('.user-card')).toHaveCount(1);\n});",
+        "question": "What is the fundamental difference between `request.get()` and `page.route()` + fulfill?",
+        "options": [
+          "request.get() is faster because it skips the browser rendering engine",
+          "request.get() makes a real HTTP call from Node.js while page.route() intercepts the browser's network and serves fake responses",
+          "request.get() only works for GET requests while page.route() works for all HTTP methods",
+          "page.route() is deprecated in favor of request.get() for API testing"
+        ],
+        "correct": 1,
+        "explanation": "`request.get()` (from APIRequestContext) makes a real HTTP call from the Node.js test process directly to the server — no browser involved. It's for testing APIs in isolation. `page.route()` intercepts network requests made by the browser during page interactions and lets you fulfill them with mock data. Use `request` when you want to test the API itself. Use `page.route()` when you want to test how the UI behaves with controlled API responses. They serve completely different purposes and complement each other."
+      }
+    },
+    {
+      "id": "p8u7_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain the difference between Playwright's request context and route mocking, using generics for type safety.",
+        "sentence": "The _____ context makes real HTTP calls for API testing, while page.route() _____ browser network requests, and generics like <T> let you _____ API response types.",
+        "blanks": [
+          "request",
+          "intercepts",
+          "strongly type"
+        ],
+        "distractors": [
+          "page",
+          "redirects",
+          "validate"
+        ]
+      }
+    },
+    {
+      "id": "p8u7_c8",
+      "type": "connect",
+      "content": {
+        "text": "API testing patterns feed directly into fixtures (Unit 8). Instead of calling the API in every test to set up data, you'll create fixtures that handle API setup/teardown automatically. The generic patterns you learned here (`<T>`) will become essential when typing custom fixtures with test.extend<T>.",
+        "code": "// Preview: Fixture that creates test data via API (Unit 8)\nimport { test as base } from '@playwright/test';\n\ninterface TestUser { id: number; name: string; token: string; }\n\nconst test = base.extend<{ testUser: TestUser }>({\n  testUser: async ({ request }, use) => {\n    // Setup: Create user via API (from this unit!)\n    const res = await request.post('/api/users', {\n      data: { name: 'fixture-user', role: 'tester' }\n    });\n    const user: TestUser = await res.json();\n\n    await use(user); // Provide to test\n\n    // Teardown: Clean up via API\n    await request.delete(`/api/users/${user.id}`);\n  },\n});\n\ntest('uses auto-created user', async ({ page, testUser }) => {\n  // testUser already exists — created by fixture!\n  await page.goto(`/profile/${testUser.id}`);\n});",
+        "note": "The generic `<T>` you learned for typing API responses is the same syntax used to type fixtures. Master generics now, and Unit 8's fixture typing becomes trivial."
+      }
+    }
+  ]
+}

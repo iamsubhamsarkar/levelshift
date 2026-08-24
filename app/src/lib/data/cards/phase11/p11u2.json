@@ -1,0 +1,98 @@
+{
+  "unitId": "p11u2",
+  "title": "Embeddings — A Tiny Semantic Search",
+  "phase": 11,
+  "unit": 2,
+  "teaches": [
+    "agentic.build_embeddings",
+    "agentic.build_semantic_search"
+  ],
+  "requires": [
+    "agentic.build_memory",
+    "agentic.embeddings",
+    "agentic.semantic_search"
+  ],
+  "estimatedMinutes": 15,
+  "cards": [
+    {
+      "id": "p11u2_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Get access to an embedding model. Confirm your provider offers one.",
+        "why": "An embedding model is DIFFERENT from a chat model — it turns text into a vector (a position on a \"map of meaning\"). NVIDIA NIM offers free embedding models. (Learned in Phase 9, Ch 10, section 10.2.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# In .env, add an embedding model name your provider supports, e.g.:\n# EMBED_MODEL=nvidia/nv-embedqa-e5-v5      (via NVIDIA NIM)\n# Some Groq-compatible stacks route embeddings elsewhere — use NIM's\n# embeddings endpoint if Groq does not serve one.",
+        "verify": "You have an embedding model name in .env and know which base_url serves it. If your primary provider has no embeddings, point an embed client at NIM specifically.",
+        "troubleshoot": "If unsure, NVIDIA NIM (build.nvidia.com) reliably offers free embedding models with an OpenAI-compatible embeddings endpoint. You can keep chat on Groq and embeddings on NIM — two clients, same protocol.",
+        "reference": "Phase 9, Ch 10"
+      }
+    },
+    {
+      "id": "p11u2_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Write an embed() helper that turns text into a vector.",
+        "why": "This is the single new primitive of the chapter: text in, a list of numbers out, where closeness of numbers means closeness of meaning. (Learned in Phase 9, Ch 10, section 10.2.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "# If embeddings come from a different provider, make a second client:\nembed_client = OpenAI(\n    api_key=os.environ.get(\"NIM_API_KEY\", os.environ[\"GROQ_API_KEY\"]),\n    base_url=os.environ.get(\"NIM_BASE_URL\", os.environ[\"GROQ_BASE_URL\"]),\n)\nEMBED_MODEL = os.environ[\"EMBED_MODEL\"]\n\ndef embed(text):\n    resp = embed_client.embeddings.create(model=EMBED_MODEL, input=text)\n    return resp.data[0].embedding",
+        "verify": "Calling embed(\"hello\") returns a long list of floats. Print len(embed(\"hello\")) to see the vector's dimension (often several hundred or a few thousand numbers).",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 10"
+      }
+    },
+    {
+      "id": "p11u2_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Measure closeness with cosine similarity.",
+        "why": "\"How similar in meaning?\" becomes \"how close are the two vectors?\" — a value near 1 means nearly the same meaning. (Learned in Phase 9, Ch 10, section 10.3.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "import math\n\ndef cosine(a, b):\n    dot = sum(x*y for x, y in zip(a, b))\n    na = math.sqrt(sum(x*x for x in a))\n    nb = math.sqrt(sum(y*y for y in b))\n    return dot / (na * nb)",
+        "verify": "cosine(embed(\"reset my password\"), embed(\"recover my login credentials\")) is high (close to 1), while cosine(embed(\"reset my password\"), embed(\"capital of France\")) is much lower. Meaning, not words, drives the score.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 10"
+      }
+    },
+    {
+      "id": "p11u2_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Build a tiny in-memory semantic search over a handful of texts.",
+        "why": "This is semantic search in miniature: embed everything ahead of time, embed the question at query time, return the closest. (Learned in Phase 9, Ch 10, section 10.4.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "DOCS = [\n    \"To reset your password, click 'Forgot password' on the login page.\",\n    \"Our office hours are 9am to 5pm, Monday to Friday.\",\n    \"Refunds are processed within 5 business days.\",\n]\nDOC_VECTORS = [(d, embed(d)) for d in DOCS]  # done once, ahead of time\n\ndef search(query, k=1):\n    qv = embed(query)\n    scored = [(cosine(qv, dv), d) for d, dv in DOC_VECTORS]\n    scored.sort(reverse=True)\n    return [d for _, d in scored[:k]]\n\nprint(search(\"I forgot my login credentials\"))",
+        "verify": "The query \"I forgot my login credentials\" returns the PASSWORD RESET document — even though they share almost no words. That is a match on meaning, the leap beyond keyword search.",
+        "troubleshoot": "If results look random, confirm you use the SAME embed() model for both the docs and the query — vectors from different models cannot be compared.",
+        "reference": "Phase 9, Ch 10"
+      }
+    },
+    {
+      "id": "p11u2_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — you can search by meaning.",
+        "why": "Semantic search is the engine beneath RAG. Confirm it before Unit 3 builds a real pipeline over your own documents.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — embed() returns vectors; cosine() scores similarity sensibly; search() finds the right document by meaning, not words. You understand: same model on both sides, meaning-not-truth. Next unit turns this into a real RAG pipeline over YOUR files.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 10"
+      }
+    }
+  ]
+}

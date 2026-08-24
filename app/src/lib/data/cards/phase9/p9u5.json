@@ -1,0 +1,95 @@
+{
+  "unitId": "p9u5",
+  "title": "Structured Output",
+  "phase": 9,
+  "unit": 5,
+  "teaches": [
+    "agentic.structured_output",
+    "agentic.output_reliability",
+    "agentic.self_correction"
+  ],
+  "requires": [
+    "agentic.system_prompt",
+    "agentic.prompt_techniques"
+  ],
+  "estimatedMinutes": 21,
+  "cards": [
+    {
+      "id": "p9u5_c1",
+      "type": "theory",
+      "content": {
+        "heading": "5.0  The hinge of the whole book",
+        "body": "This short chapter carries one big idea, and it is a hinge for the whole book. So far the model produces PROSE — text meant for humans. To build software that ACTS on a model's output, you need the model to produce DATA in a predictable shape your code can rely on.\n\nThat capability — structured output — is the bridge from \"a chatbot that talks\" to \"a component in a system.\" It is also, quite literally, the mechanism behind tool use (Chapter 6). Understand this well and the rest of agentic AI unlocks.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Structured output is the bridge from \"a chatbot that talks\" to \"a component in a system.\""
+      }
+    },
+    {
+      "id": "p9u5_c2",
+      "type": "theory",
+      "content": {
+        "heading": "5.1  Why prose is not enough",
+        "body": "Consider a model classifying a bug report. Two possible outputs. Human-friendly (but useless to a program): \"This looks pretty serious — I'd call it a major issue affecting login.\" Machine-friendly (something code can act on): severity = MAJOR, component = login, confidence = high.\n\nThe first is fine for a person to read but a nightmare for a program to use — your code would have to parse loose English to figure out the severity. The second is unambiguous: a program can immediately branch on it (\"if severity is BLOCKER, alert the on-call engineer\"). The moment a model's output takes a reliable, predictable shape, the model becomes a usable building block rather than a novelty.\n\nIn your world, this is the difference between a REST endpoint returning a blob of freeform text versus returning a well-defined JSON body that maps cleanly onto a Java object. You would never build a system on the former. Structured output is how we get the latter from an LLM.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Predictable shape turns a model from a novelty into a usable building block."
+      }
+    },
+    {
+      "id": "p9u5_c3",
+      "type": "theory",
+      "content": {
+        "heading": "5.2  What \"structured output\" means",
+        "body": "Structured output means asking the model to reply in a defined DATA FORMAT — overwhelmingly, in practice, JSON (the same key-value format you know from REST bodies). Instead of a paragraph, you get something like an object with named fields.",
+        "snippet": "{\n  \"severity\": \"MAJOR\",\n  \"component\": \"login\",\n  \"confidence\": 0.8\n}",
+        "snippetExplanation": "What this shows: This is an object with three named fields. \"severity\" holds one of a fixed set of words; \"component\" holds a piece of text; \"confidence\" holds a number. Because the shape is predictable, code can read each field directly and act on it — no guessing, no parsing of loose sentences. It is exactly like a small data-transfer object arriving from an API. The goal, then, is not merely \"get JSON,\" but \"get JSON of the RIGHT SHAPE, every time.\" Achieving that reliably takes a little care, because a text-prediction machine will, left to itself, sometimes wrap the JSON in chatty text or bend the format.",
+        "callout": "The goal is not \"get JSON\" — it is \"get JSON of the RIGHT SHAPE, every time.\""
+      }
+    },
+    {
+      "id": "p9u5_c4",
+      "type": "theory",
+      "content": {
+        "heading": "5.3  Three levels of reliability",
+        "body": "There are, roughly, three levels of rigor for getting good structured output. You need to understand the ladder, because it shows how a \"usually works\" trick becomes an \"always works\" guarantee.\n\nLEVEL 1 — JUST ASK, IN THE PROMPT. You instruct the model: \"Reply with only a JSON object with these fields, and no other text.\" This often works — but it is fragile. The model might still add a friendly preface, or wrap the JSON in code fences, and then your code has to clean up the mess. Fine for quick experiments; risky for real systems.\n\nLEVEL 2 — ASK THE PROVIDER TO ENFORCE VALID JSON. Most providers offer a mode that FORCES the output to be syntactically valid JSON. This removes a whole category of problems: no stray prose, no broken syntax. However — and this is subtle but important — it guarantees the output is valid JSON, NOT that it has the fields and types you actually wanted. The model could still return the wrong keys.\n\nLEVEL 3 — DEFINE A SCHEMA AND VALIDATE AGAINST IT. You define the exact expected SHAPE — which fields, of which types, within which ranges — and you check the model's output against that definition, rejecting anything that does not conform. This gives you output that is BOTH valid JSON AND the right structure. This is the professional default in 2026.\n\nThe Java parallel is precise: Level 3 is like receiving a JSON response, deserializing it into a typed object, AND running validation on it (the kind of field constraints you would express with validation annotations). You would never trust a raw external payload without validating it; you should not trust raw model output either. In Python this is commonly done with a library called Pydantic — but the concept, not the tool, is what matters.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Level 3 — schema-defined and validated — is the professional default. Never trust raw model output."
+      }
+    },
+    {
+      "id": "p9u5_c5",
+      "type": "theory",
+      "content": {
+        "heading": "5.4  Self-correction — a glimpse of something deeper",
+        "body": "A powerful pattern falls naturally out of Level 3. Suppose the model returns something that fails validation — a missing field, a number out of range. Instead of giving up, the system can hand the error BACK to the model — \"that failed validation because the confidence value was above 1; please correct it\" — and ask again. The model, seeing its own mistake described, usually fixes it.\n\nThis little loop — produce, check, feed the problem back, try again — is a miniature version of a much bigger idea called \"reflection,\" which you will meet properly in Chapter 7. Notice the shape: the model is fallible, so we wrap it in a checking process that catches and corrects errors. That shape — a careful control loop around a fallible generator — is one of the deepest recurring themes in all of agentic engineering.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "A careful control loop around a fallible generator — the deepest recurring shape in agentic engineering."
+      }
+    },
+    {
+      "id": "p9u5_c6",
+      "type": "theory",
+      "content": {
+        "heading": "5.5  Why this is the doorway to tools",
+        "body": "Here is the connection that makes this chapter pivotal. When an agent uses a tool (Chapter 6), what actually happens under the hood is that the model produces STRUCTURED OUTPUT describing which function to call and with what arguments — something like: \"call the function get_weather, with the argument city set to Tokyo.\" That is just structured data of a particular shape.\n\nSo tool use is not a separate, mysterious capability. It is structured output, formalized and given a dedicated channel by the model's API. Everything you understand about getting reliable, well-shaped data from a model applies directly to getting reliable, well-shaped TOOL REQUESTS from it. Master structured output, and tool calling — the engine of agents — becomes almost obvious.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Tool use IS structured output in disguise, given a dedicated channel."
+      }
+    },
+    {
+      "id": "p9u5_c7",
+      "type": "theory",
+      "content": {
+        "heading": "Check your understanding",
+        "body": "For reflection, not coding.\n\n1. In your own words, why can't a program easily act on the sentence \"this looks like a fairly major login issue,\" but it can act on a small JSON object with a \"severity\" field?\n\n2. Describe the three levels of reliability for structured output. What does each level add over the one before it?\n\n3. Level 2 guarantees valid JSON but not the right shape. Explain the difference, and why Level 3 is needed to close the gap.\n\n4. Explain the self-correction loop from 5.4 and how it foreshadows a bigger idea in later chapters.\n\n5. Why is it fair to say that \"tool use is just structured output in disguise\"?",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Next chapter: tools and function calling — where the LLM stops talking and starts DOING."
+      }
+    }
+  ]
+}

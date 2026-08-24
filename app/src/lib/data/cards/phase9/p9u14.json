@@ -1,0 +1,107 @@
+{
+  "unitId": "p9u14",
+  "title": "Multi-Agent Systems",
+  "phase": 9,
+  "unit": 14,
+  "teaches": [
+    "agentic.multi_agent_when",
+    "agentic.agent_as_tool",
+    "agentic.topologies",
+    "agentic.agent_contracts"
+  ],
+  "requires": [
+    "agentic.workflow_vs_agent",
+    "agentic.mcp"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p9u14_c1",
+      "type": "theory",
+      "content": {
+        "heading": "14.0  Specialists that collaborate",
+        "body": "A single agent with tools handles a great deal (Chapter 7). But some problems benefit from MULTIPLE agents — specialists that collaborate, like a team. This chapter explains how multi-agent systems are organized, how the agents communicate, and what makes them hard.\n\nIt also delivers, up front, the most important lesson of the chapter: multi-agent is powerful but frequently OVERUSED. Learning WHEN it genuinely helps — and when it just adds chaos — matters more than any particular technique.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Multi-agent is powerful but frequently overused. Knowing WHEN to use it matters more than any technique."
+      }
+    },
+    {
+      "id": "p9u14_c2",
+      "type": "theory",
+      "content": {
+        "heading": "14.1  When (and when not) to use multiple agents",
+        "body": "The governing rule from Chapter 1 applies with special force here: use the least agentic thing that works. Multiple agents sit near the top of the complexity ladder. They add coordination overhead, more model calls (so more cost and latency), more unpredictability, and more ways to fail — agents talking past each other, looping, or losing track of shared context.\n\nUSE MULTIPLE AGENTS WHEN: the task splits into genuinely SEPARATE sub-problems needing DIFFERENT expertise, tools, or prompts (research, then writing, then reviewing); a single agent's set of tools or its context becomes OVERWHELMED, and splitting the work makes it more reliable; sub-tasks can run in PARALLEL to save time; or you want ISOLATION — a narrow specialist with a limited, safe tool set reduces how much can go wrong.\n\nSTAY WITH A SINGLE AGENT WHEN: one agent with the right tools already does the job; the sub-tasks are tightly intertwined and share a lot of context (splitting forces expensive context-passing and invites drift); or you cannot clearly say WHY each agent needs to exist.\n\nA frank 2026 reality: many \"multi-agent\" systems perform WORSE than a single good agent, because the cost of coordinating exceeds the benefit of specializing. Before committing to a team, prove (by measuring — Chapter 15) that it beats the simpler single-agent version.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Before committing to a team, PROVE (by measuring) that it beats the simpler single-agent version."
+      }
+    },
+    {
+      "id": "p9u14_c3",
+      "type": "theory",
+      "content": {
+        "heading": "14.2  The key insight — an agent can be a tool",
+        "body": "The cleanest way to think about multi-agent systems — and the one most likely to click for you — is this: a sub-agent is just something another agent can CALL, exactly like a tool (Chapter 6).\n\nImagine a \"research\" capability. To the main agent, it looks like a tool named \"research.\" But behind that tool, instead of a simple function, sits a whole second agent that runs its own loop with its own tools and returns a result. The main agent does not know or care; it just calls \"research\" and gets an answer.\n\nBy treating a specialist agent as a tool the coordinator can invoke, coordination stays EXPLICIT and understandable — you know exactly when and how the specialist is used. It also composes neatly with everything you already know. Many robust multi-agent designs are, at heart, just this: one coordinator whose \"tools\" happen to be other agents. Prefer this clear model before reaching for free-form agent-to-agent chatter.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "A sub-agent is just a tool the coordinator can call. This keeps coordination explicit and testable."
+      }
+    },
+    {
+      "id": "p9u14_c4",
+      "type": "theory",
+      "content": {
+        "heading": "14.3  Ways to organize agents (topologies)",
+        "body": "There are a handful of standard shapes for arranging agents. Recognizing them lets you pick the right one instead of inventing something ad hoc.\n\nSUPERVISOR (orchestrator-worker) — the most common and most reliable. One \"supervisor\" agent receives the goal, decides which specialist(s) to call, delegates, collects their results, and assembles the final answer. The workers do not talk to each other — only to the supervisor. Hub-and-spoke, mapping directly onto \"an agent can be a tool\" (14.2). Make this your DEFAULT.\n\nPIPELINE (sequential) — an assembly line. Agents run in a fixed order, each transforming the previous one's output: researcher, then writer, then editor. Simple and predictable (it is really Chapter 8's prompt chaining, done with agents).\n\nPARALLEL (fan-out, fan-in). Several agents work at once on independent parts, and their results are merged. Good for speed or diverse perspectives.\n\nNETWORK (peer-to-peer). Any agent may talk to any other, freely. The most flexible but the LEAST predictable and hardest to debug. Rarely the right first choice.\n\nHIERARCHICAL. Supervisors managing teams that themselves have supervisors — for very large tasks. High complexity; justify it heavily.\n\nA DEPENDENCY GRAPH. Stages with defined dependencies: some run in parallel, some in sequence, feeding one another — with carefully capped loops for \"keep improving until good enough.\"",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Make SUPERVISOR your default topology. It maps directly onto \"an agent can be a tool.\""
+      }
+    },
+    {
+      "id": "p9u14_c5",
+      "type": "theory",
+      "content": {
+        "heading": "14.4  How agents communicate — and why contracts matter",
+        "body": "However agents talk, the single most important discipline is to DEFINE THE CONTRACT between them (echoing Chapter 8's point about state). Loose, free-text chatter between agents is where multi-agent systems rot. From safest to riskiest:\n\nSTRUCTURED MESSAGES (best). Agents exchange well-shaped, validated data — the structured-output idea from Chapter 5. \"The researcher returns a Findings object with a list of facts and a list of sources.\" Predictable, checkable, easy to debug.\n\nA SHARED WORKSPACE. A common store that agents read from and write to. Powerful, but it demands discipline about who writes what, and a firm rule to minimize shared mutable state.\n\nFREE-FORM NATURAL LANGUAGE (riskiest). Agents converse in prose. Most flexible, least reliable — prone to misunderstanding and looping. Use sparingly and with limits.\n\nThere is also emerging standardization for agents built by different teams to communicate (a complement to MCP, which standardizes agent-to-TOOL communication). The principle is the same as everywhere in this book: prefer explicit, well-shaped, bounded contracts over implicit, free-form ones.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Prefer structured-message contracts. Free-form prose between agents is where multi-agent systems rot."
+      }
+    },
+    {
+      "id": "p9u14_c6",
+      "type": "theory",
+      "content": {
+        "heading": "14.5  The hard parts (why \"just add more agents\" backfires)",
+        "body": "Multi-agent systems introduce coordination problems that any distributed-systems engineer will recognize.\n\nTERMINATION. How does the whole system know it is DONE? You need clear completion criteria and GLOBAL limits — a cap on total steps or cost across ALL agents, not just per agent — or they can ping-pong forever.\n\nPASSING CONTEXT. Each agent has its own finite desk (Chapter 2). Passing everything between them explodes token usage; passing too little loses information. Pass SUMMARIES and structured results, not raw transcripts.\n\nHANDLING FAILURE. If a worker fails, the supervisor must cope — retry, route elsewhere, or degrade gracefully. This is \"errors as observations\" (Chapter 7) scaled up to a team.\n\nCONFLICTING OUTPUTS. Parallel agents may disagree. You need a rule to reconcile — the supervisor decides, or a majority vote.\n\nCOST EXPLOSION. Many agents, each taking many steps, each resending context, adds up fast. Budget globally, and use small, fast models for the worker roles.\n\nVISIBILITY. With many agents, you MUST be able to trace who did what, or the bugs are nearly impossible to find. (This is Chapter 16's observability, which multi-agent systems make essential rather than optional.)",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "Termination, context-passing, failure, conflicts, cost, visibility — the six hard parts that sink naive multi-agent systems."
+      }
+    },
+    {
+      "id": "p9u14_c7",
+      "type": "theory",
+      "content": {
+        "heading": "14.6  A design checklist",
+        "body": "Before building a multi-agent system, you should be able to answer these. If you cannot, you are probably not ready to build it.\n\nWhy does a SINGLE agent not suffice here? (Be specific.) What is each agent's ONE responsibility and its tool set? Which topology (default: supervisor)? What is the CONTRACT between agents — structured messages, a shared workspace? How is context passed WITHOUT exploding token usage? What are the GLOBAL limits on steps and cost, and the completion criteria? How are worker failures handled by the coordinator? How will you TRACE and debug the whole run? What is the single-agent baseline you will compare against (Chapter 15)?",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "If you cannot answer why a single agent won't suffice, you are not ready to build a multi-agent system."
+      }
+    },
+    {
+      "id": "p9u14_c8",
+      "type": "theory",
+      "content": {
+        "heading": "Check your understanding",
+        "body": "For reflection, not coding.\n\n1. Give two situations where multiple agents genuinely help, and two where a single agent is the better choice.\n\n2. Explain the \"an agent can be a tool\" idea and why it keeps coordination clear and testable.\n\n3. Describe the supervisor topology and why it is the recommended default. Contrast it with the network (peer-to-peer) topology.\n\n4. Why are structured-message contracts between agents safer than free-form conversation?\n\n5. Pick two of the \"hard parts\" (termination, context-passing, failure, conflicts, cost, visibility) and explain why each can sink a naive multi-agent system.",
+        "snippet": null,
+        "snippetExplanation": null,
+        "callout": "You now have the full construction toolkit. The remaining chapters are about TRUST and PRODUCTION."
+      }
+    }
+  ]
+}

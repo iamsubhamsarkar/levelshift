@@ -6,6 +6,7 @@
 import { writable, derived } from 'svelte/store';
 import { loadData, saveData } from '../utils/storage.js';
 import { today, addDays, daysBetween, formatDate } from '../utils/dates.js';
+import phasesData from '../data/phases.json';
 
 // ─── Default State ────────────────────────────────────────────────────────────
 
@@ -18,6 +19,7 @@ function createDefaultState() {
       interviewDate: addDays(now, 60),
       weekendRest: true,
       dailyMode: 'normal', // 'full' | 'normal' | 'tired'
+      osPreference: 'windows', // 'windows' | 'ubuntu' — for agentic build_step command tabs
       onboarded: false
     },
     progress: {
@@ -201,7 +203,36 @@ export function completeUnit(unitId, xpEarned = 50) {
     }
     p.totalXP += xpEarned;
     p.currentCard = 0;
-    p.currentUnit += 1;
+
+    // Advance to the next unit, rolling over into the next phase when the
+    // current phase runs out of units. Skips phases that have no units yet.
+    const phases = phasesData.phases;
+    let phaseIdx = p.currentPhase - 1;
+    let unitIdx = p.currentUnit - 1;
+
+    if (phaseIdx >= 0 && phaseIdx < phases.length) {
+      const unitsInPhase = phases[phaseIdx].units.length;
+      if (unitIdx + 1 < unitsInPhase) {
+        // Next unit in the same phase
+        p.currentUnit += 1;
+      } else {
+        // Move to the next phase that actually has units
+        let nextPhase = phaseIdx + 1;
+        while (nextPhase < phases.length && phases[nextPhase].units.length === 0) {
+          nextPhase++;
+        }
+        if (nextPhase < phases.length) {
+          p.currentPhase = nextPhase + 1;
+          p.currentUnit = 1;
+        } else {
+          // No more units anywhere — stay put; LearnView shows "All Done".
+          p.currentUnit += 1;
+        }
+      }
+    } else {
+      p.currentUnit += 1;
+    }
+
     return p;
   });
 

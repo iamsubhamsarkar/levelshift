@@ -1,0 +1,122 @@
+{
+  "unitId": "p8u2",
+  "title": "First Test & Selectors",
+  "phase": 8,
+  "unit": 2,
+  "teaches": [
+    "playwright.test_structure",
+    "playwright.locators",
+    "typescript.async_await",
+    "playwright.getby"
+  ],
+  "requires": [
+    "typescript.types",
+    "playwright.setup"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u2_c1",
+      "type": "hook",
+      "content": {
+        "question": "Two selectors find the same Submit button. One breaks when a developer renames a CSS class. Which one survives a refactor?",
+        "code": "// Selector A — CSS-based\nawait page.click('#btn-submit');\n\n// Selector B — Role-based\nawait page.getByRole('button', { name: 'Submit' }).click();"
+      }
+    },
+    {
+      "id": "p8u2_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write a Playwright test that navigates to 'https://demo.playwright.dev/todomvc' and verifies the page title contains 'TodoMVC'. Use the test() function with async/await.",
+        "starterCode": "import { test, expect } from '@playwright/test';\n\n// Write your test here\ntest('___', ___ ({ page }) => {\n  // Navigate to the URL\n  \n  // Check the title contains 'TodoMVC'\n  \n});",
+        "hint": "Every Playwright test callback must be `async` and use `await` for page operations because browser actions take time to complete.",
+        "expectedOutput": "The test function takes a string name and an async callback that destructures `{ page }`. Inside, `await page.goto(url)` navigates, and `await expect(page).toHaveTitle(/TodoMVC/)` verifies the title. Without `await`, the test would finish before the browser even starts loading.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u2_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Think of `async/await` like ordering food at a restaurant. When you say `await page.goto(url)`, you're telling the waiter \"I'll wait here until the page is ready.\" Without `await`, it's like shouting your order and immediately asking \"where's my food?\" — the kitchen hasn't even started yet. The `async` keyword on the function is like making a reservation — it tells JavaScript \"this function will have waiting involved, prepare for it.\" Selectors like `getByRole` are like describing what you want to the waiter: \"the button that says Submit\" works even if they rearrange the menu (change CSS classes). But saying \"item #47\" (CSS ID) breaks the moment they reprint the menu.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u2_c4",
+      "type": "code",
+      "content": {
+        "code": "import { test, expect } from '@playwright/test';\n\ntest('user can add a todo item', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc');\n\n  // getByPlaceholder — finds by placeholder text (accessible)\n  const todoInput = page.getByPlaceholder('What needs to be done?');\n  await todoInput.fill('Write Playwright tests');\n  await todoInput.press('Enter');\n\n  // getByText — finds by visible text content\n  const todoItem = page.getByText('Write Playwright tests');\n  await expect(todoItem).toBeVisible();\n});",
+        "highlight": [
+          "3",
+          "6",
+          "7",
+          "12"
+        ],
+        "annotation": "Line 3 — `async ({ page })` destructures the test fixtures; `page` is a fresh browser tab. Line 6-7 — `getByPlaceholder` finds the input by its placeholder attribute, which is how screen readers identify it too. Line 12 — `getByText` finds any element containing that exact text. Notice every `page` interaction uses `await` because the browser is a separate process — these operations are asynchronous promises that resolve when the browser completes the action."
+      }
+    },
+    {
+      "id": "p8u2_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { test, expect } from '@playwright/test';\n\ntest('verify heading exists', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc');\n  const heading = page.getByRole('heading', { name: 'todos' });\n  await expect(heading).toBeVisible();\n});",
+        "modification": "Remove the `await` keyword from line 4 (`page.goto(...)`) so it becomes just `page.goto('https://demo.playwright.dev/todomvc');`",
+        "question": "What happens when you remove await from page.goto()?",
+        "options": [
+          "The test passes but runs slower",
+          "The test fails because the page hasn't loaded when it tries to find the heading",
+          "The test throws a syntax error at compile time"
+        ],
+        "correct": 1,
+        "explanation": "Without `await`, `page.goto()` returns a Promise but doesn't wait for it to resolve. The code immediately moves to line 5 and tries to find a heading on a page that hasn't loaded yet. The locator finds nothing, `toBeVisible()` times out after 5 seconds, and the test fails with a timeout error. This is the #1 beginner mistake in Playwright — forgetting `await` on async operations."
+      }
+    },
+    {
+      "id": "p8u2_c6",
+      "type": "contrast",
+      "content": {
+        "label": "getByRole vs CSS Selectors — Resilience to change",
+        "codeA": "// CSS/XPath selectors — coupled to implementation\nawait page.click('#login-btn');\nawait page.fill('input[name=\"email\"]', 'user@test.com');\nawait page.click('div.form-container > button.submit');\nawait page.locator('//div[@class=\"alert success\"]').isVisible();",
+        "codeB": "// Built-in locators — coupled to user-visible behavior\nawait page.getByRole('button', { name: 'Log in' }).click();\nawait page.getByLabel('Email address').fill('user@test.com');\nawait page.getByRole('button', { name: 'Submit' }).click();\nawait page.getByRole('alert').filter({ hasText: 'Success' }).isVisible();",
+        "question": "A developer changes the button's class from 'submit' to 'btn-primary' and its ID from 'login-btn' to 'auth-button'. How many tests break in each approach?",
+        "options": [
+          "Both approaches break equally",
+          "Code A breaks on 2 lines — Code B breaks on 0 lines",
+          "Code A breaks on 1 line — Code B breaks on 1 line",
+          "Neither breaks — Playwright auto-heals selectors"
+        ],
+        "correct": 1,
+        "explanation": "Code A uses CSS selectors tied to implementation details (IDs, classes, DOM structure). When `#login-btn` becomes `#auth-button`, line 1 breaks. When `.submit` becomes `.btn-primary`, line 3 breaks. Code B uses semantic locators based on what the USER sees — the button text \"Log in\" and \"Submit\" didn't change, so zero tests break. This is why Playwright recommends `getByRole`, `getByLabel`, `getByText` — they mirror how real users (and screen readers) find elements."
+      }
+    },
+    {
+      "id": "p8u2_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how async/await and locator strategies work together in a Playwright test.",
+        "sentence": "The _____ keyword marks a function as returning a Promise, while _____ pauses execution until that Promise resolves, and _____ finds elements by their accessible role instead of CSS implementation details.",
+        "blanks": [
+          "async",
+          "await",
+          "getByRole"
+        ],
+        "distractors": [
+          "function",
+          "return",
+          "querySelector"
+        ]
+      }
+    },
+    {
+      "id": "p8u2_c8",
+      "type": "connect",
+      "content": {
+        "text": "You can now write tests that find elements reliably. But finding elements is only half the story — you need to VERIFY what you found is correct. Unit 3 introduces assertions (`expect`) that auto-retry, plus TypeScript interfaces to structure your test data so your tests are both reliable and maintainable.",
+        "code": "// Coming in Unit 3 — assertions that auto-retry\nimport { test, expect } from '@playwright/test';\n\ntest('todo count updates after adding items', async ({ page }) => {\n  await page.goto('https://demo.playwright.dev/todomvc');\n  \n  const input = page.getByPlaceholder('What needs to be done?');\n  await input.fill('First task');\n  await input.press('Enter');\n  await input.fill('Second task');\n  await input.press('Enter');\n\n  // This auto-retries until count equals 2 or times out\n  await expect(page.getByTestId('todo-count')).toHaveText('2 items left');\n});",
+        "note": "The locator strategies you just learned (getByRole, getByText, getByPlaceholder) will be used in every single test from now on. Master them now — they're the foundation of everything that follows. Practice by inspecting a real website and identifying elements by their role, label, and text rather than their CSS class."
+      }
+    }
+  ]
+}

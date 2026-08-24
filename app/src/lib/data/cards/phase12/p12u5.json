@@ -1,0 +1,112 @@
+{
+  "unitId": "p12u5",
+  "title": "Wrap ATLAS as a Local API Service",
+  "phase": 12,
+  "unit": 5,
+  "teaches": [
+    "agentic.build_service"
+  ],
+  "requires": [
+    "agentic.build_hitl",
+    "agentic.agent_as_service"
+  ],
+  "estimatedMinutes": 18,
+  "cards": [
+    {
+      "id": "p12u5_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Install a small web framework (FastAPI) and a server.",
+        "why": "The usual way to make an agent available is to wrap it behind a web API — exactly as you would expose a REST service. (Learned in Phase 9, Ch 17, section 17.2.)",
+        "commands": {
+          "windows": "pip install fastapi uvicorn",
+          "ubuntu": "pip install fastapi uvicorn"
+        },
+        "code": null,
+        "verify": "fastapi and uvicorn install without error. Confirm with `pip list`.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u5_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Create service.py that exposes ATLAS behind an endpoint, with guardrails at the boundary.",
+        "why": "The agent sits inside an ordinary service, with input and output guardrails guarding the entrance and exit — structurally identical to a validating web controller. (Learned in Phase 9, Ch 17, section 17.2.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# service.py\nfrom fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel\nfrom atlas import guarded_run\n\napp = FastAPI(title=\"ATLAS\")\n\nclass Query(BaseModel):\n    goal: str\n\n@app.post(\"/ask\")\ndef ask_endpoint(q: Query):\n    try:\n        answer, trace = guarded_run(q.goal)   # guardrails run inside guarded_run\n        return {\"answer\": answer, \"trace_id\": trace.trace_id, \"steps\": trace.summary()[\"steps\"]}\n    except ValueError as e:\n        raise HTTPException(status_code=400, detail=str(e))  # blocked by input guardrail",
+        "verify": "service.py saves. The endpoint validates input (via the guardrail), runs the agent, and returns the answer plus a trace id — a clean request-in, answer-out contract.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u5_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Run the service and call it.",
+        "why": "This turns ATLAS from a script into a service others can call over HTTP. (Learned in Phase 9, Ch 17, section 17.1.)",
+        "commands": {
+          "windows": "uvicorn service:app --reload --port 8000",
+          "ubuntu": "uvicorn service:app --reload --port 8000"
+        },
+        "code": null,
+        "verify": "The server starts on port 8000. Open http://localhost:8000/docs in your browser and use the interactive form to POST a goal to /ask — you get back an answer and a trace id.",
+        "troubleshoot": "Note: a dangerous-tool approval prompt (Unit 4) blocks on console input, which does not fit a web request. For the service, either exclude dangerous tools or replace the console prompt with a \"pending approval\" response — see the next step.",
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u5_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Make the service STATELESS — store conversation state outside, keyed by session id.",
+        "why": "A stateless service can run as many copies as you need; conversation memory lives in an external store keyed by session. (Learned in Phase 9, Ch 17, section 17.2.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# Keep sessions in an external dict (a real system uses a database/redis):\nSESSIONS = {}   # session_id -> messages list\n\nclass Query(BaseModel):\n    goal: str\n    session_id: str | None = None\n# Load/create the session's messages by session_id, run the agent, save it back.\n# The service process itself holds no per-user state in module globals.",
+        "verify": "Two different session_ids maintain separate conversations; restarting the service does not lose state IF you persist SESSIONS to disk or a store. The service instance holds no request-specific state of its own.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    },
+    {
+      "id": "p12u5_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Handle the dangerous-action gate in a web-appropriate way.",
+        "why": "A web request cannot block on console input; instead, return a \"needs approval\" response and require a second, explicit confirm call. (Learned in Phase 9, Ch 16-17.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# If the agent wants a dangerous tool, DON'T prompt on the console.\n# Instead return: {\"status\": \"needs_approval\", \"action\": {...}, \"token\": \"...\"}\n# The caller reviews it and POSTs to /approve with the token to actually run it.\n# This is human-in-the-loop adapted to an async, multi-user service.",
+        "verify": "When ATLAS proposes a dangerous action over the API, the response says \"needs_approval\" with the proposed action, rather than silently running it or hanging. Approval happens via a separate, explicit call.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 16, Ch 17"
+      }
+    },
+    {
+      "id": "p12u5_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — ATLAS is a running service.",
+        "why": "This is the packaging milestone: a stateless, guardrailed API around your agent.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — ATLAS is reachable over HTTP at /ask; input and output guardrails run at the boundary; the service is stateless with session state stored outside; dangerous actions return \"needs_approval\" rather than blocking. Next unit adds production reliability: retries, timeouts, and provider fallback.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 17"
+      }
+    }
+  ]
+}

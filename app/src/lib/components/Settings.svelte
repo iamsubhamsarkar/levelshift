@@ -9,6 +9,7 @@
   let interviewDate = $userSettings.interviewDate;
   let weekendRest = $userSettings.weekendRest;
   let soundEnabled = $userSettings.soundEnabled !== false; // default true
+  let osPreference = $userSettings.osPreference || 'windows';
   let storageUsage = getStorageUsage();
   let showClearConfirm = false;
   let importInput;
@@ -18,7 +19,8 @@
       ...s,
       interviewDate,
       weekendRest,
-      soundEnabled
+      soundEnabled,
+      osPreference
     }));
     persistAll();
   }
@@ -80,7 +82,23 @@
     </label>
   </div>
 
-  <!-- Streak Freeze Bank (H-09) -->
+  <!-- OS Preference (for Agentic AI build steps) -->
+  <div class="card space-y-3">
+    <h3 class="text-sm font-semibold text-text-muted uppercase">Build Commands OS</h3>
+    <p class="text-xs text-text-muted">Which commands to show in Agentic AI build steps.</p>
+    <div class="flex gap-2">
+      <button
+        class="flex-1 text-sm px-3 py-2 rounded-lg border transition-colors
+          {osPreference === 'windows' ? 'bg-accent-blue/15 text-accent-blue border-accent-blue/40' : 'bg-surface-0 text-text-secondary border-surface-3'}"
+        on:click={() => { osPreference = 'windows'; saveSettings(); }}
+      >🪟 Windows</button>
+      <button
+        class="flex-1 text-sm px-3 py-2 rounded-lg border transition-colors
+          {osPreference === 'ubuntu' ? 'bg-accent-blue/15 text-accent-blue border-accent-blue/40' : 'bg-surface-0 text-text-secondary border-surface-3'}"
+        on:click={() => { osPreference = 'ubuntu'; saveSettings(); }}
+      >🐧 Ubuntu</button>
+    </div>
+  </div>
   <div class="card space-y-3">
     <h3 class="text-sm font-semibold text-text-muted uppercase">Streak Freeze Bank</h3>
     <div class="flex items-center justify-between">

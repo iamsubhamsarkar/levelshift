@@ -1,19 +1,94 @@
 {
-  "totalUnits": 47,
+  "totalUnits": 59,
   "phases": [
     {
       "id": 1,
       "title": "Java Core",
       "subtitle": "OOP from zero to framework-ready",
       "units": [
-        { "id": "p1u1", "title": "Variables, Types & Strings", "cards": 10, "minutes": 20, "teaches": ["basics.types", "basics.strings"] },
-        { "id": "p1u2", "title": "Control Flow & Methods", "cards": 10, "minutes": 20, "teaches": ["basics.controlflow", "basics.methods"] },
-        { "id": "p1u3", "title": "Classes & Objects", "cards": 10, "minutes": 25, "teaches": ["oop.classes", "oop.constructors", "oop.this"] },
-        { "id": "p1u4", "title": "Encapsulation", "cards": 10, "minutes": 20, "teaches": ["oop.encapsulation", "oop.accessmodifiers"] },
-        { "id": "p1u5", "title": "Inheritance", "cards": 10, "minutes": 25, "teaches": ["oop.inheritance", "oop.super", "oop.constructorchain"] },
-        { "id": "p1u6", "title": "Polymorphism", "cards": 10, "minutes": 25, "teaches": ["oop.polymorphism", "oop.overloading", "oop.overriding"] },
-        { "id": "p1u7", "title": "Abstract & Interfaces", "cards": 10, "minutes": 25, "teaches": ["oop.abstract", "oop.interfaces", "oop.defaultmethods"] },
-        { "id": "p1u8", "title": "OOP Integration Challenge", "cards": 12, "minutes": 30, "teaches": ["oop.integration"] }
+        {
+          "id": "p1u1",
+          "title": "Variables, Types & Strings",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "basics.types",
+            "basics.strings"
+          ]
+        },
+        {
+          "id": "p1u2",
+          "title": "Control Flow & Methods",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "basics.controlflow",
+            "basics.methods"
+          ]
+        },
+        {
+          "id": "p1u3",
+          "title": "Classes & Objects",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "oop.classes",
+            "oop.constructors",
+            "oop.this"
+          ]
+        },
+        {
+          "id": "p1u4",
+          "title": "Encapsulation",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "oop.encapsulation",
+            "oop.accessmodifiers"
+          ]
+        },
+        {
+          "id": "p1u5",
+          "title": "Inheritance",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "oop.inheritance",
+            "oop.super",
+            "oop.constructorchain"
+          ]
+        },
+        {
+          "id": "p1u6",
+          "title": "Polymorphism",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "oop.polymorphism",
+            "oop.overloading",
+            "oop.overriding"
+          ]
+        },
+        {
+          "id": "p1u7",
+          "title": "Abstract & Interfaces",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "oop.abstract",
+            "oop.interfaces",
+            "oop.defaultmethods"
+          ]
+        },
+        {
+          "id": "p1u8",
+          "title": "OOP Integration Challenge",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "oop.integration"
+          ]
+        }
       ]
     },
     {
@@ -21,11 +96,59 @@
       "title": "Collections & Generics",
       "subtitle": "Data structures that power everything",
       "units": [
-        { "id": "p2u1", "title": "ArrayList & LinkedList", "cards": 10, "minutes": 20, "teaches": ["collections.list", "collections.arraylist", "collections.linkedlist"] },
-        { "id": "p2u2", "title": "HashMap & HashSet", "cards": 10, "minutes": 25, "teaches": ["collections.hashmap", "collections.hashset", "collections.equals_hashcode"] },
-        { "id": "p2u3", "title": "Iteration & Sorting", "cards": 10, "minutes": 25, "teaches": ["collections.iterator", "collections.comparable", "collections.comparator"] },
-        { "id": "p2u4", "title": "Generics", "cards": 10, "minutes": 25, "teaches": ["collections.generics", "collections.bounded", "collections.wildcards"] },
-        { "id": "p2u5", "title": "Collections Integration", "cards": 12, "minutes": 30, "teaches": ["collections.integration"] }
+        {
+          "id": "p2u1",
+          "title": "ArrayList & LinkedList",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "collections.list",
+            "collections.arraylist",
+            "collections.linkedlist"
+          ]
+        },
+        {
+          "id": "p2u2",
+          "title": "HashMap & HashSet",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "collections.hashmap",
+            "collections.hashset",
+            "collections.equals_hashcode"
+          ]
+        },
+        {
+          "id": "p2u3",
+          "title": "Iteration & Sorting",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "collections.iterator",
+            "collections.comparable",
+            "collections.comparator"
+          ]
+        },
+        {
+          "id": "p2u4",
+          "title": "Generics",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "collections.generics",
+            "collections.bounded",
+            "collections.wildcards"
+          ]
+        },
+        {
+          "id": "p2u5",
+          "title": "Collections Integration",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "collections.integration"
+          ]
+        }
       ]
     },
     {
@@ -33,11 +156,59 @@
       "title": "Exceptions & Java 8+",
       "subtitle": "Error handling and modern Java",
       "units": [
-        { "id": "p3u1", "title": "Exception Handling", "cards": 10, "minutes": 25, "teaches": ["exceptions.trycatch", "exceptions.checked", "exceptions.custom"] },
-        { "id": "p3u2", "title": "Lambdas & Functional Interfaces", "cards": 10, "minutes": 25, "teaches": ["java8.lambdas", "java8.functional", "java8.predicate"] },
-        { "id": "p3u3", "title": "Streams — filter, map, collect", "cards": 10, "minutes": 25, "teaches": ["java8.streams.basics", "java8.streams.filter", "java8.streams.collect"] },
-        { "id": "p3u4", "title": "Streams — Advanced", "cards": 10, "minutes": 25, "teaches": ["java8.streams.flatmap", "java8.streams.grouping", "java8.optional"] },
-        { "id": "p3u5", "title": "Java Core Integration", "cards": 12, "minutes": 30, "teaches": ["java8.integration"] }
+        {
+          "id": "p3u1",
+          "title": "Exception Handling",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "exceptions.trycatch",
+            "exceptions.checked",
+            "exceptions.custom"
+          ]
+        },
+        {
+          "id": "p3u2",
+          "title": "Lambdas & Functional Interfaces",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "java8.lambdas",
+            "java8.functional",
+            "java8.predicate"
+          ]
+        },
+        {
+          "id": "p3u3",
+          "title": "Streams — filter, map, collect",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "java8.streams.basics",
+            "java8.streams.filter",
+            "java8.streams.collect"
+          ]
+        },
+        {
+          "id": "p3u4",
+          "title": "Streams — Advanced",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "java8.streams.flatmap",
+            "java8.streams.grouping",
+            "java8.optional"
+          ]
+        },
+        {
+          "id": "p3u5",
+          "title": "Java Core Integration",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "java8.integration"
+          ]
+        }
       ]
     },
     {
@@ -45,12 +216,70 @@
       "title": "DSA Essentials",
       "subtitle": "Interview-level problem solving",
       "units": [
-        { "id": "p4u1", "title": "Array Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.arrays", "dsa.twopointers", "dsa.slidingwindow"] },
-        { "id": "p4u2", "title": "String Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.strings", "dsa.palindrome", "dsa.anagram"] },
-        { "id": "p4u3", "title": "HashMap Pattern Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.hashmap_patterns", "dsa.frequency", "dsa.grouping"] },
-        { "id": "p4u4", "title": "Sorting & Searching", "cards": 10, "minutes": 25, "teaches": ["dsa.sorting", "dsa.binarysearch", "dsa.customsort"] },
-        { "id": "p4u5", "title": "Stack & Queue Problems", "cards": 10, "minutes": 25, "teaches": ["dsa.stack", "dsa.queue", "dsa.bfs_basics"] },
-        { "id": "p4u6", "title": "DSA Integration", "cards": 12, "minutes": 30, "teaches": ["dsa.integration"] }
+        {
+          "id": "p4u1",
+          "title": "Array Problems",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "dsa.arrays",
+            "dsa.twopointers",
+            "dsa.slidingwindow"
+          ]
+        },
+        {
+          "id": "p4u2",
+          "title": "String Problems",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "dsa.strings",
+            "dsa.palindrome",
+            "dsa.anagram"
+          ]
+        },
+        {
+          "id": "p4u3",
+          "title": "HashMap Pattern Problems",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "dsa.hashmap_patterns",
+            "dsa.frequency",
+            "dsa.grouping"
+          ]
+        },
+        {
+          "id": "p4u4",
+          "title": "Sorting & Searching",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "dsa.sorting",
+            "dsa.binarysearch",
+            "dsa.customsort"
+          ]
+        },
+        {
+          "id": "p4u5",
+          "title": "Stack & Queue Problems",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "dsa.stack",
+            "dsa.queue",
+            "dsa.bfs_basics"
+          ]
+        },
+        {
+          "id": "p4u6",
+          "title": "DSA Integration",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "dsa.integration"
+          ]
+        }
       ]
     },
     {
@@ -58,16 +287,111 @@
       "title": "REST Assured",
       "subtitle": "API testing mastery",
       "units": [
-        { "id": "p5u1", "title": "HTTP & REST Concepts", "cards": 10, "minutes": 20, "teaches": ["http.methods", "http.statuscodes", "http.headers", "rest.principles"] },
-        { "id": "p5u2", "title": "First REST Assured Test", "cards": 10, "minutes": 25, "teaches": ["restassured.givenwhen", "restassured.statuscode"] },
-        { "id": "p5u3", "title": "Request Building", "cards": 10, "minutes": 25, "teaches": ["restassured.headers", "restassured.params", "restassured.body"] },
-        { "id": "p5u4", "title": "Response Validation", "cards": 10, "minutes": 25, "teaches": ["restassured.hamcrest", "restassured.jsonpath", "restassured.gpath"] },
-        { "id": "p5u5", "title": "POJOs as Request/Response", "cards": 10, "minutes": 25, "teaches": ["restassured.pojo", "restassured.serialization"] },
-        { "id": "p5u6", "title": "Auth & Specs", "cards": 10, "minutes": 25, "teaches": ["restassured.auth", "restassured.requestspec", "restassured.responsespec"] },
-        { "id": "p5u7", "title": "Data-Driven API Tests", "cards": 10, "minutes": 25, "teaches": ["restassured.dataprovider", "restassured.parameterized"] },
-        { "id": "p5u8", "title": "Chaining & Extraction", "cards": 10, "minutes": 25, "teaches": ["restassured.extract", "restassured.chaining"] },
-        { "id": "p5u9", "title": "Error Handling & Logging", "cards": 10, "minutes": 25, "teaches": ["restassured.logging", "restassured.filters", "restassured.retry"] },
-        { "id": "p5u10", "title": "API Framework Mini-Project", "cards": 12, "minutes": 35, "teaches": ["restassured.framework"] }
+        {
+          "id": "p5u1",
+          "title": "HTTP & REST Concepts",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "http.methods",
+            "http.statuscodes",
+            "http.headers",
+            "rest.principles"
+          ]
+        },
+        {
+          "id": "p5u2",
+          "title": "First REST Assured Test",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.givenwhen",
+            "restassured.statuscode"
+          ]
+        },
+        {
+          "id": "p5u3",
+          "title": "Request Building",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.headers",
+            "restassured.params",
+            "restassured.body"
+          ]
+        },
+        {
+          "id": "p5u4",
+          "title": "Response Validation",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.hamcrest",
+            "restassured.jsonpath",
+            "restassured.gpath"
+          ]
+        },
+        {
+          "id": "p5u5",
+          "title": "POJOs as Request/Response",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.pojo",
+            "restassured.serialization"
+          ]
+        },
+        {
+          "id": "p5u6",
+          "title": "Auth & Specs",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.auth",
+            "restassured.requestspec",
+            "restassured.responsespec"
+          ]
+        },
+        {
+          "id": "p5u7",
+          "title": "Data-Driven API Tests",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.dataprovider",
+            "restassured.parameterized"
+          ]
+        },
+        {
+          "id": "p5u8",
+          "title": "Chaining & Extraction",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.extract",
+            "restassured.chaining"
+          ]
+        },
+        {
+          "id": "p5u9",
+          "title": "Error Handling & Logging",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.logging",
+            "restassured.filters",
+            "restassured.retry"
+          ]
+        },
+        {
+          "id": "p5u10",
+          "title": "API Framework Mini-Project",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "restassured.framework"
+          ]
+        }
       ]
     },
     {
@@ -75,11 +399,58 @@
       "title": "API Testing Strategy",
       "subtitle": "Think like a test architect",
       "units": [
-        { "id": "p6u1", "title": "Positive & Negative Testing", "cards": 10, "minutes": 25, "teaches": ["apistrategy.positive", "apistrategy.negative", "apistrategy.boundary"] },
-        { "id": "p6u2", "title": "Schema Validation", "cards": 10, "minutes": 25, "teaches": ["apistrategy.schema", "apistrategy.contract"] },
-        { "id": "p6u3", "title": "E2E API Flows", "cards": 10, "minutes": 30, "teaches": ["apistrategy.e2e", "apistrategy.lifecycle"] },
-        { "id": "p6u4", "title": "Edge Cases & Idempotency", "cards": 10, "minutes": 25, "teaches": ["apistrategy.idempotency", "apistrategy.race", "apistrategy.timeout"] },
-        { "id": "p6u5", "title": "Test Strategy Design", "cards": 10, "minutes": 25, "teaches": ["apistrategy.design", "apistrategy.coverage"] }
+        {
+          "id": "p6u1",
+          "title": "Positive & Negative Testing",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "apistrategy.positive",
+            "apistrategy.negative",
+            "apistrategy.boundary"
+          ]
+        },
+        {
+          "id": "p6u2",
+          "title": "Schema Validation",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "apistrategy.schema",
+            "apistrategy.contract"
+          ]
+        },
+        {
+          "id": "p6u3",
+          "title": "E2E API Flows",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "apistrategy.e2e",
+            "apistrategy.lifecycle"
+          ]
+        },
+        {
+          "id": "p6u4",
+          "title": "Edge Cases & Idempotency",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "apistrategy.idempotency",
+            "apistrategy.race",
+            "apistrategy.timeout"
+          ]
+        },
+        {
+          "id": "p6u5",
+          "title": "Test Strategy Design",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "apistrategy.design",
+            "apistrategy.coverage"
+          ]
+        }
       ]
     },
     {
@@ -87,15 +458,677 @@
       "title": "Selenium WebDriver",
       "subtitle": "Framework architecture from scratch",
       "units": [
-        { "id": "p7u1", "title": "Architecture & Setup", "cards": 10, "minutes": 20, "teaches": ["selenium.architecture", "selenium.webdriver_protocol"] },
-        { "id": "p7u2", "title": "Locators — CSS & XPath", "cards": 10, "minutes": 25, "teaches": ["selenium.css", "selenium.xpath", "selenium.locators"] },
-        { "id": "p7u3", "title": "Waits", "cards": 10, "minutes": 25, "teaches": ["selenium.implicit_wait", "selenium.explicit_wait", "selenium.fluent_wait"] },
-        { "id": "p7u4", "title": "Page Object Model", "cards": 12, "minutes": 30, "teaches": ["selenium.pom", "selenium.basepage", "selenium.pagefactory"] },
-        { "id": "p7u5", "title": "Complex Elements", "cards": 10, "minutes": 25, "teaches": ["selenium.dropdowns", "selenium.alerts", "selenium.frames", "selenium.actions"] },
-        { "id": "p7u6", "title": "TestNG Integration", "cards": 10, "minutes": 25, "teaches": ["selenium.testng", "selenium.annotations", "selenium.dataprovider"] },
-        { "id": "p7u7", "title": "Framework: Config & Reporting", "cards": 10, "minutes": 25, "teaches": ["selenium.config", "selenium.reporting", "selenium.screenshots"] },
-        { "id": "p7u8", "title": "Framework: Parallel & CI", "cards": 10, "minutes": 25, "teaches": ["selenium.threadlocal", "selenium.parallel", "selenium.cicd"] },
-        { "id": "p7u9", "title": "Selenium Framework Project", "cards": 12, "minutes": 40, "teaches": ["selenium.framework_project"] }
+        {
+          "id": "p7u1",
+          "title": "Architecture & Setup",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.architecture",
+            "selenium.webdriver_protocol"
+          ]
+        },
+        {
+          "id": "p7u2",
+          "title": "Locators — CSS & XPath",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.css",
+            "selenium.xpath",
+            "selenium.locators"
+          ]
+        },
+        {
+          "id": "p7u3",
+          "title": "Waits",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.implicit_wait",
+            "selenium.explicit_wait",
+            "selenium.fluent_wait"
+          ]
+        },
+        {
+          "id": "p7u4",
+          "title": "Page Object Model",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.pom",
+            "selenium.basepage",
+            "selenium.pagefactory"
+          ]
+        },
+        {
+          "id": "p7u5",
+          "title": "Complex Elements",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.dropdowns",
+            "selenium.alerts",
+            "selenium.frames",
+            "selenium.actions"
+          ]
+        },
+        {
+          "id": "p7u6",
+          "title": "TestNG Integration",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.testng",
+            "selenium.annotations",
+            "selenium.dataprovider"
+          ]
+        },
+        {
+          "id": "p7u7",
+          "title": "Framework: Config & Reporting",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.config",
+            "selenium.reporting",
+            "selenium.screenshots"
+          ]
+        },
+        {
+          "id": "p7u8",
+          "title": "Framework: Parallel & CI",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.threadlocal",
+            "selenium.parallel",
+            "selenium.cicd"
+          ]
+        },
+        {
+          "id": "p7u9",
+          "title": "Selenium Framework Project",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "selenium.framework_project"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Playwright (TypeScript)",
+      "subtitle": "Modern UI automation from zero — learning TypeScript along the way",
+      "units": [
+        {
+          "id": "p8u1",
+          "title": "TypeScript & Playwright Setup",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "typescript.types",
+            "typescript.const_let",
+            "playwright.setup",
+            "playwright.test_runner"
+          ]
+        },
+        {
+          "id": "p8u2",
+          "title": "First Test & Selectors",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.test_structure",
+            "playwright.locators",
+            "typescript.async_await",
+            "playwright.getby"
+          ]
+        },
+        {
+          "id": "p8u3",
+          "title": "Assertions & TypeScript Types",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.assertions",
+            "typescript.interfaces",
+            "typescript.unions",
+            "playwright.expect"
+          ]
+        },
+        {
+          "id": "p8u4",
+          "title": "Actions & Interactions",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.actions",
+            "playwright.fill",
+            "playwright.click",
+            "typescript.functions",
+            "typescript.arrow_functions"
+          ]
+        },
+        {
+          "id": "p8u5",
+          "title": "Page Object Model",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.pom",
+            "typescript.classes",
+            "typescript.constructors",
+            "playwright.page_abstraction"
+          ]
+        },
+        {
+          "id": "p8u6",
+          "title": "Waits & Async Patterns",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.auto_wait",
+            "playwright.wait_for",
+            "typescript.promises",
+            "typescript.async_patterns"
+          ]
+        },
+        {
+          "id": "p8u7",
+          "title": "API Testing in Playwright",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.api_request",
+            "playwright.api_mock",
+            "typescript.generics",
+            "playwright.route"
+          ]
+        },
+        {
+          "id": "p8u8",
+          "title": "Fixtures & Hooks",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.fixtures",
+            "playwright.extend",
+            "typescript.generics_advanced",
+            "playwright.hooks"
+          ]
+        },
+        {
+          "id": "p8u9",
+          "title": "Advanced Patterns",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.multi_page",
+            "playwright.iframes",
+            "playwright.downloads",
+            "playwright.visual",
+            "typescript.utility_types"
+          ]
+        },
+        {
+          "id": "p8u10",
+          "title": "Framework Project",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "playwright.config",
+            "playwright.reporters",
+            "playwright.ci",
+            "playwright.parallel",
+            "typescript.project_structure"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Agentic AI — Theory",
+      "subtitle": "The complete book, in-app: read to understand before you build",
+      "units": [
+        {
+          "id": "p9u1",
+          "title": "Foundations — LLMs and Agents",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "agentic.llm_basics",
+            "agentic.tokens_context",
+            "agentic.agent_definition"
+          ]
+        },
+        {
+          "id": "p9u2",
+          "title": "How LLMs Work — Tokens, Context & Temperature",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.tokens",
+            "agentic.context_window",
+            "agentic.temperature",
+            "agentic.hallucination"
+          ]
+        },
+        {
+          "id": "p9u3",
+          "title": "Talking to an LLM — APIs, Messages & Providers",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.messages_roles",
+            "agentic.llm_response",
+            "agentic.openai_compatible",
+            "agentic.free_providers"
+          ]
+        },
+        {
+          "id": "p9u4",
+          "title": "Prompting as a Discipline",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "agentic.prompt_spec",
+            "agentic.system_prompt",
+            "agentic.prompt_techniques",
+            "agentic.prompt_management"
+          ]
+        },
+        {
+          "id": "p9u5",
+          "title": "Structured Output",
+          "cards": 7,
+          "minutes": 21,
+          "teaches": [
+            "agentic.structured_output",
+            "agentic.output_reliability",
+            "agentic.self_correction"
+          ]
+        },
+        {
+          "id": "p9u6",
+          "title": "Tools and Function Calling",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.tool_calling",
+            "agentic.tool_description",
+            "agentic.tool_cycle",
+            "agentic.tool_safety"
+          ]
+        },
+        {
+          "id": "p9u7",
+          "title": "The Agent Loop — ReAct and Reasoning",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.agent_loop",
+            "agentic.react",
+            "agentic.loop_safeguards",
+            "agentic.planning_reflection"
+          ]
+        },
+        {
+          "id": "p9u8",
+          "title": "Architecture Patterns",
+          "cards": 14,
+          "minutes": 42,
+          "teaches": [
+            "agentic.least_agentic",
+            "agentic.workflow_vs_agent",
+            "agentic.workflow_patterns",
+            "agentic.agent_patterns",
+            "agentic.human_in_loop"
+          ]
+        },
+        {
+          "id": "p9u9",
+          "title": "Memory and Context",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.memory_kinds",
+            "agentic.context_strategies",
+            "agentic.persistent_memory",
+            "agentic.context_engineering"
+          ]
+        },
+        {
+          "id": "p9u10",
+          "title": "Embeddings and Semantic Search",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "agentic.embeddings",
+            "agentic.semantic_search",
+            "agentic.vector_store"
+          ]
+        },
+        {
+          "id": "p9u11",
+          "title": "RAG — Retrieval-Augmented Generation",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.rag",
+            "agentic.chunking",
+            "agentic.grounding",
+            "agentic.agentic_rag"
+          ]
+        },
+        {
+          "id": "p9u12",
+          "title": "Frameworks",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.framework_need",
+            "agentic.framework_primitives",
+            "agentic.framework_landscape",
+            "agentic.spring_ai"
+          ]
+        },
+        {
+          "id": "p9u13",
+          "title": "MCP — The Model Context Protocol",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.mcp",
+            "agentic.mcp_architecture",
+            "agentic.mcp_security"
+          ]
+        },
+        {
+          "id": "p9u14",
+          "title": "Multi-Agent Systems",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "agentic.multi_agent_when",
+            "agentic.agent_as_tool",
+            "agentic.topologies",
+            "agentic.agent_contracts"
+          ]
+        },
+        {
+          "id": "p9u15",
+          "title": "Evaluation and Testing",
+          "cards": 11,
+          "minutes": 33,
+          "teaches": [
+            "agentic.eval_mindset",
+            "agentic.eval_levels",
+            "agentic.scoring_methods",
+            "agentic.pass_rate"
+          ]
+        },
+        {
+          "id": "p9u16",
+          "title": "Observability and Guardrails",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.observability",
+            "agentic.traces_spans",
+            "agentic.guardrails",
+            "agentic.prompt_injection"
+          ]
+        },
+        {
+          "id": "p9u17",
+          "title": "Production and Deployment",
+          "cards": 10,
+          "minutes": 30,
+          "teaches": [
+            "agentic.production",
+            "agentic.agent_as_service",
+            "agentic.cost_latency",
+            "agentic.reliability"
+          ]
+        },
+        {
+          "id": "p9u18",
+          "title": "Agent Types and Where to Go Next",
+          "cards": 9,
+          "minutes": 27,
+          "teaches": [
+            "agentic.universal_recipe",
+            "agentic.agent_types",
+            "agentic.enduring_habits"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Agentic AI — Environment & Your First Agent",
+      "subtitle": "Guided build on your machine (Windows & Ubuntu)",
+      "units": [
+        {
+          "id": "p10u1",
+          "title": "Environment Setup — Python, venv & Keys",
+          "cards": 8,
+          "minutes": 24,
+          "teaches": [
+            "agentic.setup_env",
+            "agentic.providers"
+          ]
+        },
+        {
+          "id": "p10u2",
+          "title": "Your First LLM Call — A Provider-Agnostic Client",
+          "cards": 7,
+          "minutes": 21,
+          "teaches": [
+            "agentic.first_call",
+            "agentic.client_wrapper"
+          ]
+        },
+        {
+          "id": "p10u3",
+          "title": "Reliable Structured Output — Validated JSON",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_structured",
+            "agentic.build_validation"
+          ]
+        },
+        {
+          "id": "p10u4",
+          "title": "Give the Model a Tool — Wire the Cycle by Hand",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_tool",
+            "agentic.build_tool_cycle"
+          ]
+        },
+        {
+          "id": "p10u5",
+          "title": "The Agent Loop — ReAct with a Step Limit",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_loop",
+            "agentic.build_safeguards"
+          ]
+        },
+        {
+          "id": "p10u6",
+          "title": "CHECKPOINT — Break a Tool, Make the Agent Recover",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_error_recovery"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Agentic AI — Knowledge, Structure & Interop",
+      "subtitle": "Memory, RAG, frameworks, MCP, and a specialist sub-agent",
+      "units": [
+        {
+          "id": "p11u1",
+          "title": "Conversation Memory — Trim & Summarize Context",
+          "cards": 7,
+          "minutes": 21,
+          "teaches": [
+            "agentic.build_memory",
+            "agentic.build_context_mgmt"
+          ]
+        },
+        {
+          "id": "p11u2",
+          "title": "Embeddings — A Tiny Semantic Search",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_embeddings",
+            "agentic.build_semantic_search"
+          ]
+        },
+        {
+          "id": "p11u3",
+          "title": "A Real RAG Pipeline Over Your Documents",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_rag",
+            "agentic.build_chunking"
+          ]
+        },
+        {
+          "id": "p11u4",
+          "title": "Agentic RAG — Retrieval as a Tool",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_agentic_rag",
+            "agentic.build_grounding"
+          ]
+        },
+        {
+          "id": "p11u5",
+          "title": "Refactor onto a Framework — and Compare to Raw",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_framework",
+            "agentic.build_framework_compare"
+          ]
+        },
+        {
+          "id": "p11u6",
+          "title": "MCP — Consume and Expose a Tool",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_mcp",
+            "agentic.build_mcp_security"
+          ]
+        },
+        {
+          "id": "p11u7",
+          "title": "Supervisor + Specialist Sub-Agent (Agent-as-a-Tool)",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_multi_agent",
+            "agentic.build_agent_as_tool"
+          ]
+        },
+        {
+          "id": "p11u8",
+          "title": "CHECKPOINT — Multi-Hop with RAG + Sub-Agent",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_multi_hop"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Agentic AI — Trust & Ship It",
+      "subtitle": "Evaluate, guardrail, and deploy your agent",
+      "units": [
+        {
+          "id": "p12u1",
+          "title": "Build an Eval Set — Measure a Pass Rate",
+          "cards": 7,
+          "minutes": 21,
+          "teaches": [
+            "agentic.build_eval",
+            "agentic.build_pass_rate"
+          ]
+        },
+        {
+          "id": "p12u2",
+          "title": "Tracing — Log Every Step, Inspect a Trajectory",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_tracing"
+          ]
+        },
+        {
+          "id": "p12u3",
+          "title": "Guardrails — Defend Against Prompt Injection",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_guardrails",
+            "agentic.build_injection_defense"
+          ]
+        },
+        {
+          "id": "p12u4",
+          "title": "Human-in-the-Loop — An Approval Gate",
+          "cards": 5,
+          "minutes": 15,
+          "teaches": [
+            "agentic.build_hitl"
+          ]
+        },
+        {
+          "id": "p12u5",
+          "title": "Wrap ATLAS as a Local API Service",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_service"
+          ]
+        },
+        {
+          "id": "p12u6",
+          "title": "Reliability — Retries, Timeouts & Provider Fallback",
+          "cards": 6,
+          "minutes": 18,
+          "teaches": [
+            "agentic.build_reliability",
+            "agentic.build_fallback"
+          ]
+        },
+        {
+          "id": "p12u7",
+          "title": "CAPSTONE — Run Everywhere, Document, Ship",
+          "cards": 7,
+          "minutes": 21,
+          "teaches": [
+            "agentic.build_capstone"
+          ]
+        }
       ]
     }
   ]

@@ -4,16 +4,20 @@
 
 | Field | Value |
 |-------|-------|
-| **Overall Status** | ✅ COMPLETE — 98/98 tasks done |
+| **Overall Status** | ✅ COMPLETE — SDET track + Playwright + full Agentic AI track (Phases 9–12) |
 | **Live URL** | Netlify (connected to GitHub repo) |
 | **Repo** | git@github.com:iamsubhamsarkar/levelshift.git (private) |
-| **Last Updated** | 2026-07-26 |
+| **Last Updated** | 2026-08-24 |
+| **Content Totals** | 97 units, 777 cards across 12 phases |
+| **Tests** | 90 passing (6 files) · `npm run build` green |
 
 ---
 
 ## What Is This
 
-LevelShift is a self-hosted, static SPA for Amazon SDET-1 interview preparation. Card-based micro-learning with gamification, spaced repetition, and punishment mechanics. Built with Svelte 4 + Vite + Tailwind CSS. No backend — all data in localStorage.
+LevelShift is a self-hosted, static SPA that began as an Amazon SDET-1 interview-prep tool and now also teaches a complete **Agentic AI** track. Card-based micro-learning with gamification, spaced repetition, and punishment mechanics. Built with Svelte 4 + Vite + Tailwind CSS. No backend — all data in localStorage.
+
+The Agentic AI track pairs an in-app **18-chapter theory book** (Phase 9) with a **guided, 0→100 hands-on build** (Phases 10–12) in which the learner constructs one continuous agent project ("ATLAS") on their own machine, with per-OS (Windows / Ubuntu) commands and a verify-and-mark-done flow.
 
 ---
 
@@ -33,7 +37,7 @@ LevelShift is a self-hosted, static SPA for Amazon SDET-1 interview preparation.
 ## What's Built (Everything)
 
 ### Content
-- **48 units across 7 phases, 412 cards total**
+- **97 units across 12 phases, 777 cards total**
 - Phase 1: Java Core (8 units) — OOP from variables to integration
 - Phase 2: Collections & Generics (5 units)
 - Phase 3: Exceptions + Java 8 (5 units)
@@ -41,8 +45,15 @@ LevelShift is a self-hosted, static SPA for Amazon SDET-1 interview preparation.
 - Phase 5: REST Assured (10 units)
 - Phase 6: API Testing Strategy (5 units)
 - Phase 7: Selenium WebDriver (9 units)
+- Phase 8: Playwright + TypeScript (10 units)
+- **Phase 9: Agentic AI — Theory (18 units)** — the full 18-chapter book, interactive
+- **Phase 10: Agentic AI — Environment & Your First Agent (6 units)** — ATLAS begins
+- **Phase 11: Agentic AI — Knowledge, Structure & Interop (8 units)** — memory, RAG, framework, MCP, multi-agent
+- **Phase 12: Agentic AI — Trust & Ship It (7 units)** — eval, tracing, guardrails, HITL, service, reliability, capstone
 
-### Card Types (8-step teaching methodology)
+### Card Types
+
+**SDET track (8-step teaching methodology)**
 1. HOOK — curiosity trigger, never a definition
 2. FAIL_FIRST — code challenge before teaching (with model answer + Wandbox execution)
 3. ANALOGY — real-world mapping
@@ -52,9 +63,16 @@ LevelShift is a self-hosted, static SPA for Amazon SDET-1 interview preparation.
 7. EXPLAIN_BACK — fill-in-the-blanks (60%) or pick-best-answer (40%)
 8. CONNECT — where concept appears in future frameworks
 
-### Components (25 Svelte components)
+**Agentic AI track (2 additive card types)**
+9. THEORY — interactive chapter reading (Phase 9). Full chapter content split by section, rendered as a colorful one-pager (TheoryPage.svelte); "Mark as read" completes it. Faithful to (or expanded from) the source `.txt` book — never briefer.
+10. BUILD_STEP — a single guided build action (Phases 10–12). Goal + why + Windows/Ubuntu command tabs + optional code + "you'll know it worked when…" verify + troubleshoot + a "Learned in Phase 9, Ch X" reference. "I did this and verified it" completes it.
+
+Both new types are additive: they slot into the existing Markdown → `build-content.js` → JSON → `CardRenderer.svelte` pipeline and the existing completion/gating engine. No engine rewrites; existing card types untouched.
+
+### Components (28 Svelte components)
 - Dashboard, CourseMap, LearnView, CardDeck, CardRenderer
 - HookCard, FailFirstCard, AnalogyCard, CodeCard, BreakItCard, ContrastCard, ExplainBackCard, ConnectCard
+- **TheoryCard, TheoryPage, BuildStepCard** (Agentic AI track)
 - Heatmap, Radar, Timeline, DecayLog, GhostReplay
 - ReadinessReport, WeeklyReport, QuickChallenge, Settings, Onboarding
 - Card (base wrapper)
@@ -120,14 +138,19 @@ LevelShift/
     ├── vite.config.js
     ├── tailwind.config.js
     ├── build-content.js            # Markdown → JSON compiler
-    ├── content/                    # Source markdown (7 phase dirs)
+    ├── content/                    # Source markdown (12 phase dirs)
     │   ├── phase1-java-core/
     │   ├── phase2-collections/
     │   ├── phase3-exceptions-java8/
     │   ├── phase4-dsa/
     │   ├── phase5-rest-assured/
     │   ├── phase6-api-strategy/
-    │   └── phase7-selenium/
+    │   ├── phase7-selenium/
+    │   ├── phase8-playwright/
+    │   ├── phase9-agentic-theory/   # Phase 9: 18 theory units (p9u1..p9u18)
+    │   ├── phase10-agentic-build/   # Phase 10: 6 build units
+    │   ├── phase11-agentic-build/   # Phase 11: 8 build units
+    │   └── phase12-agentic-build/   # Phase 12: 7 build units
     ├── public/
     │   ├── favicon.svg
     │   └── sw.js                   # Service worker
@@ -136,14 +159,14 @@ LevelShift/
         ├── main.js                 # Entry + SW registration
         ├── app.css                 # Tailwind + custom styles
         └── lib/
-            ├── components/         # 25 Svelte components
+            ├── components/         # 28 Svelte components
             ├── engines/            # 7 algorithm modules + __tests__/
             ├── stores/             # progress.js, session.js
             ├── utils/              # storage.js, dates.js, code-runner.js, sounds.js
             └── data/
-                ├── phases.json     # All 7 phases + 48 unit metadata
-                ├── concepts.json   # 100+ concepts with dependency graph
-                └── cards/          # Built JSON (48 unit files)
+                ├── phases.json     # All 12 phases + 97 unit metadata
+                ├── concepts.json   # 200+ concepts (incl. 104 agentic.*) with dependency graph
+                └── cards/          # Built JSON (97 unit files across 12 phase dirs)
 ```
 
 ---
@@ -229,3 +252,29 @@ Built entire platform from scratch in one day:
 - **Netlify deployment fixed**: Moved `netlify.toml` to repo root, removed GitHub Pages config
 - **GitHub repo**: Connected, pushed, deployed live
 - Model answers shortened (was 400-600 chars → now 100-150 chars)
+
+### Session 4 — 2026-08-24
+
+Completed the full **Agentic AI track** (Phases 9–12), authored from the 18-chapter source book in `WORK_HISTORY/agentic AI/`. (Phase 8 Playwright, 10 units, was already present from prior work.)
+
+**Content authored (37 new units):**
+- **Phase 9 — Theory (17 new units, p9u2–p9u18):** Chapters 2–18 rendered as interactive, section-by-section `theory` cards plus a "Check your understanding" reflection card. Faithful to (or expanded from) the source `.txt`, never briefer. p9u1 (Ch 1) pre-existed.
+- **Phase 10 — First Agent (5 new units, p10u2–p10u6):** first LLM call + provider-agnostic client, validated structured output (pydantic), tool wiring by hand, ReAct loop with step limit + repeated-call guard, error recovery. p10u1 (env setup) pre-existed.
+- **Phase 11 — Knowledge/Interop (8 units, p11u1–p11u8):** conversation memory + trim/summarize, embeddings + semantic search, real RAG pipeline over the user's docs, agentic RAG (retrieval as a tool), framework refactor (Strands) + hidden-prompt inspection, MCP server/consume, supervisor + specialist sub-agent, multi-hop checkpoint.
+- **Phase 12 — Trust & Ship (7 units, p12u1–p12u7):** eval set + pass rate, tracing (traces/spans), guardrails + prompt-injection defense, human-in-the-loop approval gate, FastAPI service, reliability (retry/backoff, timeouts, provider fallback, idempotency), capstone (run on both OSes, requirements.txt, README via the six-question recipe).
+
+All Phase 10–12 build units advance ONE continuous project, **ATLAS** (an Agentic Research & Ops Assistant), with per-OS Windows/Ubuntu command tabs and a verify-and-mark-done flow. Design honors "no live execution in browser": theory is read; build verification is user-confirmed.
+
+**Platform changes (additive only):**
+- Two new card types wired end to end: `theory` (→ `TheoryCard.svelte` / `TheoryPage.svelte` one-pager) and `build_step` (→ `BuildStepCard.svelte` with OS tabs). Parsers added to `build-content.js`; both registered in `CardRenderer.svelte`. (These were already scaffolded from a prior pilot; this session authored all the content behind them.)
+- `phases.json`: registered every new unit (Phase 9 = 18, 10 = 6, 11 = 8, 12 = 7).
+- `concepts.json`: added agentic concepts (**104 total** `agentic.*`) with `category: "agentic"` and a full prereq dependency graph mirroring the learning/build order — feeds the existing spaced-rep, decay, timeline, and Radar engines unchanged. The Radar "Agentic AI" axis and the Settings `osPreference` toggle were already wired.
+
+**Verification (all green):**
+- `node build-content.js` → 97 units, 777 cards, exit 0.
+- `npm test` → 90/90 passing (6 files).
+- `npm run build` → succeeds; all 39 agentic unit chunks bundle (dynamic imports resolve).
+- Concept graph checked: no cycles (DFS), all prereqs resolve, every agentic concept's unit exists in `phases.json`.
+- Parser pitfall found & fixed: prose after a fenced snippet must live in `snippetExplanation`, not a stray field (a `body2:` mistake was corrected in p9u5/p9u6/p9u7/p9u16).
+
+**Known pre-existing (not from this session):** 12 `apistrategy.*` teaches in Phase 6 reference unregistered concepts — left untouched (out of scope, avoids risking existing Phase 6).

@@ -1,0 +1,97 @@
+{
+  "unitId": "p10u6",
+  "title": "CHECKPOINT — Break a Tool, Make the Agent Recover",
+  "phase": 10,
+  "unit": 6,
+  "teaches": [
+    "agentic.build_error_recovery"
+  ],
+  "requires": [
+    "agentic.build_loop",
+    "agentic.build_safeguards",
+    "agentic.loop_safeguards"
+  ],
+  "estimatedMinutes": 15,
+  "cards": [
+    {
+      "id": "p10u6_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Add a tool that can fail, and make it fail on purpose.",
+        "why": "The most-skipped competency is error handling. We will deliberately break a tool, then make ATLAS recover — errors as observations. (Learned in Phase 9, Ch 7, section 7.3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "def fetch_fact(topic: str) -> dict:\n    \"\"\"Look up a fact about a topic. (Simulated: fails for 'unknown'.)\"\"\"\n    known = {\"python\": \"Python was released in 1991.\",\n             \"http\": \"HTTP is a stateless request-response protocol.\"}\n    if topic.lower() not in known:\n        return {\"error\": f\"no fact found for '{topic}' — ask the user to pick a known topic\"}\n    return {\"fact\": known[topic.lower()]}\n\nTOOL_IMPLS[\"fetch_fact\"] = fetch_fact\nTOOLS.append({\n    \"type\": \"function\",\n    \"function\": {\n        \"name\": \"fetch_fact\",\n        \"description\": \"Look up a fact about a topic. Known topics: python, http. \"\n                       \"Returns an error for unknown topics.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"topic\": {\"type\": \"string\", \"description\": \"Topic to look up.\"}},\n            \"required\": [\"topic\"],\n        },\n    },\n})",
+        "verify": "The file saves. The tool returns a clear, informative error for unknown topics instead of crashing — exactly what the theory calls \"informative failures.\"",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 6-7"
+      }
+    },
+    {
+      "id": "p10u6_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Confirm the loop already feeds tool errors back as observations.",
+        "why": "Because run_tool_call returns the error dict (rather than raising), your loop already hands it to the model as a tool result — the model SEES the failure and can adapt. (Learned in Phase 9, Ch 7, section 7.3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "# No new code needed IF your run_tool_call returns errors as data.\n# Make sure tool exceptions become observations, not crashes:\ndef run_tool_call(tool_call):\n    name = tool_call.function.name\n    try:\n        args = json.loads(tool_call.function.arguments)\n        fn = TOOL_IMPLS.get(name)\n        if fn is None:\n            return {\"error\": f\"unknown tool {name}\"}\n        return fn(**args)\n    except Exception as e:\n        return {\"error\": f\"tool {name} raised: {e}\"}",
+        "verify": "The file saves. Any tool failure — bad arguments, an exception, an unknown topic — now returns as an {\"error\": ...} observation the model can react to.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 7"
+      }
+    },
+    {
+      "id": "p10u6_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Run a task that triggers the failure and watch ATLAS recover.",
+        "why": "A resilient agent adapts to failure — retries with a different argument, or asks the user — instead of dying. (Learned in Phase 9, Ch 7, section 7.3.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "if __name__ == \"__main__\":\n    print(run_agent(\"Tell me a fact about kangaroos. If that fails, tell me a fact about python instead.\"))",
+        "verify": "ATLAS calls fetch_fact('kangaroos'), receives the error observation, and RECOVERS — either asking you to pick a known topic or falling back to 'python' as instructed. It does not crash. That recovery is the whole point of this checkpoint.",
+        "troubleshoot": "If ATLAS gives up too early, add to the system prompt: \"If a tool returns an error, adapt — try a different valid input or ask the user — do not abandon the goal.\" If it loops on the failing call, your repeated-call guard (Unit 5) stops it.",
+        "reference": "Phase 9, Ch 7"
+      }
+    },
+    {
+      "id": "p10u6_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Simulate a rate limit and add a simple retry-with-backoff around the model call.",
+        "why": "Free tiers throttle you; robust code retries transient failures politely. This previews the reliability engineering of Ch 17. (Learned in Phase 9, Ch 3 and Ch 17.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "import time\n\ndef ask_resilient(create_kwargs, retries=3):\n    for attempt in range(retries):\n        try:\n            return client.chat.completions.create(**create_kwargs)\n        except Exception as e:\n            if attempt == retries - 1:\n                raise\n            wait = 2 ** attempt  # 1s, 2s, 4s\n            print(f\"[retry] {e} — waiting {wait}s\")\n            time.sleep(wait)",
+        "verify": "When the provider returns a transient error (like a 429 rate limit), ATLAS waits and retries with growing backoff instead of failing immediately. On a healthy connection it succeeds on the first attempt.",
+        "troubleshoot": "Only retry TRANSIENT errors (timeouts, 429, 5xx). Do not retry a 401 (bad key) or 400 (bad request) — those will never succeed and waste your quota.",
+        "reference": "Phase 9, Ch 3, Ch 17"
+      }
+    },
+    {
+      "id": "p10u6_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "PHASE 10 CHECKPOINT — a resilient first agent, complete.",
+        "why": "You have exercised all four core competencies at a basic level: orchestration (the loop), tool integration, and — the hardest — error handling and recovery.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — ATLAS runs a multi-step ReAct loop; it has a step limit and a repeated-call guard; tool failures return as observations and the agent recovers; transient provider errors are retried with backoff. Save your atlas.py. In Phase 11 you will give ATLAS memory, real document knowledge (RAG), a framework, MCP, and a specialist sub-agent.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 1-7"
+      }
+    }
+  ]
+}

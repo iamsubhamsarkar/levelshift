@@ -1,0 +1,128 @@
+{
+  "unitId": "p8u9",
+  "title": "Advanced Patterns",
+  "phase": 8,
+  "unit": 9,
+  "teaches": [
+    "playwright.multi_page",
+    "playwright.iframes",
+    "playwright.downloads",
+    "playwright.visual",
+    "typescript.utility_types"
+  ],
+  "requires": [
+    "playwright.fixtures",
+    "playwright.api_mock",
+    "typescript.generics_advanced"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u9_c1",
+      "type": "hook",
+      "content": {
+        "question": "One line catches visual bugs. It pixel-diffs against a golden image. How can a single assertion replace hours of manual visual QA?",
+        "code": "import { test, expect } from '@playwright/test';\n\ntest('homepage looks correct', async ({ page }) => {\n  await page.goto('https://demo.example.com');\n  await expect(page).toHaveScreenshot(); // That's it. Pixel-perfect comparison.\n});\n// First run: saves a golden screenshot in __snapshots__/\n// Subsequent runs: diffs current page against golden image\n// Fails if >0.2% pixels differ (configurable threshold)"
+      }
+    },
+    {
+      "id": "p8u9_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Write a test that opens a popup window (new tab) when clicking a \"Open Preview\" button, then verifies the popup shows the text \"Preview Mode\". Use page.waitForEvent to catch the new page.",
+        "starterCode": "import { test, expect } from '@playwright/test';\n\ntest('handle popup window', async ({ page }) => {\n  await page.goto('https://editor.example.com');\n  // TODO: Click \"Open Preview\" button and capture the popup page\n  // TODO: Wait for the popup to load\n  // TODO: Assert the popup contains \"Preview Mode\"\n});",
+        "hint": "Use `const [popup] = await Promise.all([page.waitForEvent('popup'), page.click('#open-preview')])` to catch the new page.",
+        "expectedOutput": "The solution uses Promise.all to register the popup listener before clicking, then uses the returned Page object to assert content: `await expect(popup.locator('h1')).toContainText('Preview Mode')`.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u9_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Think of advanced Playwright patterns like being a film director managing multiple camera angles simultaneously. A regular test is one camera following one actor. Multi-page testing is having cameras in different rooms catching different actors at the same time. iframes are like TVs within the scene — you need to \"zoom into\" the TV screen to interact with what's playing on it. File downloads are like props being handed off-stage — you need to watch for the handoff and verify the prop is correct. And visual regression is like comparing today's footage frame-by-frame against yesterday's approved cut — any unintended change gets flagged immediately. TypeScript's utility types are your director's shorthand: \"give me this actor's costume but without the hat (Omit)\" or \"only their shoes and jacket (Pick).\"",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u9_c4",
+      "type": "code",
+      "content": {
+        "code": "import { test, expect, Page, BrowserContext } from '@playwright/test';\n\n// Utility types for test configuration\ntype FullConfig = {\n  baseURL: string;\n  apiURL: string;\n  timeout: number;\n  retries: number;\n  viewport: { width: number; height: number };\n};\n\n// Partial<T> — all properties optional (for overrides)\ntype ConfigOverride = Partial<FullConfig>;\n\n// Pick<T, K> — only selected properties\ntype MinimalConfig = Pick<FullConfig, 'baseURL' | 'timeout'>;\n\n// Omit<T, K> — everything except specified\ntype PublicConfig = Omit<FullConfig, 'apiURL'>;\n\n// Record<K, V> — typed dictionary\ntype BrowserViewports = Record<'mobile' | 'tablet' | 'desktop', { width: number; height: number }>;\n\nconst viewports: BrowserViewports = {\n  mobile: { width: 375, height: 667 },\n  tablet: { width: 768, height: 1024 },\n  desktop: { width: 1440, height: 900 },\n};\n\ntest('multi-context: admin and user see different views', async ({ browser }) => {\n  const adminCtx: BrowserContext = await browser.newContext();\n  const userCtx: BrowserContext = await browser.newContext();\n\n  const adminPage: Page = await adminCtx.newPage();\n  const userPage: Page = await userCtx.newPage();\n\n  // Admin logs in and navigates\n  await adminPage.goto('/login');\n  await adminPage.fill('#email', 'admin@example.com');\n  await adminPage.fill('#password', 'admin123');\n  await adminPage.click('#submit');\n\n  // User logs in separately\n  await userPage.goto('/login');\n  await userPage.fill('#email', 'user@example.com');\n  await userPage.fill('#password', 'user123');\n  await userPage.click('#submit');\n\n  // Verify different views\n  await expect(adminPage.locator('[data-role=\"admin-panel\"]')).toBeVisible();\n  await expect(userPage.locator('[data-role=\"admin-panel\"]')).toBeHidden();\n\n  await adminCtx.close();\n  await userCtx.close();\n});",
+        "highlight": [
+          "13",
+          "16",
+          "19",
+          "22",
+          "30",
+          "31",
+          "32",
+          "33"
+        ],
+        "annotation": "Lines 13, 16, 19, 22 show the four key utility types — Partial makes all fields optional (perfect for config overrides), Pick selects specific fields, Omit removes fields, Record creates typed maps. Lines 30-33 show multi-context setup — each `browser.newContext()` creates an isolated browser session with separate cookies, storage, and auth state. This enables testing multi-user scenarios without interference."
+      }
+    },
+    {
+      "id": "p8u9_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { test, expect } from '@playwright/test';\n\ntest('interact with iframe payment form', async ({ page }) => {\n  await page.goto('https://checkout.example.com');\n\n  // Access iframe content\n  const paymentFrame = page.frameLocator('#payment-iframe');\n\n  // Fill card details inside iframe\n  await paymentFrame.locator('#card-number').fill('4242424242424242');\n  await paymentFrame.locator('#expiry').fill('12/28');\n  await paymentFrame.locator('#cvc').fill('123');\n\n  // Click pay button inside iframe\n  await paymentFrame.locator('#pay-btn').click();\n\n  // Verify success message on PARENT page\n  await expect(page.locator('.payment-success')).toBeVisible();\n});",
+        "modification": "Change `page.frameLocator('#payment-iframe')` to `page.locator('#payment-iframe')` — using a regular locator instead of frameLocator.",
+        "question": "What happens when you use page.locator() instead of page.frameLocator() for an iframe?",
+        "options": [
+          "The locator finds the iframe element itself but cannot reach inside it — subsequent .locator() calls fail to find elements within the iframe",
+          "The locator automatically detects it's an iframe and switches context",
+          "The test throws a compile error because locator doesn't accept iframe selectors"
+        ],
+        "correct": 0,
+        "explanation": "`page.locator('#payment-iframe')` finds the `<iframe>` DOM element on the parent page. When you chain `.locator('#card-number')` on it, Playwright looks for #card-number as a child of the iframe element in the parent DOM — which doesn't exist there. The card input lives INSIDE the iframe's document, which is a separate browsing context. `frameLocator()` is specifically designed to cross this boundary — it returns a FrameLocator that resolves selectors within the iframe's document. This distinction is critical for testing payment forms, embedded widgets, and third-party integrations."
+      }
+    },
+    {
+      "id": "p8u9_c6",
+      "type": "contrast",
+      "content": {
+        "label": "File download handling vs File upload handling",
+        "codeA": "// Download: intercepting browser's file save\ntest('download report', async ({ page }) => {\n  // Start waiting for download BEFORE clicking\n  const [download] = await Promise.all([\n    page.waitForEvent('download'),\n    page.locator('#export-csv').click(),\n  ]);\n\n  // Verify download metadata\n  expect(download.suggestedFilename()).toBe('report.csv');\n\n  // Save to filesystem and verify content\n  const path = await download.path();\n  const content = require('fs').readFileSync(path!, 'utf-8');\n  expect(content).toContain('Total Revenue');\n});",
+        "codeB": "// Upload: setting files on an input element\ntest('upload avatar', async ({ page }) => {\n  await page.goto('/profile/settings');\n\n  // Set file on input[type=\"file\"] — no file dialog opens\n  await page.locator('#avatar-input').setInputFiles('./fixtures/avatar.png');\n\n  // Verify preview shows\n  await expect(page.locator('.avatar-preview img')).toHaveAttribute(\n    'src', /blob:|data:/\n  );\n\n  // Upload multiple files\n  await page.locator('#attachments').setInputFiles([\n    './fixtures/doc1.pdf',\n    './fixtures/doc2.pdf',\n  ]);\n\n  // Clear file selection\n  await page.locator('#avatar-input').setInputFiles([]);\n});",
+        "question": "Why does download use Promise.all + waitForEvent while upload uses a simple setInputFiles call?",
+        "options": [
+          "Downloads are asynchronous events triggered by navigation while uploads are synchronous DOM mutations",
+          "Downloads are events you must listen for BEFORE the triggering action or you'll miss them while uploads directly set the file input's value without triggering events",
+          "Uploads are faster because they don't involve network transfer",
+          "Downloads require special permissions from the browser"
+        ],
+        "correct": 1,
+        "explanation": "A download is a browser event — once you click the button, the browser starts the download immediately. If you're not already listening (waitForEvent registered BEFORE click), you'll miss it. That's why Promise.all is needed — it starts listening and clicking simultaneously. An upload is different — `setInputFiles()` directly manipulates the file input's property, programmatically setting which files are \"selected.\" It doesn't trigger a file dialog or emit an event you could miss. It's a direct, synchronous(ish) operation on the DOM element."
+      }
+    },
+    {
+      "id": "p8u9_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how Playwright handles iframes and why a special API is needed.",
+        "sentence": "An iframe creates a separate _____ context, so you need _____ to cross the boundary and locate elements _____ the iframe's document.",
+        "blanks": [
+          "browsing",
+          "frameLocator()",
+          "inside"
+        ],
+        "distractors": [
+          "rendering",
+          "switchTo()",
+          "outside"
+        ]
+      }
+    },
+    {
+      "id": "p8u9_c8",
+      "type": "connect",
+      "content": {
+        "text": "These advanced patterns culminate in Unit 10's Framework Project. Multi-context testing, visual regression, and file handling all need proper configuration in playwright.config.ts. You'll configure screenshot thresholds, download paths, and parallel workers. The utility types (Partial, Record) will type your config objects and environment maps.",
+        "code": "// Preview: Framework config using patterns from this unit (Unit 10)\nimport { defineConfig, devices } from '@playwright/test';\n\ntype EnvConfig = Record<'dev' | 'staging' | 'prod', {\n  baseURL: string;\n  apiURL: string;\n}>;\n\nconst environments: EnvConfig = {\n  dev: { baseURL: 'http://localhost:3000', apiURL: 'http://localhost:4000' },\n  staging: { baseURL: 'https://staging.app.com', apiURL: 'https://api.staging.app.com' },\n  prod: { baseURL: 'https://app.com', apiURL: 'https://api.app.com' },\n};\n\nconst env = (process.env.TEST_ENV || 'dev') as keyof EnvConfig;\n\nexport default defineConfig({\n  use: {\n    baseURL: environments[env].baseURL,\n    screenshot: 'only-on-failure',\n  },\n  expect: {\n    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },\n  },\n});",
+        "note": "Unit 10 ties everything together — your multi-context tests, visual assertions, downloads, and utility types all get configured in one framework. Think of Unit 10 as the architecture that houses everything you've built."
+      }
+    }
+  ]
+}

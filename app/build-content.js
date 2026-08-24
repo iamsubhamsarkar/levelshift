@@ -122,17 +122,24 @@ function parseUnitFile(content, filename) {
       case 'contrast': return parseContrastCard(cardId, cardBody);
       case 'explain_back': return parseExplainBackCard(cardId, cardBody);
       case 'connect': return parseConnectCard(cardId, cardBody);
+      case 'theory': return parseTheoryCard(cardId, cardBody);
+      case 'build_step': return parseBuildStepCard(cardId, cardBody);
       default:
         console.warn(`  ⚠️  Unknown card type: ${type}`);
         return { id: cardId, type: 'unknown', content: { text: cardBody } };
     }
   });
 
+  // Parse phase/unit numbers robustly (supports multi-digit, e.g. p10u1)
+  const unitMatch = (frontmatter.unit || '').match(/^p(\d+)u(\d+)$/i);
+  const phaseNum = unitMatch ? parseInt(unitMatch[1], 10) : 1;
+  const unitNum = unitMatch ? parseInt(unitMatch[2], 10) : 1;
+
   return {
     unitId: frontmatter.unit,
     title: frontmatter.title,
-    phase: parseInt(frontmatter.unit?.charAt(1)) || 1,
-    unit: parseInt(frontmatter.unit?.slice(3)) || 1,
+    phase: phaseNum,
+    unit: unitNum,
     teaches: frontmatter.teaches || [],
     requires: frontmatter.requires || [],
     estimatedMinutes: Math.max(15, cards.length * 3),
@@ -258,6 +265,79 @@ function parseConnectCard(id, body) {
   };
 }
 
+/**
+ * THEORY card — full interactive chapter section (Phase 9).
+ * Format:
+ *   heading: 1.2  What an LLM is
+ *   body:
+ *   <multi-line prose ... until the next labeled field or a fenced block>
+ *   ```
+ *   optional illustrative snippet
+ *   ```
+ *   snippetExplanation: What this shows: ...
+ *   callout: The single most important idea ...
+ */
+function parseTheoryCard(id, body) {
+  const heading = extractField(body, 'heading');
+  const bodyText = extractBlockField(body, 'body');
+  // snippet may be a plain labeled block (ASCII diagram) or a fenced code block
+  const snippet = extractBlockField(body, 'snippet') || extractCodeBlock(body);
+  const snippetExplanation = extractField(body, 'snippetExplanation');
+  const callout = extractField(body, 'callout');
+  return {
+    id, type: 'theory',
+    content: {
+      heading: heading || null,
+      body: bodyText || body.split('```')[0].replace(/^heading:.*$/mi, '').trim(),
+      snippet: snippet || null,
+      snippetExplanation: snippetExplanation || null,
+      callout: callout || null
+    }
+  };
+}
+
+/**
+ * BUILD_STEP card — one guided build action (Phases 10-12).
+ * Format:
+ *   goal: Create and activate a virtual environment.
+ *   why: Isolates dependencies. (Learned in Phase 9, Ch 2-3.)
+ *   windows:
+ *   ```
+ *   python -m venv .venv
+ *   ```
+ *   ubuntu:
+ *   ```
+ *   python3 -m venv .venv
+ *   ```
+ *   code:
+ *   ```
+ *   optional file content to add
+ *   ```
+ *   verify: You'll know it worked when ...
+ *   troubleshoot: If X fails, do Y.
+ *   reference: Phase 9, Ch 2
+ */
+function parseBuildStepCard(id, body) {
+  const windows = extractLabeledCodeBlock(body, 'windows');
+  const ubuntu = extractLabeledCodeBlock(body, 'ubuntu');
+  const code = extractLabeledCodeBlock(body, 'code');
+  return {
+    id, type: 'build_step',
+    content: {
+      goal: extractField(body, 'goal') || body.split('\n')[0],
+      why: extractField(body, 'why') || null,
+      commands: {
+        windows: windows || null,
+        ubuntu: ubuntu || null
+      },
+      code: code || null,
+      verify: extractField(body, 'verify') || null,
+      troubleshoot: extractField(body, 'troubleshoot') || null,
+      reference: extractField(body, 'reference') || null
+    }
+  };
+}
+
 // ─── Utilities ─────────────────────────────────────────────────────────────────
 
 function parseFrontmatter(fm) {
@@ -299,6 +379,55 @@ function extractCodeBlock(body, index = 0) {
 function extractAllCodeBlocks(body) {
   const matches = [...body.matchAll(/```\w*\n([\s\S]*?)```/g)];
   return matches.map(m => m[1].trim());
+}
+
+/**
+ * Extract a multi-line "block" field: everything after `field:` (on its own line)
+ * up to the next labeled field, a fenced code block, or end of body.
+ * Used for THEORY body prose that spans paragraphs.
+ */
+function extractBlockField(body, fieldName) {
+  const lines = body.split('\n');
+  const startIdx = lines.findIndex(l =>
+    new RegExp(`^${fieldName}:\\s*$`, 'i').test(l.trim()) ||
+    new RegExp(`^${fieldName}:\\s+`, 'i').test(l.trim())
+  );
+  if (startIdx === -1) return null;
+
+  // Inline value on same line?
+  const inline = lines[startIdx].replace(new RegExp(`^${fieldName}:\\s*`, 'i'), '').trim();
+  const collected = [];
+  if (inline) collected.push(inline);
+
+  const KNOWN_FIELDS = ['heading', 'body', 'snippet', 'snippetexplanation', 'callout', 'goal', 'why',
+    'windows', 'ubuntu', 'code', 'verify', 'troubleshoot', 'reference', 'question', 'prompt',
+    'hint', 'expected', 'annotation', 'note', 'text', 'modification', 'options', 'correct',
+    'explanation', 'label', 'mode', 'sentence', 'blanks', 'distractors', 'visual', 'model',
+    'modelanswer', 'highlight', 'setup', 'solution'];
+
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    // Stop at a fenced code block
+    if (trimmed.startsWith('```')) break;
+    // Stop at the next labeled field
+    const labelMatch = trimmed.match(/^([a-zA-Z_]+):\s/);
+    const labelOnly = trimmed.match(/^([a-zA-Z_]+):\s*$/);
+    const label = (labelMatch && labelMatch[1]) || (labelOnly && labelOnly[1]);
+    if (label && KNOWN_FIELDS.includes(label.toLowerCase())) break;
+    collected.push(line);
+  }
+  return collected.join('\n').trim() || null;
+}
+
+/**
+ * Extract the fenced code block that immediately follows a `label:` line.
+ * Used for BUILD_STEP per-OS commands (windows:/ubuntu:) and optional code:.
+ */
+function extractLabeledCodeBlock(body, label) {
+  const re = new RegExp(`^${label}:\\s*\\n\\s*\`\`\`\\w*\\n([\\s\\S]*?)\`\`\``, 'mi');
+  const m = body.match(re);
+  return m ? m[1].trim() : null;
 }
 
 // ─── Main Build ────────────────────────────────────────────────────────────────

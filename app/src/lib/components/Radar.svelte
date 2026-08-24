@@ -5,12 +5,17 @@
   export let size = 200;
 
   const categories = [
-    { id: 'java', label: 'Java', angle: -90, prefixes: ['basics.', 'oop.', 'collections.', 'exceptions.', 'java8.'] },
-    { id: 'dsa', label: 'DSA', angle: -18, prefixes: ['dsa.'] },
-    { id: 'restassured', label: 'REST Assured', angle: 54, prefixes: ['restassured.'] },
-    { id: 'api', label: 'APIs', angle: 126, prefixes: ['http.', 'rest.', 'apistrategy.'] },
-    { id: 'selenium', label: 'Selenium', angle: 198, prefixes: ['selenium.'] }
-  ];
+    { id: 'java', label: 'Java', prefixes: ['basics.', 'oop.', 'collections.', 'exceptions.', 'java8.'] },
+    { id: 'dsa', label: 'DSA', prefixes: ['dsa.'] },
+    { id: 'restassured', label: 'REST Assured', prefixes: ['restassured.'] },
+    { id: 'api', label: 'APIs', prefixes: ['http.', 'rest.', 'apistrategy.'] },
+    { id: 'selenium', label: 'Selenium', prefixes: ['selenium.'] },
+    { id: 'agentic', label: 'Agentic AI', prefixes: ['agentic.'] }
+  ].map((cat, i, arr) => ({
+    // Distribute axes evenly around the circle, starting from the top (-90deg).
+    ...cat,
+    angle: -90 + (360 / arr.length) * i
+  }));
 
   $: scores = calculateCategoryScores($concepts);
 

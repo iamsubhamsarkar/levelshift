@@ -1,0 +1,127 @@
+{
+  "unitId": "p8u8",
+  "title": "Fixtures & Hooks",
+  "phase": 8,
+  "unit": 8,
+  "teaches": [
+    "playwright.fixtures",
+    "playwright.extend",
+    "typescript.generics_advanced",
+    "playwright.hooks"
+  ],
+  "requires": [
+    "playwright.pom",
+    "typescript.generics",
+    "typescript.classes"
+  ],
+  "estimatedMinutes": 24,
+  "cards": [
+    {
+      "id": "p8u8_c1",
+      "type": "hook",
+      "content": {
+        "question": "Every test gets a fresh logged-in page. Zero setup code in tests. How?",
+        "code": "import { test } from './fixtures';\n\n// No login code. No page setup. Just the test.\ntest('admin can view user list', async ({ adminPage }) => {\n  await adminPage.goto('/admin/users');\n  await adminPage.locator('.user-row').first().waitFor();\n  // adminPage is already logged in as admin — the fixture handled it\n});\n\ntest('admin can delete user', async ({ adminPage }) => {\n  await adminPage.goto('/admin/users');\n  await adminPage.locator('[data-action=\"delete\"]').first().click();\n  // Still logged in. Fresh context. No state leakage from previous test.\n});"
+      }
+    },
+    {
+      "id": "p8u8_c2",
+      "type": "fail_first",
+      "content": {
+        "prompt": "Create a custom fixture that provides a `todoPage` — a page already navigated to the todo app with one pre-existing todo item created via the UI. Use test.extend to define it.",
+        "starterCode": "import { test as base, Page } from '@playwright/test';\n\n// TODO: Define a fixture type that includes todoPage: Page\n// TODO: Use base.extend to create the fixture\n// TODO: In the fixture, navigate to /todos, add \"Buy milk\", then provide the page\n\n// Export the extended test",
+        "hint": "Use `base.extend<{ todoPage: Page }>({ todoPage: async ({ page }, use) => { ... await use(page); } })`.",
+        "expectedOutput": "The fixture should navigate to '/todos', fill an input with 'Buy milk', click add, then call `await use(page)`. The exported test type includes todoPage. Tests using this fixture get a page that's already at /todos with one item.",
+        "solutionCode": null
+      }
+    },
+    {
+      "id": "p8u8_c3",
+      "type": "analogy",
+      "content": {
+        "text": "Fixtures are like a hotel room service preparing your room before you arrive. You don't check in and then call housekeeping for sheets, pillows, and towels (that's hooks in beforeEach — you do the setup yourself). With fixtures, you just request \"a room with ocean view and extra pillows\" and it's ready when you walk in. Each guest (test) gets their own fresh room — no sharing, no leftover mess from previous guests. And just like the hotel handles checkout cleanup (stripping beds, restocking), fixtures handle teardown after each test. The `use()` call is the moment you hand the room key to the guest — everything before it is setup, everything after is teardown.",
+        "visual": null
+      }
+    },
+    {
+      "id": "p8u8_c4",
+      "type": "code",
+      "content": {
+        "code": "import { test as base, expect, Page } from '@playwright/test';\nimport { LoginPage } from './pages/login.page';\nimport { DashboardPage } from './pages/dashboard.page';\n\n// Define fixture types with advanced generics\ntype MyFixtures = {\n  loginPage: LoginPage;\n  authenticatedPage: Page;\n  dashboardPage: DashboardPage;\n};\n\nconst test = base.extend<MyFixtures>({\n  loginPage: async ({ page }, use) => {\n    const loginPage = new LoginPage(page);\n    await loginPage.navigate();\n    await use(loginPage);\n  },\n\n  authenticatedPage: async ({ page }, use) => {\n    // Setup: Log in\n    await page.goto('/login');\n    await page.fill('#email', 'test@example.com');\n    await page.fill('#password', 'password123');\n    await page.click('#login-btn');\n    await page.waitForURL('/dashboard');\n\n    await use(page); // Test runs here with authenticated page\n\n    // Teardown: Log out\n    await page.click('#logout');\n  },\n\n  dashboardPage: async ({ authenticatedPage }, use) => {\n    // Depends on authenticatedPage fixture — Playwright resolves order\n    const dashboard = new DashboardPage(authenticatedPage);\n    await use(dashboard);\n  },\n});\n\nexport { test, expect };",
+        "highlight": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "12",
+          "27",
+          "30",
+          "32"
+        ],
+        "annotation": "Lines 6-9 define the fixture type using a TypeScript type alias — this tells test.extend exactly what fixtures exist and their types. Line 12 passes this type as a generic parameter `<MyFixtures>` to base.extend. Line 27 is the `use()` boundary — everything above is setup, everything below is teardown. Line 30 shows teardown code. Line 32 shows fixture dependencies — `dashboardPage` depends on `authenticatedPage`, and Playwright automatically resolves the dependency chain (authenticatedPage runs first)."
+      }
+    },
+    {
+      "id": "p8u8_c5",
+      "type": "break_it",
+      "content": {
+        "setup": "import { test as base } from '@playwright/test';\n\ntype Fixtures = { userToken: string };\n\nconst test = base.extend<Fixtures>({\n  userToken: async ({ request }, use) => {\n    const res = await request.post('/api/auth/login', {\n      data: { email: 'user@test.com', password: 'pass123' }\n    });\n    const { token } = await res.json();\n    await use(token);\n\n    // Teardown: invalidate token\n    await request.post('/api/auth/logout', {\n      headers: { Authorization: `Bearer ${token}` }\n    });\n  },\n});\n\ntest('first test', async ({ userToken, page }) => {\n  await page.setExtraHTTPHeaders({ Authorization: `Bearer ${userToken}` });\n  await page.goto('/profile');\n});\n\ntest('second test', async ({ userToken, page }) => {\n  await page.setExtraHTTPHeaders({ Authorization: `Bearer ${userToken}` });\n  await page.goto('/settings');\n});",
+        "modification": "Change `test = base.extend<Fixtures>` to use a worker-scoped fixture by adding `{ scope: 'worker' }` to the userToken definition: `userToken: [async ({ request }, use) => { ... }, { scope: 'worker' }]`.",
+        "question": "What changes when userToken becomes a worker-scoped fixture?",
+        "options": [
+          "Both tests share the same token — login happens once per worker instead of once per test",
+          "The fixture throws an error because request is not available in worker scope",
+          "Nothing changes because scope only affects parallel execution"
+        ],
+        "correct": 0,
+        "explanation": "Worker-scoped fixtures run once per worker process and are shared across all tests in that worker. This means login happens once, and both tests reuse the same token. The teardown (logout) only runs when the worker shuts down. This is efficient for expensive setup (like authentication) but dangerous if tests modify shared state. Test-scoped fixtures (the default) create fresh instances per test — slower but isolated. Choose worker scope for read-only shared resources."
+      }
+    },
+    {
+      "id": "p8u8_c6",
+      "type": "contrast",
+      "content": {
+        "label": "beforeEach hooks vs Custom fixtures",
+        "codeA": "// hooks approach — setup in beforeEach\nimport { test, expect, Page } from '@playwright/test';\n\nlet loggedInPage: Page;\n\ntest.beforeEach(async ({ page }) => {\n  await page.goto('/login');\n  await page.fill('#email', 'admin@test.com');\n  await page.fill('#password', 'admin123');\n  await page.click('#submit');\n  await page.waitForURL('/dashboard');\n  loggedInPage = page;\n});\n\ntest('view users', async () => {\n  await loggedInPage.goto('/admin/users');\n  await expect(loggedInPage.locator('.user-row')).toHaveCount(5);\n});",
+        "codeB": "// fixture approach — encapsulated, typed, composable\nimport { test as base, expect } from '@playwright/test';\nimport { AdminPage } from './pages/admin.page';\n\nconst test = base.extend<{ adminPage: AdminPage }>({\n  adminPage: async ({ page }, use) => {\n    await page.goto('/login');\n    await page.fill('#email', 'admin@test.com');\n    await page.fill('#password', 'admin123');\n    await page.click('#submit');\n    await page.waitForURL('/dashboard');\n    await use(new AdminPage(page));\n    await page.click('#logout'); // guaranteed teardown\n  },\n});\n\ntest('view users', async ({ adminPage }) => {\n  await adminPage.navigateToUsers();\n  await expect(adminPage.userRows).toHaveCount(5);\n});",
+        "question": "What are the key advantages of fixtures over beforeEach hooks?",
+        "options": [
+          "Fixtures are faster because they run in parallel",
+          "Fixtures provide automatic teardown + type safety + composability + on-demand instantiation",
+          "Fixtures skip browser setup entirely using mocks",
+          "Fixtures are just syntactic sugar — they compile to beforeEach internally"
+        ],
+        "correct": 1,
+        "explanation": "Fixtures win in four ways. (1) Guaranteed teardown — code after `use()` always runs, even if the test fails. beforeEach has no teardown guarantee unless you pair it with afterEach. (2) Type safety — fixtures are typed via generics, so TypeScript catches wrong usage. (3) Composability — fixtures can depend on other fixtures, creating a dependency graph. (4) On-demand — fixtures only run if the test actually requests them. A beforeEach runs for ALL tests in the file, even those that don't need the setup. Fixtures are not just sugar; they're architecturally superior."
+      }
+    },
+    {
+      "id": "p8u8_c7",
+      "type": "explain_back",
+      "content": {
+        "mode": "fill_blank",
+        "prompt": "Explain how Playwright fixtures work using test.extend and the use() callback pattern.",
+        "sentence": "A fixture uses test.extend<_____> to declare types, runs _____ code before `use()`, and runs _____ code after `use()`.",
+        "blanks": [
+          "FixtureTypes",
+          "setup",
+          "teardown"
+        ],
+        "distractors": [
+          "TestConfig",
+          "assertion",
+          "cleanup"
+        ]
+      }
+    },
+    {
+      "id": "p8u8_c8",
+      "type": "connect",
+      "content": {
+        "text": "Fixtures are the foundation for advanced patterns in Unit 9. When you need multiple browser contexts (multi-user testing), you'll create fixtures that provide separate authenticated pages per role. Visual regression tests use fixtures to set up consistent viewport states. And in Unit 10 (Framework Project), your entire test architecture will be built on layered fixtures.",
+        "code": "// Preview: Multi-role fixture for e2e scenarios (Unit 9)\nimport { test as base, Browser, Page } from '@playwright/test';\n\ntype MultiUserFixtures = {\n  adminPage: Page;\n  customerPage: Page;\n};\n\nconst test = base.extend<MultiUserFixtures>({\n  adminPage: async ({ browser }, use) => {\n    const ctx = await browser.newContext();\n    const page = await ctx.newPage();\n    await page.goto('/login');\n    await page.fill('#email', 'admin@test.com');\n    await page.fill('#password', 'admin123');\n    await page.click('#submit');\n    await use(page);\n    await ctx.close();\n  },\n  customerPage: async ({ browser }, use) => {\n    const ctx = await browser.newContext();\n    const page = await ctx.newPage();\n    await page.goto('/login');\n    await page.fill('#email', 'customer@test.com');\n    await page.fill('#password', 'cust123');\n    await page.click('#submit');\n    await use(page);\n    await ctx.close();\n  },\n});\n\ntest('admin sees customer order', async ({ adminPage, customerPage }) => {\n  // Two browsers, two users, one test!\n});",
+        "note": "Multi-context fixtures enable real-world scenarios like chat apps, collaborative editing, and admin/customer flows. Unit 9 builds heavily on this pattern."
+      }
+    }
+  ]
+}

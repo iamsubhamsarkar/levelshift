@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import CardDeck from './CardDeck.svelte';
   import CardRenderer from './CardRenderer.svelte';
+  import TheoryPage from './TheoryPage.svelte';
   import GhostReplay from './GhostReplay.svelte';
   import { session, currentCard, sessionProgress, startSession, nextCard, prevCard, endSession, recordAnswer, completeCard } from '../stores/session.js';
   import { progress, completeUnit, recordActivity, updateConceptStrength, ghostRecords, persistAll } from '../stores/progress.js';
@@ -171,6 +172,23 @@
     ghostBest = null;
     loadCurrentUnit(); // Load next unit
   }
+
+  // A theory unit (Phase 9): all cards are 'theory' → render as a one-pager.
+  $: isTheoryUnit = !!unitData
+    && Array.isArray(unitData.cards)
+    && unitData.cards.length > 0
+    && unitData.cards.every(c => c.type === 'theory');
+
+  /** One-pager "Mark chapter as read": complete all cards, then finish the unit. */
+  function handleTheoryComplete() {
+    if (unitData?.cards) {
+      unitData.cards.forEach(c => completeCard(c.id, { read: true }));
+    }
+    if (unitData?.teaches) {
+      unitData.teaches.forEach(conceptId => updateConceptStrength(conceptId, 4));
+    }
+    completeCurrentSession();
+  }
 </script>
 
 {#if loading}
@@ -215,23 +233,33 @@
     </div>
   </div>
 {:else if unitData}
-  <!-- Active Learning Session -->
-  <CardDeck
-    unitTitle={unitData.title}
-    phaseTitle={`Phase ${$progress.currentPhase}`}
-    on:next={handleNext}
-    on:prev={handlePrev}
-    on:exit={handleExit}
-  >
-    {#key $currentCard?.id}
-      <CardRenderer 
-        card={$currentCard} 
-        on:answer={handleAnswer}
-        on:rating={handleRating}
-        on:skip={handleNext}
-      />
-    {/key}
-  </CardDeck>
+  {#if isTheoryUnit}
+    <!-- Phase 9: theory chapter as a colorful one-pager -->
+    <TheoryPage
+      {unitData}
+      phaseTitle={`Phase ${$progress.currentPhase}`}
+      on:complete={handleTheoryComplete}
+      on:exit={handleExit}
+    />
+  {:else}
+    <!-- Active Learning Session (card deck) -->
+    <CardDeck
+      unitTitle={unitData.title}
+      phaseTitle={`Phase ${$progress.currentPhase}`}
+      on:next={handleNext}
+      on:prev={handlePrev}
+      on:exit={handleExit}
+    >
+      {#key $currentCard?.id}
+        <CardRenderer 
+          card={$currentCard} 
+          on:answer={handleAnswer}
+          on:rating={handleRating}
+          on:skip={handleNext}
+        />
+      {/key}
+    </CardDeck>
+  {/if}
 {:else}
   <div class="min-h-screen bg-surface-0 flex items-center justify-center">
     <div class="card text-center">

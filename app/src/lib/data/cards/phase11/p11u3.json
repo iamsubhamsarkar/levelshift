@@ -1,0 +1,114 @@
+{
+  "unitId": "p11u3",
+  "title": "A Real RAG Pipeline Over Your Documents",
+  "phase": 11,
+  "unit": 3,
+  "teaches": [
+    "agentic.build_rag",
+    "agentic.build_chunking"
+  ],
+  "requires": [
+    "agentic.build_semantic_search",
+    "agentic.rag",
+    "agentic.chunking"
+  ],
+  "estimatedMinutes": 18,
+  "cards": [
+    {
+      "id": "p11u3_c1",
+      "type": "build_step",
+      "content": {
+        "goal": "Create a documents folder and drop in a few real text files.",
+        "why": "RAG answers from YOUR data. Use documents you actually care about — notes, a handbook, an FAQ. (Learned in Phase 9, Ch 11, section 11.1.)",
+        "commands": {
+          "windows": "mkdir docs\nnotepad docs\\notes.txt",
+          "ubuntu": "mkdir docs\nnano docs/notes.txt"
+        },
+        "code": null,
+        "verify": "A docs/ folder exists with at least one .txt file containing a few paragraphs of real content you can later ask questions about.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u3_c2",
+      "type": "build_step",
+      "content": {
+        "goal": "Load and CHUNK the documents. Add chunking to atlas.py.",
+        "why": "Chunking is the underrated make-or-break step — split at natural boundaries, keep chunks a few hundred words, with a little overlap. (Learned in Phase 9, Ch 11, section 11.3.)",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": "import glob\n\ndef load_docs(folder=\"docs\"):\n    texts = []\n    for path in glob.glob(f\"{folder}/*.txt\"):\n        texts.append((path, open(path, encoding=\"utf-8\").read()))\n    return texts\n\ndef chunk(text, size=800, overlap=100):\n    # split on blank lines first (respect structure), then pack to ~size chars\n    paras = [p.strip() for p in text.split(\"\\n\\n\") if p.strip()]\n    chunks, cur = [], \"\"\n    for p in paras:\n        if len(cur) + len(p) > size and cur:\n            chunks.append(cur)\n            cur = cur[-overlap:] + \" \" + p   # carry a little overlap\n        else:\n            cur = (cur + \" \" + p).strip()\n    if cur:\n        chunks.append(cur)\n    return chunks",
+        "verify": "Running chunk() on your notes produces a list of coherent passages, each a few hundred characters, split at paragraph boundaries with slight overlap.",
+        "troubleshoot": "If chunks are one giant blob, your file has no blank lines between paragraphs — add them, or lower the size. Too-big chunks dilute meaning; too-small chunks lose context.",
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u3_c3",
+      "type": "build_step",
+      "content": {
+        "goal": "Build the index — chunk, embed, and store each chunk with its source metadata.",
+        "why": "This is Phase One of RAG (indexing), done once and re-run whenever documents change. Keep metadata so you can cite the source. (Learned in Phase 9, Ch 11, section 11.2.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "INDEX = []  # list of dicts: {\"text\":..., \"source\":..., \"vector\":...}\n\ndef build_index(folder=\"docs\"):\n    INDEX.clear()\n    for path, text in load_docs(folder):\n        for c in chunk(text):\n            INDEX.append({\"text\": c, \"source\": path, \"vector\": embed(c)})\n    print(f\"indexed {len(INDEX)} chunks from {folder}\")\n\nbuild_index()",
+        "verify": "It prints how many chunks were indexed. Each entry carries its text, its source file (metadata for citations), and its meaning-vector.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u3_c4",
+      "type": "build_step",
+      "content": {
+        "goal": "Retrieve the most relevant chunks for a question.",
+        "why": "Phase Two begins with retrieval: embed the question, find the closest chunks by meaning. (Learned in Phase 9, Ch 11, section 11.2.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "def retrieve(question, k=3):\n    qv = embed(question)\n    scored = [(cosine(qv, item[\"vector\"]), item) for item in INDEX]\n    scored.sort(key=lambda x: x[0], reverse=True)\n    return [item for _, item in scored[:k]]",
+        "verify": "retrieve(\"your question here\") returns the 3 chunks most relevant in meaning, each with its source. These are what will be placed on the model's desk.",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u3_c5",
+      "type": "build_step",
+      "content": {
+        "goal": "Augment and generate — answer USING ONLY the retrieved context, with a citation.",
+        "why": "The grounding instruction turns a hallucination-prone model into a checkable one: use only the context, admit ignorance, cite the source. (Learned in Phase 9, Ch 11, section 11.4.)",
+        "commands": {
+          "windows": "python atlas.py",
+          "ubuntu": "python3 atlas.py"
+        },
+        "code": "def rag_answer(question, k=3):\n    chunks = retrieve(question, k)\n    context = \"\\n\\n\".join(f\"[{i+1}] (source: {c['source']})\\n{c['text']}\"\n                          for i, c in enumerate(chunks))\n    return ask([\n        {\"role\": \"system\", \"content\":\n         \"Answer the question using ONLY the context below. \"\n         \"If the answer is not in the context, say you don't know. \"\n         \"Cite the [number] of the piece you used.\"},\n        {\"role\": \"user\", \"content\": f\"Context:\\n{context}\\n\\nQuestion: {question}\"},\n    ])\n\nprint(rag_answer(\"<ask something answerable from your docs>\"))",
+        "verify": "ATLAS answers from your documents and cites a [number]. Ask something NOT in your docs — it should say it doesn't know, rather than inventing an answer. That honesty is the grounding instruction working.",
+        "troubleshoot": "If it hallucinates, strengthen \"ONLY the context\" and confirm retrieval actually returned relevant chunks (print them). Retrieval quality caps answer quality.",
+        "reference": "Phase 9, Ch 11"
+      }
+    },
+    {
+      "id": "p11u3_c6",
+      "type": "build_step",
+      "content": {
+        "goal": "CHECKPOINT — ATLAS can chat with your documents.",
+        "why": "This is the workhorse pattern of the whole field, running on your machine over your own data.",
+        "commands": {
+          "windows": null,
+          "ubuntu": null
+        },
+        "code": null,
+        "verify": "All true — documents are chunked, embedded, and indexed with source metadata; retrieval finds relevant chunks by meaning; answers are grounded in the context and cited; unanswerable questions get an honest \"I don't know.\" Next unit turns retrieval into a TOOL so the AGENT decides when to search (agentic RAG).",
+        "troubleshoot": null,
+        "reference": "Phase 9, Ch 11"
+      }
+    }
+  ]
+}

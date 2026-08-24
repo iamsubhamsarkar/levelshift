@@ -1,0 +1,164 @@
+---
+unit: p8u6
+title: Waits & Async Patterns
+teaches: [playwright.auto_wait, playwright.wait_for, typescript.promises, typescript.async_patterns]
+requires: [playwright.actions, typescript.async_await, playwright.assertions]
+---
+
+## HOOK
+question: Where did the wait go? Selenium needs 8 lines of explicit waiting. Playwright needs... zero. It's invisible.
+```typescript
+// Selenium (Java-style pseudocode in TS for comparison)
+import { Builder, By, until } from 'selenium-webdriver';
+const driver = await new Builder().forBrowser('chrome').build();
+await driver.get('https://shop.example.com');
+const wait = driver.wait(until.elementLocated(By.css('.product-card')), 10000);
+const element = await wait;
+await driver.wait(until.elementIsVisible(element), 5000);
+await element.click();
+await driver.wait(until.elementLocated(By.css('.cart-badge')), 10000);
+const badge = await driver.findElement(By.css('.cart-badge'));
+
+// Playwright — same outcome
+import { test } from '@playwright/test';
+test('add to cart', async ({ page }) => {
+  await page.goto('https://shop.example.com');
+  await page.click('.product-card');  // auto-waits for visible + stable + enabled
+  await page.locator('.cart-badge').textContent(); // auto-waits for attached
+});
+```
+
+## FAIL_FIRST
+prompt: A page loads a product list via AJAX after 2 seconds. Write a test that clicks the 3rd product card. Don't add any explicit waits — just use Playwright's locator and click.
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('click third product after AJAX load', async ({ page }) => {
+  await page.goto('https://shop.example.com/products');
+  // TODO: Click the 3rd .product-card element
+  // TODO: Verify the product detail page title is visible
+});
+```
+hint: Playwright locators auto-wait. Use .nth(2) to get the 3rd element (0-indexed).
+expected: The test passes without any explicit sleep or waitFor — Playwright's auto-waiting handles the AJAX delay automatically. The code should be `await page.locator('.product-card').nth(2).click()` followed by `await expect(page.locator('h1.product-title')).toBeVisible()`.
+
+## ANALOGY
+Think of Playwright's auto-waiting like an automatic door at a supermarket. You don't stop walking, pull out a key, unlock the door, push it open, then walk through (that's Selenium's explicit waits). You just walk toward the door and it opens exactly when you arrive. Playwright watches the DOM the same way — the moment you ask to click something, it automatically waits for the element to be attached, visible, stable, enabled, and not obscured. You just express your intent; the framework handles the timing. But sometimes you need to wait for something specific that isn't an action — like waiting for a network response or a page to finish loading. That's when you reach for explicit waitFor methods, like telling the automatic door "don't open until my friend catches up."
+
+## CODE
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('checkout flow with smart waits', async ({ page }) => {
+  await page.goto('https://shop.example.com');
+
+  // Auto-wait: click waits for element to be actionable
+  await page.locator('[data-testid="add-to-cart"]').click();
+
+  // Explicit wait: wait for API response before asserting
+  const response = await page.waitForResponse('**/api/cart');
+  expect(response.status()).toBe(200);
+
+  // Wait for navigation to complete
+  await page.waitForLoadState('networkidle');
+
+  // Parallel wait: click triggers both navigation AND API call
+  const [apiResponse] = await Promise.all([
+    page.waitForResponse('**/api/order'),
+    page.locator('#checkout-btn').click(), // triggers the above
+  ]);
+
+  expect(apiResponse.status()).toBe(201);
+});
+```
+highlight: [7, 10, 14, 17, 18, 19]
+annotation: Line 7 shows auto-waiting (no explicit wait needed). Line 10 shows waitForResponse to intercept a specific API call. Line 14 uses waitForLoadState for page-level readiness. Lines 17-19 demonstrate Promise.all — the critical pattern for waiting on something that's triggered by an action. The click on line 19 triggers the response awaited on line 18. They must run in parallel because if you await the click first, you'd miss the response.
+
+## BREAK_IT
+setup:
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('wait for order confirmation', async ({ page }) => {
+  await page.goto('https://shop.example.com/cart');
+
+  const [response] = await Promise.all([
+    page.waitForResponse('**/api/order'),
+    page.locator('#place-order').click(),
+  ]);
+
+  expect(response.status()).toBe(201);
+  await expect(page.locator('.confirmation-number')).toBeVisible();
+});
+```
+modification: Move the `page.locator('#place-order').click()` BEFORE the `Promise.all`, so it's awaited separately first, then waitForResponse runs alone inside Promise.all.
+question: What happens when the click is awaited before waitForResponse?
+options: [The test times out because waitForResponse misses the response that already fired, The test passes but slower because it waits twice, The test throws a syntax error because Promise.all needs two promises]
+correct: 0
+explanation: When you await the click first, the browser fires the API request immediately. By the time waitForResponse starts listening, the response has already arrived and gone. Playwright never sees it, so it waits until the 30-second timeout. This is why Promise.all is essential — it registers the listener BEFORE the action triggers the event. Think of it like pressing record before someone speaks.
+
+## CONTRAST
+label: Auto-wait vs Explicit waitFor
+codeA:
+```typescript
+// Auto-wait — built into every action
+test('auto-wait example', async ({ page }) => {
+  await page.goto('https://app.example.com');
+  // click() auto-waits for: attached, visible, stable, enabled, no overlay
+  await page.locator('#submit').click();
+  // fill() auto-waits for: attached, visible, enabled, editable
+  await page.locator('#email').fill('test@example.com');
+  // textContent() auto-waits for: attached
+  const text = await page.locator('.status').textContent();
+});
+```
+codeB:
+```typescript
+// Explicit waitFor — for events, not elements
+test('explicit wait example', async ({ page }) => {
+  await page.goto('https://app.example.com');
+  // Wait for a specific network response
+  await page.waitForResponse(resp =>
+    resp.url().includes('/api/users') && resp.status() === 200
+  );
+  // Wait for page load state
+  await page.waitForLoadState('domcontentloaded');
+  // Wait for a selector with specific state
+  await page.waitForSelector('.modal', { state: 'hidden' });
+  // Wait for a custom event/condition
+  await page.waitForFunction(() => window.appReady === true);
+});
+```
+question: When should you use explicit waitFor methods instead of relying on auto-wait?
+options: [When testing slow pages that take more than 5 seconds to load, When you need to wait for network responses or page-level states or element disappearance, When auto-wait doesn't work and you need to add timeouts, When testing APIs that return JSON data]
+correct: 1
+explanation: Auto-wait covers element actionability (visible, stable, enabled) and is built into every locator action. But it doesn't cover waiting for network events, page load states, elements to DISAPPEAR (state 'hidden'/'detached'), or arbitrary JavaScript conditions. That's where explicit waitFor methods come in. It's not about speed — it's about waiting for things that aren't element actions. Auto-wait asks "is this element ready to interact with?" while waitFor asks "has this event/condition occurred?"
+
+## EXPLAIN_BACK
+mode: fill_blank
+prompt: Explain how Promise.all works with Playwright's wait patterns for actions that trigger network events.
+sentence: Promise.all runs multiple _____ in parallel, so you register the _____ before the action _____ it.
+blanks: [promises, waitForResponse listener, triggers]
+distractors: [callbacks, click handler, resolves]
+
+## CONNECT
+text: Understanding async patterns and waits is foundational for API testing (next unit). When you mock API responses with route(), you'll combine waitForResponse with route handlers to verify your mocks are hit. In the fixtures unit (p8u8), you'll use async setup in beforeEach hooks that rely on these same wait patterns.
+```typescript
+// Preview: API mocking + wait pattern (Unit 7)
+test('mocked checkout', async ({ page }) => {
+  await page.route('**/api/order', route => route.fulfill({
+    status: 201,
+    body: JSON.stringify({ orderId: 'ORD-123' })
+  }));
+
+  const [response] = await Promise.all([
+    page.waitForResponse('**/api/order'),
+    page.locator('#checkout').click(),
+  ]);
+
+  // Verify the mock was hit with correct data
+  const body = await response.json();
+  expect(body.orderId).toBe('ORD-123');
+});
+```
+note: Promise.all + waitForResponse is the backbone of API test verification. Master it here, and API testing in Unit 7 becomes natural.

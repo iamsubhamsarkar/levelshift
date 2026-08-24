@@ -9,6 +9,8 @@
   import ContrastCard from './ContrastCard.svelte';
   import ExplainBackCard from './ExplainBackCard.svelte';
   import ConnectCard from './ConnectCard.svelte';
+  import TheoryCard from './TheoryCard.svelte';
+  import BuildStepCard from './BuildStepCard.svelte';
 
   export let card = null;
 
@@ -54,6 +56,10 @@
     <ExplainBackCard data={card.content} cardState={$currentCardState} on:answer={handleAnswer} on:rating={handleRating} />
   {:else if card.type === 'connect'}
     <ConnectCard data={card.content} />
+  {:else if card.type === 'theory'}
+    <TheoryCard data={card.content} cardState={$currentCardState} on:answer={handleAnswer} />
+  {:else if card.type === 'build_step'}
+    <BuildStepCard data={card.content} cardState={$currentCardState} on:answer={handleAnswer} />
   {:else}
     <div class="card text-center">
       <p class="text-text-muted">Unknown card type: {card.type}</p>

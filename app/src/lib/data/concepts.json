@@ -1,127 +1,2234 @@
 {
   "concepts": {
-    "basics.types":              { "phase": 1, "unit": "p1u1", "prereqs": [], "category": "java" },
-    "basics.strings":            { "phase": 1, "unit": "p1u1", "prereqs": [], "category": "java" },
-    "basics.controlflow":        { "phase": 1, "unit": "p1u2", "prereqs": ["basics.types"], "category": "java" },
-    "basics.methods":            { "phase": 1, "unit": "p1u2", "prereqs": ["basics.types", "basics.controlflow"], "category": "java" },
-    "oop.classes":               { "phase": 1, "unit": "p1u3", "prereqs": ["basics.methods"], "category": "java" },
-    "oop.constructors":          { "phase": 1, "unit": "p1u3", "prereqs": ["oop.classes"], "category": "java" },
-    "oop.this":                  { "phase": 1, "unit": "p1u3", "prereqs": ["oop.classes", "oop.constructors"], "category": "java" },
-    "oop.encapsulation":         { "phase": 1, "unit": "p1u4", "prereqs": ["oop.classes"], "category": "java" },
-    "oop.accessmodifiers":       { "phase": 1, "unit": "p1u4", "prereqs": ["oop.encapsulation"], "category": "java" },
-    "oop.inheritance":           { "phase": 1, "unit": "p1u5", "prereqs": ["oop.encapsulation", "oop.constructors"], "category": "java" },
-    "oop.super":                 { "phase": 1, "unit": "p1u5", "prereqs": ["oop.inheritance"], "category": "java" },
-    "oop.constructorchain":      { "phase": 1, "unit": "p1u5", "prereqs": ["oop.inheritance", "oop.constructors"], "category": "java" },
-    "oop.polymorphism":          { "phase": 1, "unit": "p1u6", "prereqs": ["oop.inheritance"], "category": "java" },
-    "oop.overloading":           { "phase": 1, "unit": "p1u6", "prereqs": ["basics.methods"], "category": "java" },
-    "oop.overriding":            { "phase": 1, "unit": "p1u6", "prereqs": ["oop.inheritance", "oop.polymorphism"], "category": "java" },
-    "oop.abstract":              { "phase": 1, "unit": "p1u7", "prereqs": ["oop.inheritance", "oop.polymorphism"], "category": "java" },
-    "oop.interfaces":            { "phase": 1, "unit": "p1u7", "prereqs": ["oop.abstract"], "category": "java" },
-    "oop.defaultmethods":        { "phase": 1, "unit": "p1u7", "prereqs": ["oop.interfaces"], "category": "java" },
-    "oop.integration":           { "phase": 1, "unit": "p1u8", "prereqs": ["oop.polymorphism", "oop.interfaces", "oop.encapsulation"], "category": "java" },
-
-    "collections.list":          { "phase": 2, "unit": "p2u1", "prereqs": ["oop.classes", "basics.types"], "category": "java" },
-    "collections.arraylist":     { "phase": 2, "unit": "p2u1", "prereqs": ["collections.list"], "category": "java" },
-    "collections.linkedlist":    { "phase": 2, "unit": "p2u1", "prereqs": ["collections.list"], "category": "java" },
-    "collections.hashmap":       { "phase": 2, "unit": "p2u2", "prereqs": ["oop.classes", "oop.encapsulation"], "category": "java" },
-    "collections.hashset":       { "phase": 2, "unit": "p2u2", "prereqs": ["collections.hashmap"], "category": "java" },
-    "collections.equals_hashcode": { "phase": 2, "unit": "p2u2", "prereqs": ["oop.classes", "oop.overriding"], "category": "java" },
-    "collections.iterator":      { "phase": 2, "unit": "p2u3", "prereqs": ["collections.list"], "category": "java" },
-    "collections.comparable":    { "phase": 2, "unit": "p2u3", "prereqs": ["oop.interfaces", "collections.list"], "category": "java" },
-    "collections.comparator":    { "phase": 2, "unit": "p2u3", "prereqs": ["oop.interfaces", "collections.list"], "category": "java" },
-    "collections.generics":      { "phase": 2, "unit": "p2u4", "prereqs": ["collections.list", "oop.inheritance"], "category": "java" },
-    "collections.bounded":       { "phase": 2, "unit": "p2u4", "prereqs": ["collections.generics", "oop.inheritance"], "category": "java" },
-    "collections.wildcards":     { "phase": 2, "unit": "p2u4", "prereqs": ["collections.generics"], "category": "java" },
-    "collections.integration":   { "phase": 2, "unit": "p2u5", "prereqs": ["collections.hashmap", "collections.comparator", "collections.generics"], "category": "java" },
-
-    "exceptions.trycatch":       { "phase": 3, "unit": "p3u1", "prereqs": ["basics.methods", "oop.classes"], "category": "java" },
-    "exceptions.checked":        { "phase": 3, "unit": "p3u1", "prereqs": ["exceptions.trycatch", "oop.inheritance"], "category": "java" },
-    "exceptions.custom":         { "phase": 3, "unit": "p3u1", "prereqs": ["exceptions.checked", "oop.inheritance"], "category": "java" },
-    "java8.lambdas":             { "phase": 3, "unit": "p3u2", "prereqs": ["oop.interfaces"], "category": "java" },
-    "java8.functional":          { "phase": 3, "unit": "p3u2", "prereqs": ["java8.lambdas", "oop.interfaces"], "category": "java" },
-    "java8.predicate":           { "phase": 3, "unit": "p3u2", "prereqs": ["java8.functional"], "category": "java" },
-    "java8.streams.basics":      { "phase": 3, "unit": "p3u3", "prereqs": ["java8.lambdas", "collections.list"], "category": "java" },
-    "java8.streams.filter":      { "phase": 3, "unit": "p3u3", "prereqs": ["java8.streams.basics", "java8.predicate"], "category": "java" },
-    "java8.streams.collect":     { "phase": 3, "unit": "p3u3", "prereqs": ["java8.streams.basics", "collections.list"], "category": "java" },
-    "java8.streams.flatmap":     { "phase": 3, "unit": "p3u4", "prereqs": ["java8.streams.basics", "collections.list"], "category": "java" },
-    "java8.streams.grouping":    { "phase": 3, "unit": "p3u4", "prereqs": ["java8.streams.collect", "collections.hashmap"], "category": "java" },
-    "java8.optional":            { "phase": 3, "unit": "p3u4", "prereqs": ["java8.streams.basics"], "category": "java" },
-    "java8.integration":         { "phase": 3, "unit": "p3u5", "prereqs": ["java8.streams.grouping", "exceptions.trycatch", "java8.optional"], "category": "java" },
-
-    "dsa.arrays":                { "phase": 4, "unit": "p4u1", "prereqs": ["basics.types", "basics.controlflow"], "category": "dsa" },
-    "dsa.twopointers":           { "phase": 4, "unit": "p4u1", "prereqs": ["dsa.arrays"], "category": "dsa" },
-    "dsa.slidingwindow":         { "phase": 4, "unit": "p4u1", "prereqs": ["dsa.arrays", "collections.hashmap"], "category": "dsa" },
-    "dsa.strings":               { "phase": 4, "unit": "p4u2", "prereqs": ["basics.strings", "collections.hashmap"], "category": "dsa" },
-    "dsa.palindrome":            { "phase": 4, "unit": "p4u2", "prereqs": ["dsa.strings", "dsa.twopointers"], "category": "dsa" },
-    "dsa.anagram":               { "phase": 4, "unit": "p4u2", "prereqs": ["dsa.strings", "collections.hashmap"], "category": "dsa" },
-    "dsa.hashmap_patterns":      { "phase": 4, "unit": "p4u3", "prereqs": ["collections.hashmap", "java8.streams.basics"], "category": "dsa" },
-    "dsa.frequency":             { "phase": 4, "unit": "p4u3", "prereqs": ["dsa.hashmap_patterns"], "category": "dsa" },
-    "dsa.grouping":              { "phase": 4, "unit": "p4u3", "prereqs": ["dsa.hashmap_patterns", "java8.streams.grouping"], "category": "dsa" },
-    "dsa.sorting":               { "phase": 4, "unit": "p4u4", "prereqs": ["collections.comparable", "collections.comparator"], "category": "dsa" },
-    "dsa.binarysearch":          { "phase": 4, "unit": "p4u4", "prereqs": ["dsa.sorting", "dsa.arrays"], "category": "dsa" },
-    "dsa.customsort":            { "phase": 4, "unit": "p4u4", "prereqs": ["dsa.sorting", "java8.lambdas"], "category": "dsa" },
-    "dsa.stack":                 { "phase": 4, "unit": "p4u5", "prereqs": ["collections.list"], "category": "dsa" },
-    "dsa.queue":                 { "phase": 4, "unit": "p4u5", "prereqs": ["collections.list"], "category": "dsa" },
-    "dsa.bfs_basics":            { "phase": 4, "unit": "p4u5", "prereqs": ["dsa.queue"], "category": "dsa" },
-    "dsa.integration":           { "phase": 4, "unit": "p4u6", "prereqs": ["dsa.hashmap_patterns", "dsa.binarysearch", "dsa.stack"], "category": "dsa" },
-
-    "http.methods":              { "phase": 5, "unit": "p5u1", "prereqs": [], "category": "api" },
-    "http.statuscodes":          { "phase": 5, "unit": "p5u1", "prereqs": ["http.methods"], "category": "api" },
-    "http.headers":              { "phase": 5, "unit": "p5u1", "prereqs": ["http.methods"], "category": "api" },
-    "rest.principles":           { "phase": 5, "unit": "p5u1", "prereqs": ["http.methods"], "category": "api" },
-    "restassured.givenwhen":     { "phase": 5, "unit": "p5u2", "prereqs": ["http.methods", "basics.methods"], "category": "restassured" },
-    "restassured.statuscode":    { "phase": 5, "unit": "p5u2", "prereqs": ["restassured.givenwhen", "http.statuscodes"], "category": "restassured" },
-    "restassured.headers":       { "phase": 5, "unit": "p5u3", "prereqs": ["restassured.givenwhen", "collections.hashmap"], "category": "restassured" },
-    "restassured.params":        { "phase": 5, "unit": "p5u3", "prereqs": ["restassured.givenwhen"], "category": "restassured" },
-    "restassured.body":          { "phase": 5, "unit": "p5u3", "prereqs": ["restassured.givenwhen", "basics.strings"], "category": "restassured" },
-    "restassured.hamcrest":      { "phase": 5, "unit": "p5u4", "prereqs": ["restassured.statuscode"], "category": "restassured" },
-    "restassured.jsonpath":      { "phase": 5, "unit": "p5u4", "prereqs": ["restassured.hamcrest"], "category": "restassured" },
-    "restassured.gpath":         { "phase": 5, "unit": "p5u4", "prereqs": ["restassured.jsonpath", "java8.streams.filter"], "category": "restassured" },
-    "restassured.pojo":          { "phase": 5, "unit": "p5u5", "prereqs": ["oop.classes", "oop.encapsulation", "restassured.body"], "category": "restassured" },
-    "restassured.serialization": { "phase": 5, "unit": "p5u5", "prereqs": ["restassured.pojo"], "category": "restassured" },
-    "restassured.auth":          { "phase": 5, "unit": "p5u6", "prereqs": ["restassured.headers", "http.headers"], "category": "restassured" },
-    "restassured.requestspec":   { "phase": 5, "unit": "p5u6", "prereqs": ["restassured.auth", "oop.encapsulation"], "category": "restassured" },
-    "restassured.responsespec":  { "phase": 5, "unit": "p5u6", "prereqs": ["restassured.hamcrest"], "category": "restassured" },
-    "restassured.dataprovider":  { "phase": 5, "unit": "p5u7", "prereqs": ["restassured.requestspec", "collections.list", "collections.hashmap"], "category": "restassured" },
-    "restassured.parameterized": { "phase": 5, "unit": "p5u7", "prereqs": ["restassured.dataprovider", "java8.streams.collect"], "category": "restassured" },
-    "restassured.extract":       { "phase": 5, "unit": "p5u8", "prereqs": ["restassured.jsonpath", "basics.strings"], "category": "restassured" },
-    "restassured.chaining":      { "phase": 5, "unit": "p5u8", "prereqs": ["restassured.extract"], "category": "restassured" },
-    "restassured.logging":       { "phase": 5, "unit": "p5u9", "prereqs": ["restassured.requestspec"], "category": "restassured" },
-    "restassured.filters":       { "phase": 5, "unit": "p5u9", "prereqs": ["restassured.logging"], "category": "restassured" },
-    "restassured.retry":         { "phase": 5, "unit": "p5u9", "prereqs": ["exceptions.trycatch", "restassured.givenwhen"], "category": "restassured" },
-    "restassured.framework":     { "phase": 5, "unit": "p5u10", "prereqs": ["restassured.requestspec", "restassured.chaining", "restassured.dataprovider", "oop.interfaces"], "category": "restassured" },
-
-    "selenium.architecture":     { "phase": 7, "unit": "p7u1", "prereqs": ["http.methods"], "category": "selenium" },
-    "selenium.webdriver_protocol": { "phase": 7, "unit": "p7u1", "prereqs": ["selenium.architecture"], "category": "selenium" },
-    "selenium.css":              { "phase": 7, "unit": "p7u2", "prereqs": ["selenium.architecture", "basics.strings"], "category": "selenium" },
-    "selenium.xpath":            { "phase": 7, "unit": "p7u2", "prereqs": ["selenium.architecture", "basics.strings"], "category": "selenium" },
-    "selenium.locators":         { "phase": 7, "unit": "p7u2", "prereqs": ["selenium.css", "selenium.xpath"], "category": "selenium" },
-    "selenium.implicit_wait":    { "phase": 7, "unit": "p7u3", "prereqs": ["selenium.locators"], "category": "selenium" },
-    "selenium.explicit_wait":    { "phase": 7, "unit": "p7u3", "prereqs": ["selenium.locators", "java8.lambdas"], "category": "selenium" },
-    "selenium.fluent_wait":      { "phase": 7, "unit": "p7u3", "prereqs": ["selenium.explicit_wait", "exceptions.trycatch"], "category": "selenium" },
-    "selenium.pom":              { "phase": 7, "unit": "p7u4", "prereqs": ["oop.inheritance", "oop.encapsulation", "selenium.locators"], "category": "selenium" },
-    "selenium.basepage":         { "phase": 7, "unit": "p7u4", "prereqs": ["selenium.pom", "oop.abstract"], "category": "selenium" },
-    "selenium.pagefactory":      { "phase": 7, "unit": "p7u4", "prereqs": ["selenium.pom"], "category": "selenium" },
-    "selenium.dropdowns":        { "phase": 7, "unit": "p7u5", "prereqs": ["selenium.locators"], "category": "selenium" },
-    "selenium.alerts":           { "phase": 7, "unit": "p7u5", "prereqs": ["selenium.locators"], "category": "selenium" },
-    "selenium.frames":           { "phase": 7, "unit": "p7u5", "prereqs": ["selenium.locators"], "category": "selenium" },
-    "selenium.actions":          { "phase": 7, "unit": "p7u5", "prereqs": ["selenium.locators"], "category": "selenium" },
-    "selenium.testng":           { "phase": 7, "unit": "p7u6", "prereqs": ["selenium.pom", "oop.interfaces"], "category": "selenium" },
-    "selenium.annotations":      { "phase": 7, "unit": "p7u6", "prereqs": ["selenium.testng"], "category": "selenium" },
-    "selenium.dataprovider":     { "phase": 7, "unit": "p7u6", "prereqs": ["selenium.testng", "collections.list"], "category": "selenium" },
-    "selenium.config":           { "phase": 7, "unit": "p7u7", "prereqs": ["selenium.pom", "oop.encapsulation"], "category": "selenium" },
-    "selenium.reporting":        { "phase": 7, "unit": "p7u7", "prereqs": ["selenium.testng"], "category": "selenium" },
-    "selenium.screenshots":      { "phase": 7, "unit": "p7u7", "prereqs": ["selenium.testng", "exceptions.trycatch"], "category": "selenium" },
-    "selenium.threadlocal":      { "phase": 7, "unit": "p7u8", "prereqs": ["selenium.pom", "oop.classes"], "category": "selenium" },
-    "selenium.parallel":         { "phase": 7, "unit": "p7u8", "prereqs": ["selenium.threadlocal", "selenium.testng"], "category": "selenium" },
-    "selenium.cicd":             { "phase": 7, "unit": "p7u8", "prereqs": ["selenium.parallel"], "category": "selenium" },
-    "selenium.framework_project": { "phase": 7, "unit": "p7u9", "prereqs": ["selenium.pom", "selenium.parallel", "selenium.reporting", "selenium.config"], "category": "selenium" }
+    "basics.types": {
+      "phase": 1,
+      "unit": "p1u1",
+      "prereqs": [],
+      "category": "java"
+    },
+    "basics.strings": {
+      "phase": 1,
+      "unit": "p1u1",
+      "prereqs": [],
+      "category": "java"
+    },
+    "basics.controlflow": {
+      "phase": 1,
+      "unit": "p1u2",
+      "prereqs": [
+        "basics.types"
+      ],
+      "category": "java"
+    },
+    "basics.methods": {
+      "phase": 1,
+      "unit": "p1u2",
+      "prereqs": [
+        "basics.types",
+        "basics.controlflow"
+      ],
+      "category": "java"
+    },
+    "oop.classes": {
+      "phase": 1,
+      "unit": "p1u3",
+      "prereqs": [
+        "basics.methods"
+      ],
+      "category": "java"
+    },
+    "oop.constructors": {
+      "phase": 1,
+      "unit": "p1u3",
+      "prereqs": [
+        "oop.classes"
+      ],
+      "category": "java"
+    },
+    "oop.this": {
+      "phase": 1,
+      "unit": "p1u3",
+      "prereqs": [
+        "oop.classes",
+        "oop.constructors"
+      ],
+      "category": "java"
+    },
+    "oop.encapsulation": {
+      "phase": 1,
+      "unit": "p1u4",
+      "prereqs": [
+        "oop.classes"
+      ],
+      "category": "java"
+    },
+    "oop.accessmodifiers": {
+      "phase": 1,
+      "unit": "p1u4",
+      "prereqs": [
+        "oop.encapsulation"
+      ],
+      "category": "java"
+    },
+    "oop.inheritance": {
+      "phase": 1,
+      "unit": "p1u5",
+      "prereqs": [
+        "oop.encapsulation",
+        "oop.constructors"
+      ],
+      "category": "java"
+    },
+    "oop.super": {
+      "phase": 1,
+      "unit": "p1u5",
+      "prereqs": [
+        "oop.inheritance"
+      ],
+      "category": "java"
+    },
+    "oop.constructorchain": {
+      "phase": 1,
+      "unit": "p1u5",
+      "prereqs": [
+        "oop.inheritance",
+        "oop.constructors"
+      ],
+      "category": "java"
+    },
+    "oop.polymorphism": {
+      "phase": 1,
+      "unit": "p1u6",
+      "prereqs": [
+        "oop.inheritance"
+      ],
+      "category": "java"
+    },
+    "oop.overloading": {
+      "phase": 1,
+      "unit": "p1u6",
+      "prereqs": [
+        "basics.methods"
+      ],
+      "category": "java"
+    },
+    "oop.overriding": {
+      "phase": 1,
+      "unit": "p1u6",
+      "prereqs": [
+        "oop.inheritance",
+        "oop.polymorphism"
+      ],
+      "category": "java"
+    },
+    "oop.abstract": {
+      "phase": 1,
+      "unit": "p1u7",
+      "prereqs": [
+        "oop.inheritance",
+        "oop.polymorphism"
+      ],
+      "category": "java"
+    },
+    "oop.interfaces": {
+      "phase": 1,
+      "unit": "p1u7",
+      "prereqs": [
+        "oop.abstract"
+      ],
+      "category": "java"
+    },
+    "oop.defaultmethods": {
+      "phase": 1,
+      "unit": "p1u7",
+      "prereqs": [
+        "oop.interfaces"
+      ],
+      "category": "java"
+    },
+    "oop.integration": {
+      "phase": 1,
+      "unit": "p1u8",
+      "prereqs": [
+        "oop.polymorphism",
+        "oop.interfaces",
+        "oop.encapsulation"
+      ],
+      "category": "java"
+    },
+    "collections.list": {
+      "phase": 2,
+      "unit": "p2u1",
+      "prereqs": [
+        "oop.classes",
+        "basics.types"
+      ],
+      "category": "java"
+    },
+    "collections.arraylist": {
+      "phase": 2,
+      "unit": "p2u1",
+      "prereqs": [
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "collections.linkedlist": {
+      "phase": 2,
+      "unit": "p2u1",
+      "prereqs": [
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "collections.hashmap": {
+      "phase": 2,
+      "unit": "p2u2",
+      "prereqs": [
+        "oop.classes",
+        "oop.encapsulation"
+      ],
+      "category": "java"
+    },
+    "collections.hashset": {
+      "phase": 2,
+      "unit": "p2u2",
+      "prereqs": [
+        "collections.hashmap"
+      ],
+      "category": "java"
+    },
+    "collections.equals_hashcode": {
+      "phase": 2,
+      "unit": "p2u2",
+      "prereqs": [
+        "oop.classes",
+        "oop.overriding"
+      ],
+      "category": "java"
+    },
+    "collections.iterator": {
+      "phase": 2,
+      "unit": "p2u3",
+      "prereqs": [
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "collections.comparable": {
+      "phase": 2,
+      "unit": "p2u3",
+      "prereqs": [
+        "oop.interfaces",
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "collections.comparator": {
+      "phase": 2,
+      "unit": "p2u3",
+      "prereqs": [
+        "oop.interfaces",
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "collections.generics": {
+      "phase": 2,
+      "unit": "p2u4",
+      "prereqs": [
+        "collections.list",
+        "oop.inheritance"
+      ],
+      "category": "java"
+    },
+    "collections.bounded": {
+      "phase": 2,
+      "unit": "p2u4",
+      "prereqs": [
+        "collections.generics",
+        "oop.inheritance"
+      ],
+      "category": "java"
+    },
+    "collections.wildcards": {
+      "phase": 2,
+      "unit": "p2u4",
+      "prereqs": [
+        "collections.generics"
+      ],
+      "category": "java"
+    },
+    "collections.integration": {
+      "phase": 2,
+      "unit": "p2u5",
+      "prereqs": [
+        "collections.hashmap",
+        "collections.comparator",
+        "collections.generics"
+      ],
+      "category": "java"
+    },
+    "exceptions.trycatch": {
+      "phase": 3,
+      "unit": "p3u1",
+      "prereqs": [
+        "basics.methods",
+        "oop.classes"
+      ],
+      "category": "java"
+    },
+    "exceptions.checked": {
+      "phase": 3,
+      "unit": "p3u1",
+      "prereqs": [
+        "exceptions.trycatch",
+        "oop.inheritance"
+      ],
+      "category": "java"
+    },
+    "exceptions.custom": {
+      "phase": 3,
+      "unit": "p3u1",
+      "prereqs": [
+        "exceptions.checked",
+        "oop.inheritance"
+      ],
+      "category": "java"
+    },
+    "java8.lambdas": {
+      "phase": 3,
+      "unit": "p3u2",
+      "prereqs": [
+        "oop.interfaces"
+      ],
+      "category": "java"
+    },
+    "java8.functional": {
+      "phase": 3,
+      "unit": "p3u2",
+      "prereqs": [
+        "java8.lambdas",
+        "oop.interfaces"
+      ],
+      "category": "java"
+    },
+    "java8.predicate": {
+      "phase": 3,
+      "unit": "p3u2",
+      "prereqs": [
+        "java8.functional"
+      ],
+      "category": "java"
+    },
+    "java8.streams.basics": {
+      "phase": 3,
+      "unit": "p3u3",
+      "prereqs": [
+        "java8.lambdas",
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "java8.streams.filter": {
+      "phase": 3,
+      "unit": "p3u3",
+      "prereqs": [
+        "java8.streams.basics",
+        "java8.predicate"
+      ],
+      "category": "java"
+    },
+    "java8.streams.collect": {
+      "phase": 3,
+      "unit": "p3u3",
+      "prereqs": [
+        "java8.streams.basics",
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "java8.streams.flatmap": {
+      "phase": 3,
+      "unit": "p3u4",
+      "prereqs": [
+        "java8.streams.basics",
+        "collections.list"
+      ],
+      "category": "java"
+    },
+    "java8.streams.grouping": {
+      "phase": 3,
+      "unit": "p3u4",
+      "prereqs": [
+        "java8.streams.collect",
+        "collections.hashmap"
+      ],
+      "category": "java"
+    },
+    "java8.optional": {
+      "phase": 3,
+      "unit": "p3u4",
+      "prereqs": [
+        "java8.streams.basics"
+      ],
+      "category": "java"
+    },
+    "java8.integration": {
+      "phase": 3,
+      "unit": "p3u5",
+      "prereqs": [
+        "java8.streams.grouping",
+        "exceptions.trycatch",
+        "java8.optional"
+      ],
+      "category": "java"
+    },
+    "dsa.arrays": {
+      "phase": 4,
+      "unit": "p4u1",
+      "prereqs": [
+        "basics.types",
+        "basics.controlflow"
+      ],
+      "category": "dsa"
+    },
+    "dsa.twopointers": {
+      "phase": 4,
+      "unit": "p4u1",
+      "prereqs": [
+        "dsa.arrays"
+      ],
+      "category": "dsa"
+    },
+    "dsa.slidingwindow": {
+      "phase": 4,
+      "unit": "p4u1",
+      "prereqs": [
+        "dsa.arrays",
+        "collections.hashmap"
+      ],
+      "category": "dsa"
+    },
+    "dsa.strings": {
+      "phase": 4,
+      "unit": "p4u2",
+      "prereqs": [
+        "basics.strings",
+        "collections.hashmap"
+      ],
+      "category": "dsa"
+    },
+    "dsa.palindrome": {
+      "phase": 4,
+      "unit": "p4u2",
+      "prereqs": [
+        "dsa.strings",
+        "dsa.twopointers"
+      ],
+      "category": "dsa"
+    },
+    "dsa.anagram": {
+      "phase": 4,
+      "unit": "p4u2",
+      "prereqs": [
+        "dsa.strings",
+        "collections.hashmap"
+      ],
+      "category": "dsa"
+    },
+    "dsa.hashmap_patterns": {
+      "phase": 4,
+      "unit": "p4u3",
+      "prereqs": [
+        "collections.hashmap",
+        "java8.streams.basics"
+      ],
+      "category": "dsa"
+    },
+    "dsa.frequency": {
+      "phase": 4,
+      "unit": "p4u3",
+      "prereqs": [
+        "dsa.hashmap_patterns"
+      ],
+      "category": "dsa"
+    },
+    "dsa.grouping": {
+      "phase": 4,
+      "unit": "p4u3",
+      "prereqs": [
+        "dsa.hashmap_patterns",
+        "java8.streams.grouping"
+      ],
+      "category": "dsa"
+    },
+    "dsa.sorting": {
+      "phase": 4,
+      "unit": "p4u4",
+      "prereqs": [
+        "collections.comparable",
+        "collections.comparator"
+      ],
+      "category": "dsa"
+    },
+    "dsa.binarysearch": {
+      "phase": 4,
+      "unit": "p4u4",
+      "prereqs": [
+        "dsa.sorting",
+        "dsa.arrays"
+      ],
+      "category": "dsa"
+    },
+    "dsa.customsort": {
+      "phase": 4,
+      "unit": "p4u4",
+      "prereqs": [
+        "dsa.sorting",
+        "java8.lambdas"
+      ],
+      "category": "dsa"
+    },
+    "dsa.stack": {
+      "phase": 4,
+      "unit": "p4u5",
+      "prereqs": [
+        "collections.list"
+      ],
+      "category": "dsa"
+    },
+    "dsa.queue": {
+      "phase": 4,
+      "unit": "p4u5",
+      "prereqs": [
+        "collections.list"
+      ],
+      "category": "dsa"
+    },
+    "dsa.bfs_basics": {
+      "phase": 4,
+      "unit": "p4u5",
+      "prereqs": [
+        "dsa.queue"
+      ],
+      "category": "dsa"
+    },
+    "dsa.integration": {
+      "phase": 4,
+      "unit": "p4u6",
+      "prereqs": [
+        "dsa.hashmap_patterns",
+        "dsa.binarysearch",
+        "dsa.stack"
+      ],
+      "category": "dsa"
+    },
+    "http.methods": {
+      "phase": 5,
+      "unit": "p5u1",
+      "prereqs": [],
+      "category": "api"
+    },
+    "http.statuscodes": {
+      "phase": 5,
+      "unit": "p5u1",
+      "prereqs": [
+        "http.methods"
+      ],
+      "category": "api"
+    },
+    "http.headers": {
+      "phase": 5,
+      "unit": "p5u1",
+      "prereqs": [
+        "http.methods"
+      ],
+      "category": "api"
+    },
+    "rest.principles": {
+      "phase": 5,
+      "unit": "p5u1",
+      "prereqs": [
+        "http.methods"
+      ],
+      "category": "api"
+    },
+    "restassured.givenwhen": {
+      "phase": 5,
+      "unit": "p5u2",
+      "prereqs": [
+        "http.methods",
+        "basics.methods"
+      ],
+      "category": "restassured"
+    },
+    "restassured.statuscode": {
+      "phase": 5,
+      "unit": "p5u2",
+      "prereqs": [
+        "restassured.givenwhen",
+        "http.statuscodes"
+      ],
+      "category": "restassured"
+    },
+    "restassured.headers": {
+      "phase": 5,
+      "unit": "p5u3",
+      "prereqs": [
+        "restassured.givenwhen",
+        "collections.hashmap"
+      ],
+      "category": "restassured"
+    },
+    "restassured.params": {
+      "phase": 5,
+      "unit": "p5u3",
+      "prereqs": [
+        "restassured.givenwhen"
+      ],
+      "category": "restassured"
+    },
+    "restassured.body": {
+      "phase": 5,
+      "unit": "p5u3",
+      "prereqs": [
+        "restassured.givenwhen",
+        "basics.strings"
+      ],
+      "category": "restassured"
+    },
+    "restassured.hamcrest": {
+      "phase": 5,
+      "unit": "p5u4",
+      "prereqs": [
+        "restassured.statuscode"
+      ],
+      "category": "restassured"
+    },
+    "restassured.jsonpath": {
+      "phase": 5,
+      "unit": "p5u4",
+      "prereqs": [
+        "restassured.hamcrest"
+      ],
+      "category": "restassured"
+    },
+    "restassured.gpath": {
+      "phase": 5,
+      "unit": "p5u4",
+      "prereqs": [
+        "restassured.jsonpath",
+        "java8.streams.filter"
+      ],
+      "category": "restassured"
+    },
+    "restassured.pojo": {
+      "phase": 5,
+      "unit": "p5u5",
+      "prereqs": [
+        "oop.classes",
+        "oop.encapsulation",
+        "restassured.body"
+      ],
+      "category": "restassured"
+    },
+    "restassured.serialization": {
+      "phase": 5,
+      "unit": "p5u5",
+      "prereqs": [
+        "restassured.pojo"
+      ],
+      "category": "restassured"
+    },
+    "restassured.auth": {
+      "phase": 5,
+      "unit": "p5u6",
+      "prereqs": [
+        "restassured.headers",
+        "http.headers"
+      ],
+      "category": "restassured"
+    },
+    "restassured.requestspec": {
+      "phase": 5,
+      "unit": "p5u6",
+      "prereqs": [
+        "restassured.auth",
+        "oop.encapsulation"
+      ],
+      "category": "restassured"
+    },
+    "restassured.responsespec": {
+      "phase": 5,
+      "unit": "p5u6",
+      "prereqs": [
+        "restassured.hamcrest"
+      ],
+      "category": "restassured"
+    },
+    "restassured.dataprovider": {
+      "phase": 5,
+      "unit": "p5u7",
+      "prereqs": [
+        "restassured.requestspec",
+        "collections.list",
+        "collections.hashmap"
+      ],
+      "category": "restassured"
+    },
+    "restassured.parameterized": {
+      "phase": 5,
+      "unit": "p5u7",
+      "prereqs": [
+        "restassured.dataprovider",
+        "java8.streams.collect"
+      ],
+      "category": "restassured"
+    },
+    "restassured.extract": {
+      "phase": 5,
+      "unit": "p5u8",
+      "prereqs": [
+        "restassured.jsonpath",
+        "basics.strings"
+      ],
+      "category": "restassured"
+    },
+    "restassured.chaining": {
+      "phase": 5,
+      "unit": "p5u8",
+      "prereqs": [
+        "restassured.extract"
+      ],
+      "category": "restassured"
+    },
+    "restassured.logging": {
+      "phase": 5,
+      "unit": "p5u9",
+      "prereqs": [
+        "restassured.requestspec"
+      ],
+      "category": "restassured"
+    },
+    "restassured.filters": {
+      "phase": 5,
+      "unit": "p5u9",
+      "prereqs": [
+        "restassured.logging"
+      ],
+      "category": "restassured"
+    },
+    "restassured.retry": {
+      "phase": 5,
+      "unit": "p5u9",
+      "prereqs": [
+        "exceptions.trycatch",
+        "restassured.givenwhen"
+      ],
+      "category": "restassured"
+    },
+    "restassured.framework": {
+      "phase": 5,
+      "unit": "p5u10",
+      "prereqs": [
+        "restassured.requestspec",
+        "restassured.chaining",
+        "restassured.dataprovider",
+        "oop.interfaces"
+      ],
+      "category": "restassured"
+    },
+    "selenium.architecture": {
+      "phase": 7,
+      "unit": "p7u1",
+      "prereqs": [
+        "http.methods"
+      ],
+      "category": "selenium"
+    },
+    "selenium.webdriver_protocol": {
+      "phase": 7,
+      "unit": "p7u1",
+      "prereqs": [
+        "selenium.architecture"
+      ],
+      "category": "selenium"
+    },
+    "selenium.css": {
+      "phase": 7,
+      "unit": "p7u2",
+      "prereqs": [
+        "selenium.architecture",
+        "basics.strings"
+      ],
+      "category": "selenium"
+    },
+    "selenium.xpath": {
+      "phase": 7,
+      "unit": "p7u2",
+      "prereqs": [
+        "selenium.architecture",
+        "basics.strings"
+      ],
+      "category": "selenium"
+    },
+    "selenium.locators": {
+      "phase": 7,
+      "unit": "p7u2",
+      "prereqs": [
+        "selenium.css",
+        "selenium.xpath"
+      ],
+      "category": "selenium"
+    },
+    "selenium.implicit_wait": {
+      "phase": 7,
+      "unit": "p7u3",
+      "prereqs": [
+        "selenium.locators"
+      ],
+      "category": "selenium"
+    },
+    "selenium.explicit_wait": {
+      "phase": 7,
+      "unit": "p7u3",
+      "prereqs": [
+        "selenium.locators",
+        "java8.lambdas"
+      ],
+      "category": "selenium"
+    },
+    "selenium.fluent_wait": {
+      "phase": 7,
+      "unit": "p7u3",
+      "prereqs": [
+        "selenium.explicit_wait",
+        "exceptions.trycatch"
+      ],
+      "category": "selenium"
+    },
+    "selenium.pom": {
+      "phase": 7,
+      "unit": "p7u4",
+      "prereqs": [
+        "oop.inheritance",
+        "oop.encapsulation",
+        "selenium.locators"
+      ],
+      "category": "selenium"
+    },
+    "selenium.basepage": {
+      "phase": 7,
+      "unit": "p7u4",
+      "prereqs": [
+        "selenium.pom",
+        "oop.abstract"
+      ],
+      "category": "selenium"
+    },
+    "selenium.pagefactory": {
+      "phase": 7,
+      "unit": "p7u4",
+      "prereqs": [
+        "selenium.pom"
+      ],
+      "category": "selenium"
+    },
+    "selenium.dropdowns": {
+      "phase": 7,
+      "unit": "p7u5",
+      "prereqs": [
+        "selenium.locators"
+      ],
+      "category": "selenium"
+    },
+    "selenium.alerts": {
+      "phase": 7,
+      "unit": "p7u5",
+      "prereqs": [
+        "selenium.locators"
+      ],
+      "category": "selenium"
+    },
+    "selenium.frames": {
+      "phase": 7,
+      "unit": "p7u5",
+      "prereqs": [
+        "selenium.locators"
+      ],
+      "category": "selenium"
+    },
+    "selenium.actions": {
+      "phase": 7,
+      "unit": "p7u5",
+      "prereqs": [
+        "selenium.locators"
+      ],
+      "category": "selenium"
+    },
+    "selenium.testng": {
+      "phase": 7,
+      "unit": "p7u6",
+      "prereqs": [
+        "selenium.pom",
+        "oop.interfaces"
+      ],
+      "category": "selenium"
+    },
+    "selenium.annotations": {
+      "phase": 7,
+      "unit": "p7u6",
+      "prereqs": [
+        "selenium.testng"
+      ],
+      "category": "selenium"
+    },
+    "selenium.dataprovider": {
+      "phase": 7,
+      "unit": "p7u6",
+      "prereqs": [
+        "selenium.testng",
+        "collections.list"
+      ],
+      "category": "selenium"
+    },
+    "selenium.config": {
+      "phase": 7,
+      "unit": "p7u7",
+      "prereqs": [
+        "selenium.pom",
+        "oop.encapsulation"
+      ],
+      "category": "selenium"
+    },
+    "selenium.reporting": {
+      "phase": 7,
+      "unit": "p7u7",
+      "prereqs": [
+        "selenium.testng"
+      ],
+      "category": "selenium"
+    },
+    "selenium.screenshots": {
+      "phase": 7,
+      "unit": "p7u7",
+      "prereqs": [
+        "selenium.testng",
+        "exceptions.trycatch"
+      ],
+      "category": "selenium"
+    },
+    "selenium.threadlocal": {
+      "phase": 7,
+      "unit": "p7u8",
+      "prereqs": [
+        "selenium.pom",
+        "oop.classes"
+      ],
+      "category": "selenium"
+    },
+    "selenium.parallel": {
+      "phase": 7,
+      "unit": "p7u8",
+      "prereqs": [
+        "selenium.threadlocal",
+        "selenium.testng"
+      ],
+      "category": "selenium"
+    },
+    "selenium.cicd": {
+      "phase": 7,
+      "unit": "p7u8",
+      "prereqs": [
+        "selenium.parallel"
+      ],
+      "category": "selenium"
+    },
+    "selenium.framework_project": {
+      "phase": 7,
+      "unit": "p7u9",
+      "prereqs": [
+        "selenium.pom",
+        "selenium.parallel",
+        "selenium.reporting",
+        "selenium.config"
+      ],
+      "category": "selenium"
+    },
+    "typescript.types": {
+      "phase": 8,
+      "unit": "p8u1",
+      "prereqs": [],
+      "category": "playwright"
+    },
+    "typescript.const_let": {
+      "phase": 8,
+      "unit": "p8u1",
+      "prereqs": [],
+      "category": "playwright"
+    },
+    "playwright.setup": {
+      "phase": 8,
+      "unit": "p8u1",
+      "prereqs": [],
+      "category": "playwright"
+    },
+    "playwright.test_runner": {
+      "phase": 8,
+      "unit": "p8u1",
+      "prereqs": [
+        "playwright.setup"
+      ],
+      "category": "playwright"
+    },
+    "playwright.test_structure": {
+      "phase": 8,
+      "unit": "p8u2",
+      "prereqs": [
+        "playwright.setup",
+        "typescript.types"
+      ],
+      "category": "playwright"
+    },
+    "playwright.locators": {
+      "phase": 8,
+      "unit": "p8u2",
+      "prereqs": [
+        "playwright.test_structure"
+      ],
+      "category": "playwright"
+    },
+    "typescript.async_await": {
+      "phase": 8,
+      "unit": "p8u2",
+      "prereqs": [
+        "typescript.types"
+      ],
+      "category": "playwright"
+    },
+    "playwright.getby": {
+      "phase": 8,
+      "unit": "p8u2",
+      "prereqs": [
+        "playwright.locators"
+      ],
+      "category": "playwright"
+    },
+    "playwright.assertions": {
+      "phase": 8,
+      "unit": "p8u3",
+      "prereqs": [
+        "playwright.test_structure",
+        "typescript.async_await",
+        "playwright.locators"
+      ],
+      "category": "playwright"
+    },
+    "typescript.interfaces": {
+      "phase": 8,
+      "unit": "p8u3",
+      "prereqs": [
+        "typescript.types"
+      ],
+      "category": "playwright"
+    },
+    "typescript.unions": {
+      "phase": 8,
+      "unit": "p8u3",
+      "prereqs": [
+        "typescript.types"
+      ],
+      "category": "playwright"
+    },
+    "playwright.expect": {
+      "phase": 8,
+      "unit": "p8u3",
+      "prereqs": [
+        "playwright.assertions"
+      ],
+      "category": "playwright"
+    },
+    "playwright.actions": {
+      "phase": 8,
+      "unit": "p8u4",
+      "prereqs": [
+        "playwright.assertions",
+        "playwright.locators",
+        "typescript.interfaces"
+      ],
+      "category": "playwright"
+    },
+    "playwright.fill": {
+      "phase": 8,
+      "unit": "p8u4",
+      "prereqs": [
+        "playwright.actions"
+      ],
+      "category": "playwright"
+    },
+    "playwright.click": {
+      "phase": 8,
+      "unit": "p8u4",
+      "prereqs": [
+        "playwright.actions"
+      ],
+      "category": "playwright"
+    },
+    "typescript.functions": {
+      "phase": 8,
+      "unit": "p8u4",
+      "prereqs": [
+        "typescript.types",
+        "typescript.async_await"
+      ],
+      "category": "playwright"
+    },
+    "typescript.arrow_functions": {
+      "phase": 8,
+      "unit": "p8u4",
+      "prereqs": [
+        "typescript.functions"
+      ],
+      "category": "playwright"
+    },
+    "playwright.pom": {
+      "phase": 8,
+      "unit": "p8u5",
+      "prereqs": [
+        "playwright.actions",
+        "typescript.functions",
+        "playwright.assertions"
+      ],
+      "category": "playwright"
+    },
+    "typescript.classes": {
+      "phase": 8,
+      "unit": "p8u5",
+      "prereqs": [
+        "typescript.functions",
+        "typescript.interfaces"
+      ],
+      "category": "playwright"
+    },
+    "typescript.constructors": {
+      "phase": 8,
+      "unit": "p8u5",
+      "prereqs": [
+        "typescript.classes"
+      ],
+      "category": "playwright"
+    },
+    "playwright.page_abstraction": {
+      "phase": 8,
+      "unit": "p8u5",
+      "prereqs": [
+        "playwright.pom",
+        "typescript.classes"
+      ],
+      "category": "playwright"
+    },
+    "playwright.auto_wait": {
+      "phase": 8,
+      "unit": "p8u6",
+      "prereqs": [
+        "playwright.actions",
+        "typescript.async_await",
+        "playwright.assertions"
+      ],
+      "category": "playwright"
+    },
+    "playwright.wait_for": {
+      "phase": 8,
+      "unit": "p8u6",
+      "prereqs": [
+        "playwright.auto_wait"
+      ],
+      "category": "playwright"
+    },
+    "typescript.promises": {
+      "phase": 8,
+      "unit": "p8u6",
+      "prereqs": [
+        "typescript.async_await"
+      ],
+      "category": "playwright"
+    },
+    "typescript.async_patterns": {
+      "phase": 8,
+      "unit": "p8u6",
+      "prereqs": [
+        "typescript.promises"
+      ],
+      "category": "playwright"
+    },
+    "playwright.api_request": {
+      "phase": 8,
+      "unit": "p8u7",
+      "prereqs": [
+        "playwright.auto_wait",
+        "typescript.promises",
+        "typescript.interfaces"
+      ],
+      "category": "playwright"
+    },
+    "playwright.api_mock": {
+      "phase": 8,
+      "unit": "p8u7",
+      "prereqs": [
+        "playwright.api_request"
+      ],
+      "category": "playwright"
+    },
+    "typescript.generics": {
+      "phase": 8,
+      "unit": "p8u7",
+      "prereqs": [
+        "typescript.interfaces",
+        "typescript.functions"
+      ],
+      "category": "playwright"
+    },
+    "playwright.route": {
+      "phase": 8,
+      "unit": "p8u7",
+      "prereqs": [
+        "playwright.api_mock"
+      ],
+      "category": "playwright"
+    },
+    "playwright.fixtures": {
+      "phase": 8,
+      "unit": "p8u8",
+      "prereqs": [
+        "playwright.pom",
+        "typescript.generics",
+        "typescript.classes"
+      ],
+      "category": "playwright"
+    },
+    "playwright.extend": {
+      "phase": 8,
+      "unit": "p8u8",
+      "prereqs": [
+        "playwright.fixtures"
+      ],
+      "category": "playwright"
+    },
+    "typescript.generics_advanced": {
+      "phase": 8,
+      "unit": "p8u8",
+      "prereqs": [
+        "typescript.generics",
+        "typescript.classes"
+      ],
+      "category": "playwright"
+    },
+    "playwright.hooks": {
+      "phase": 8,
+      "unit": "p8u8",
+      "prereqs": [
+        "playwright.fixtures"
+      ],
+      "category": "playwright"
+    },
+    "playwright.multi_page": {
+      "phase": 8,
+      "unit": "p8u9",
+      "prereqs": [
+        "playwright.fixtures",
+        "playwright.api_mock",
+        "typescript.generics_advanced"
+      ],
+      "category": "playwright"
+    },
+    "playwright.iframes": {
+      "phase": 8,
+      "unit": "p8u9",
+      "prereqs": [
+        "playwright.locators"
+      ],
+      "category": "playwright"
+    },
+    "playwright.downloads": {
+      "phase": 8,
+      "unit": "p8u9",
+      "prereqs": [
+        "playwright.actions",
+        "typescript.promises"
+      ],
+      "category": "playwright"
+    },
+    "playwright.visual": {
+      "phase": 8,
+      "unit": "p8u9",
+      "prereqs": [
+        "playwright.assertions"
+      ],
+      "category": "playwright"
+    },
+    "typescript.utility_types": {
+      "phase": 8,
+      "unit": "p8u9",
+      "prereqs": [
+        "typescript.generics_advanced",
+        "typescript.interfaces"
+      ],
+      "category": "playwright"
+    },
+    "playwright.config": {
+      "phase": 8,
+      "unit": "p8u10",
+      "prereqs": [
+        "playwright.fixtures",
+        "playwright.multi_page",
+        "playwright.visual"
+      ],
+      "category": "playwright"
+    },
+    "playwright.reporters": {
+      "phase": 8,
+      "unit": "p8u10",
+      "prereqs": [
+        "playwright.config"
+      ],
+      "category": "playwright"
+    },
+    "playwright.ci": {
+      "phase": 8,
+      "unit": "p8u10",
+      "prereqs": [
+        "playwright.config"
+      ],
+      "category": "playwright"
+    },
+    "playwright.parallel": {
+      "phase": 8,
+      "unit": "p8u10",
+      "prereqs": [
+        "playwright.config",
+        "playwright.fixtures"
+      ],
+      "category": "playwright"
+    },
+    "typescript.project_structure": {
+      "phase": 8,
+      "unit": "p8u10",
+      "prereqs": [
+        "typescript.classes",
+        "typescript.generics_advanced"
+      ],
+      "category": "playwright"
+    },
+    "agentic.llm_basics": {
+      "phase": 9,
+      "unit": "p9u1",
+      "prereqs": [],
+      "category": "agentic"
+    },
+    "agentic.tokens_context": {
+      "phase": 9,
+      "unit": "p9u1",
+      "prereqs": [
+        "agentic.llm_basics"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_definition": {
+      "phase": 9,
+      "unit": "p9u1",
+      "prereqs": [
+        "agentic.tokens_context"
+      ],
+      "category": "agentic"
+    },
+    "agentic.setup_env": {
+      "phase": 10,
+      "unit": "p10u1",
+      "prereqs": [
+        "agentic.agent_definition"
+      ],
+      "category": "agentic"
+    },
+    "agentic.providers": {
+      "phase": 10,
+      "unit": "p10u1",
+      "prereqs": [
+        "agentic.setup_env"
+      ],
+      "category": "agentic"
+    },
+    "agentic.tokens": {
+      "phase": 9,
+      "unit": "p9u2",
+      "prereqs": [
+        "agentic.tokens_context"
+      ],
+      "category": "agentic"
+    },
+    "agentic.context_window": {
+      "phase": 9,
+      "unit": "p9u2",
+      "prereqs": [
+        "agentic.tokens"
+      ],
+      "category": "agentic"
+    },
+    "agentic.temperature": {
+      "phase": 9,
+      "unit": "p9u2",
+      "prereqs": [
+        "agentic.tokens"
+      ],
+      "category": "agentic"
+    },
+    "agentic.hallucination": {
+      "phase": 9,
+      "unit": "p9u2",
+      "prereqs": [
+        "agentic.llm_basics"
+      ],
+      "category": "agentic"
+    },
+    "agentic.messages_roles": {
+      "phase": 9,
+      "unit": "p9u3",
+      "prereqs": [
+        "agentic.context_window"
+      ],
+      "category": "agentic"
+    },
+    "agentic.llm_response": {
+      "phase": 9,
+      "unit": "p9u3",
+      "prereqs": [
+        "agentic.messages_roles"
+      ],
+      "category": "agentic"
+    },
+    "agentic.openai_compatible": {
+      "phase": 9,
+      "unit": "p9u3",
+      "prereqs": [
+        "agentic.messages_roles"
+      ],
+      "category": "agentic"
+    },
+    "agentic.free_providers": {
+      "phase": 9,
+      "unit": "p9u3",
+      "prereqs": [
+        "agentic.openai_compatible"
+      ],
+      "category": "agentic"
+    },
+    "agentic.prompt_spec": {
+      "phase": 9,
+      "unit": "p9u4",
+      "prereqs": [
+        "agentic.messages_roles"
+      ],
+      "category": "agentic"
+    },
+    "agentic.system_prompt": {
+      "phase": 9,
+      "unit": "p9u4",
+      "prereqs": [
+        "agentic.prompt_spec"
+      ],
+      "category": "agentic"
+    },
+    "agentic.prompt_techniques": {
+      "phase": 9,
+      "unit": "p9u4",
+      "prereqs": [
+        "agentic.system_prompt"
+      ],
+      "category": "agentic"
+    },
+    "agentic.prompt_management": {
+      "phase": 9,
+      "unit": "p9u4",
+      "prereqs": [
+        "agentic.system_prompt"
+      ],
+      "category": "agentic"
+    },
+    "agentic.structured_output": {
+      "phase": 9,
+      "unit": "p9u5",
+      "prereqs": [
+        "agentic.system_prompt"
+      ],
+      "category": "agentic"
+    },
+    "agentic.output_reliability": {
+      "phase": 9,
+      "unit": "p9u5",
+      "prereqs": [
+        "agentic.structured_output"
+      ],
+      "category": "agentic"
+    },
+    "agentic.self_correction": {
+      "phase": 9,
+      "unit": "p9u5",
+      "prereqs": [
+        "agentic.output_reliability"
+      ],
+      "category": "agentic"
+    },
+    "agentic.tool_calling": {
+      "phase": 9,
+      "unit": "p9u6",
+      "prereqs": [
+        "agentic.structured_output"
+      ],
+      "category": "agentic"
+    },
+    "agentic.tool_description": {
+      "phase": 9,
+      "unit": "p9u6",
+      "prereqs": [
+        "agentic.tool_calling"
+      ],
+      "category": "agentic"
+    },
+    "agentic.tool_cycle": {
+      "phase": 9,
+      "unit": "p9u6",
+      "prereqs": [
+        "agentic.tool_calling"
+      ],
+      "category": "agentic"
+    },
+    "agentic.tool_safety": {
+      "phase": 9,
+      "unit": "p9u6",
+      "prereqs": [
+        "agentic.tool_calling"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_loop": {
+      "phase": 9,
+      "unit": "p9u7",
+      "prereqs": [
+        "agentic.tool_cycle"
+      ],
+      "category": "agentic"
+    },
+    "agentic.react": {
+      "phase": 9,
+      "unit": "p9u7",
+      "prereqs": [
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.loop_safeguards": {
+      "phase": 9,
+      "unit": "p9u7",
+      "prereqs": [
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.planning_reflection": {
+      "phase": 9,
+      "unit": "p9u7",
+      "prereqs": [
+        "agentic.react",
+        "agentic.self_correction"
+      ],
+      "category": "agentic"
+    },
+    "agentic.least_agentic": {
+      "phase": 9,
+      "unit": "p9u8",
+      "prereqs": [
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.workflow_vs_agent": {
+      "phase": 9,
+      "unit": "p9u8",
+      "prereqs": [
+        "agentic.least_agentic"
+      ],
+      "category": "agentic"
+    },
+    "agentic.workflow_patterns": {
+      "phase": 9,
+      "unit": "p9u8",
+      "prereqs": [
+        "agentic.workflow_vs_agent"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_patterns": {
+      "phase": 9,
+      "unit": "p9u8",
+      "prereqs": [
+        "agentic.workflow_vs_agent",
+        "agentic.react"
+      ],
+      "category": "agentic"
+    },
+    "agentic.human_in_loop": {
+      "phase": 9,
+      "unit": "p9u8",
+      "prereqs": [
+        "agentic.tool_safety"
+      ],
+      "category": "agentic"
+    },
+    "agentic.memory_kinds": {
+      "phase": 9,
+      "unit": "p9u9",
+      "prereqs": [
+        "agentic.context_window",
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.context_strategies": {
+      "phase": 9,
+      "unit": "p9u9",
+      "prereqs": [
+        "agentic.memory_kinds"
+      ],
+      "category": "agentic"
+    },
+    "agentic.persistent_memory": {
+      "phase": 9,
+      "unit": "p9u9",
+      "prereqs": [
+        "agentic.memory_kinds"
+      ],
+      "category": "agentic"
+    },
+    "agentic.context_engineering": {
+      "phase": 9,
+      "unit": "p9u9",
+      "prereqs": [
+        "agentic.context_strategies"
+      ],
+      "category": "agentic"
+    },
+    "agentic.embeddings": {
+      "phase": 9,
+      "unit": "p9u10",
+      "prereqs": [
+        "agentic.persistent_memory"
+      ],
+      "category": "agentic"
+    },
+    "agentic.semantic_search": {
+      "phase": 9,
+      "unit": "p9u10",
+      "prereqs": [
+        "agentic.embeddings"
+      ],
+      "category": "agentic"
+    },
+    "agentic.vector_store": {
+      "phase": 9,
+      "unit": "p9u10",
+      "prereqs": [
+        "agentic.semantic_search"
+      ],
+      "category": "agentic"
+    },
+    "agentic.rag": {
+      "phase": 9,
+      "unit": "p9u11",
+      "prereqs": [
+        "agentic.semantic_search"
+      ],
+      "category": "agentic"
+    },
+    "agentic.chunking": {
+      "phase": 9,
+      "unit": "p9u11",
+      "prereqs": [
+        "agentic.rag"
+      ],
+      "category": "agentic"
+    },
+    "agentic.grounding": {
+      "phase": 9,
+      "unit": "p9u11",
+      "prereqs": [
+        "agentic.rag"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agentic_rag": {
+      "phase": 9,
+      "unit": "p9u11",
+      "prereqs": [
+        "agentic.rag",
+        "agentic.tool_calling",
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.framework_need": {
+      "phase": 9,
+      "unit": "p9u12",
+      "prereqs": [
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.framework_primitives": {
+      "phase": 9,
+      "unit": "p9u12",
+      "prereqs": [
+        "agentic.framework_need"
+      ],
+      "category": "agentic"
+    },
+    "agentic.framework_landscape": {
+      "phase": 9,
+      "unit": "p9u12",
+      "prereqs": [
+        "agentic.framework_primitives"
+      ],
+      "category": "agentic"
+    },
+    "agentic.spring_ai": {
+      "phase": 9,
+      "unit": "p9u12",
+      "prereqs": [
+        "agentic.framework_primitives"
+      ],
+      "category": "agentic"
+    },
+    "agentic.mcp": {
+      "phase": 9,
+      "unit": "p9u13",
+      "prereqs": [
+        "agentic.tool_calling"
+      ],
+      "category": "agentic"
+    },
+    "agentic.mcp_architecture": {
+      "phase": 9,
+      "unit": "p9u13",
+      "prereqs": [
+        "agentic.mcp"
+      ],
+      "category": "agentic"
+    },
+    "agentic.mcp_security": {
+      "phase": 9,
+      "unit": "p9u13",
+      "prereqs": [
+        "agentic.mcp",
+        "agentic.tool_safety"
+      ],
+      "category": "agentic"
+    },
+    "agentic.multi_agent_when": {
+      "phase": 9,
+      "unit": "p9u14",
+      "prereqs": [
+        "agentic.workflow_vs_agent"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_as_tool": {
+      "phase": 9,
+      "unit": "p9u14",
+      "prereqs": [
+        "agentic.multi_agent_when",
+        "agentic.tool_calling"
+      ],
+      "category": "agentic"
+    },
+    "agentic.topologies": {
+      "phase": 9,
+      "unit": "p9u14",
+      "prereqs": [
+        "agentic.agent_as_tool"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_contracts": {
+      "phase": 9,
+      "unit": "p9u14",
+      "prereqs": [
+        "agentic.topologies",
+        "agentic.structured_output"
+      ],
+      "category": "agentic"
+    },
+    "agentic.eval_mindset": {
+      "phase": 9,
+      "unit": "p9u15",
+      "prereqs": [
+        "agentic.agent_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.eval_levels": {
+      "phase": 9,
+      "unit": "p9u15",
+      "prereqs": [
+        "agentic.eval_mindset"
+      ],
+      "category": "agentic"
+    },
+    "agentic.scoring_methods": {
+      "phase": 9,
+      "unit": "p9u15",
+      "prereqs": [
+        "agentic.eval_mindset",
+        "agentic.structured_output"
+      ],
+      "category": "agentic"
+    },
+    "agentic.pass_rate": {
+      "phase": 9,
+      "unit": "p9u15",
+      "prereqs": [
+        "agentic.eval_levels"
+      ],
+      "category": "agentic"
+    },
+    "agentic.observability": {
+      "phase": 9,
+      "unit": "p9u16",
+      "prereqs": [
+        "agentic.eval_levels"
+      ],
+      "category": "agentic"
+    },
+    "agentic.traces_spans": {
+      "phase": 9,
+      "unit": "p9u16",
+      "prereqs": [
+        "agentic.observability"
+      ],
+      "category": "agentic"
+    },
+    "agentic.guardrails": {
+      "phase": 9,
+      "unit": "p9u16",
+      "prereqs": [
+        "agentic.tool_safety"
+      ],
+      "category": "agentic"
+    },
+    "agentic.prompt_injection": {
+      "phase": 9,
+      "unit": "p9u16",
+      "prereqs": [
+        "agentic.guardrails"
+      ],
+      "category": "agentic"
+    },
+    "agentic.production": {
+      "phase": 9,
+      "unit": "p9u17",
+      "prereqs": [
+        "agentic.observability",
+        "agentic.eval_mindset"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_as_service": {
+      "phase": 9,
+      "unit": "p9u17",
+      "prereqs": [
+        "agentic.production"
+      ],
+      "category": "agentic"
+    },
+    "agentic.cost_latency": {
+      "phase": 9,
+      "unit": "p9u17",
+      "prereqs": [
+        "agentic.production",
+        "agentic.tokens"
+      ],
+      "category": "agentic"
+    },
+    "agentic.reliability": {
+      "phase": 9,
+      "unit": "p9u17",
+      "prereqs": [
+        "agentic.production",
+        "agentic.free_providers"
+      ],
+      "category": "agentic"
+    },
+    "agentic.universal_recipe": {
+      "phase": 9,
+      "unit": "p9u18",
+      "prereqs": [
+        "agentic.production",
+        "agentic.multi_agent_when"
+      ],
+      "category": "agentic"
+    },
+    "agentic.agent_types": {
+      "phase": 9,
+      "unit": "p9u18",
+      "prereqs": [
+        "agentic.universal_recipe"
+      ],
+      "category": "agentic"
+    },
+    "agentic.enduring_habits": {
+      "phase": 9,
+      "unit": "p9u18",
+      "prereqs": [
+        "agentic.agent_types"
+      ],
+      "category": "agentic"
+    },
+    "agentic.first_call": {
+      "phase": 10,
+      "unit": "p10u2",
+      "prereqs": [
+        "agentic.providers",
+        "agentic.messages_roles"
+      ],
+      "category": "agentic"
+    },
+    "agentic.client_wrapper": {
+      "phase": 10,
+      "unit": "p10u2",
+      "prereqs": [
+        "agentic.first_call",
+        "agentic.openai_compatible"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_structured": {
+      "phase": 10,
+      "unit": "p10u3",
+      "prereqs": [
+        "agentic.client_wrapper",
+        "agentic.structured_output"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_validation": {
+      "phase": 10,
+      "unit": "p10u3",
+      "prereqs": [
+        "agentic.build_structured",
+        "agentic.output_reliability"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_tool": {
+      "phase": 10,
+      "unit": "p10u4",
+      "prereqs": [
+        "agentic.build_structured",
+        "agentic.tool_calling"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_tool_cycle": {
+      "phase": 10,
+      "unit": "p10u4",
+      "prereqs": [
+        "agentic.build_tool",
+        "agentic.tool_cycle"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_loop": {
+      "phase": 10,
+      "unit": "p10u5",
+      "prereqs": [
+        "agentic.build_tool_cycle",
+        "agentic.agent_loop",
+        "agentic.react"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_safeguards": {
+      "phase": 10,
+      "unit": "p10u5",
+      "prereqs": [
+        "agentic.build_loop",
+        "agentic.loop_safeguards"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_error_recovery": {
+      "phase": 10,
+      "unit": "p10u6",
+      "prereqs": [
+        "agentic.build_safeguards"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_memory": {
+      "phase": 11,
+      "unit": "p11u1",
+      "prereqs": [
+        "agentic.build_loop",
+        "agentic.memory_kinds"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_context_mgmt": {
+      "phase": 11,
+      "unit": "p11u1",
+      "prereqs": [
+        "agentic.build_memory",
+        "agentic.context_strategies"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_embeddings": {
+      "phase": 11,
+      "unit": "p11u2",
+      "prereqs": [
+        "agentic.build_memory",
+        "agentic.embeddings"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_semantic_search": {
+      "phase": 11,
+      "unit": "p11u2",
+      "prereqs": [
+        "agentic.build_embeddings",
+        "agentic.semantic_search"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_rag": {
+      "phase": 11,
+      "unit": "p11u3",
+      "prereqs": [
+        "agentic.build_semantic_search",
+        "agentic.rag"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_chunking": {
+      "phase": 11,
+      "unit": "p11u3",
+      "prereqs": [
+        "agentic.build_rag",
+        "agentic.chunking"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_agentic_rag": {
+      "phase": 11,
+      "unit": "p11u4",
+      "prereqs": [
+        "agentic.build_rag",
+        "agentic.build_tool",
+        "agentic.agentic_rag"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_grounding": {
+      "phase": 11,
+      "unit": "p11u4",
+      "prereqs": [
+        "agentic.build_agentic_rag",
+        "agentic.grounding"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_framework": {
+      "phase": 11,
+      "unit": "p11u5",
+      "prereqs": [
+        "agentic.build_agentic_rag",
+        "agentic.framework_primitives"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_framework_compare": {
+      "phase": 11,
+      "unit": "p11u5",
+      "prereqs": [
+        "agentic.build_framework",
+        "agentic.framework_landscape"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_mcp": {
+      "phase": 11,
+      "unit": "p11u6",
+      "prereqs": [
+        "agentic.build_framework",
+        "agentic.mcp"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_mcp_security": {
+      "phase": 11,
+      "unit": "p11u6",
+      "prereqs": [
+        "agentic.build_mcp",
+        "agentic.mcp_security"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_multi_agent": {
+      "phase": 11,
+      "unit": "p11u7",
+      "prereqs": [
+        "agentic.build_agentic_rag",
+        "agentic.agent_as_tool",
+        "agentic.topologies"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_agent_as_tool": {
+      "phase": 11,
+      "unit": "p11u7",
+      "prereqs": [
+        "agentic.build_multi_agent",
+        "agentic.agent_contracts"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_multi_hop": {
+      "phase": 11,
+      "unit": "p11u8",
+      "prereqs": [
+        "agentic.build_multi_agent",
+        "agentic.build_grounding"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_eval": {
+      "phase": 12,
+      "unit": "p12u1",
+      "prereqs": [
+        "agentic.build_multi_hop",
+        "agentic.eval_mindset"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_pass_rate": {
+      "phase": 12,
+      "unit": "p12u1",
+      "prereqs": [
+        "agentic.build_eval",
+        "agentic.pass_rate"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_tracing": {
+      "phase": 12,
+      "unit": "p12u2",
+      "prereqs": [
+        "agentic.build_eval",
+        "agentic.traces_spans"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_guardrails": {
+      "phase": 12,
+      "unit": "p12u3",
+      "prereqs": [
+        "agentic.build_tracing",
+        "agentic.guardrails"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_injection_defense": {
+      "phase": 12,
+      "unit": "p12u3",
+      "prereqs": [
+        "agentic.build_guardrails",
+        "agentic.prompt_injection"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_hitl": {
+      "phase": 12,
+      "unit": "p12u4",
+      "prereqs": [
+        "agentic.build_guardrails",
+        "agentic.human_in_loop"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_service": {
+      "phase": 12,
+      "unit": "p12u5",
+      "prereqs": [
+        "agentic.build_hitl",
+        "agentic.agent_as_service"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_reliability": {
+      "phase": 12,
+      "unit": "p12u6",
+      "prereqs": [
+        "agentic.build_service",
+        "agentic.reliability"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_fallback": {
+      "phase": 12,
+      "unit": "p12u6",
+      "prereqs": [
+        "agentic.build_reliability",
+        "agentic.free_providers"
+      ],
+      "category": "agentic"
+    },
+    "agentic.build_capstone": {
+      "phase": 12,
+      "unit": "p12u7",
+      "prereqs": [
+        "agentic.build_reliability",
+        "agentic.build_service",
+        "agentic.universal_recipe"
+      ],
+      "category": "agentic"
+    }
   },
   "categories": {
-    "java": { "label": "Java", "color": "#f89820" },
-    "dsa": { "label": "DSA", "color": "#bc8cff" },
-    "api": { "label": "REST APIs", "color": "#58a6ff" },
-    "restassured": { "label": "REST Assured", "color": "#3fb950" },
-    "selenium": { "label": "Selenium", "color": "#d29922" }
+    "java": {
+      "label": "Java",
+      "color": "#f89820"
+    },
+    "dsa": {
+      "label": "DSA",
+      "color": "#bc8cff"
+    },
+    "api": {
+      "label": "REST APIs",
+      "color": "#58a6ff"
+    },
+    "restassured": {
+      "label": "REST Assured",
+      "color": "#3fb950"
+    },
+    "selenium": {
+      "label": "Selenium",
+      "color": "#d29922"
+    },
+    "playwright": {
+      "label": "Playwright",
+      "color": "#45ba4b"
+    },
+    "agentic": {
+      "label": "Agentic AI",
+      "color": "#e06c9f"
+    }
   }
 }
