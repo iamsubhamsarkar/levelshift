@@ -9,6 +9,7 @@
   import DecayLog from './DecayLog.svelte';
   import WeeklyReport from './WeeklyReport.svelte';
   import { theme, toggleTheme } from '../utils/theme.js';
+  import { customCourses } from '../stores/courses.js';
 
   export let navigate;
 
@@ -33,6 +34,13 @@
   function setDailyMode(mode) {
     dailyMode = mode;
     userSettings.update(s => ({ ...s, dailyMode: mode }));
+  }
+
+  // Floating "Enable AI" nudge — only until the user turns AI on.
+  $: aiEnabled = $userSettings.aiEnabled === true;
+  function goToAiSettings() {
+    try { sessionStorage.setItem('ls_focus_ai', '1'); } catch { /* ignore */ }
+    navigate('settings');
   }
 </script>
 
@@ -195,6 +203,15 @@
     </button>
 
     <button 
+      class="card text-center hover:border-accent-purple/50 transition-colors cursor-pointer"
+      on:click={() => navigate('courses')}
+    >
+      <span class="text-xl mb-1 block">🧭</span>
+      <span class="text-xs text-text-secondary">Your Courses</span>
+      <span class="text-[10px] text-text-muted block mt-0.5">{$customCourses.length} custom</span>
+    </button>
+
+    <button 
       class="card text-center hover:border-accent-blue/50 transition-colors cursor-pointer"
       on:click={() => navigate('challenge')}
     >
@@ -265,3 +282,16 @@
     </div>
   {/if}
 </div>
+
+<!-- Floating "Enable AI" discovery button — hidden once AI is on -->
+{#if !aiEnabled}
+  <button
+    class="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full shadow-lg
+           bg-accent-purple/90 text-surface-0 px-4 py-3 font-semibold text-sm
+           hover:brightness-110 active:scale-95 transition animate-slide-up"
+    on:click={goToAiSettings}
+    title="Enable the Ask Atlas AI tutor"
+  >
+    ✨ <span>Enable AI</span>
+  </button>
+{/if}

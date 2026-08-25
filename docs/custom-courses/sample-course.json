@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "custom-sample-python",
+  "title": "Python Basics (Sample)",
+  "description": "A tiny sample course to test import, video, practice, and quiz.",
+  "radarAxes": ["Fundamentals", "Practice"],
+  "concepts": {
+    "py.print": { "prereqs": [], "axis": "Fundamentals" },
+    "py.variables": { "prereqs": ["py.print"], "axis": "Fundamentals" }
+  },
+  "modules": [
+    {
+      "id": "m1",
+      "title": "Getting Started",
+      "topics": [
+        {
+          "id": "m1t1",
+          "title": "Hello, Python",
+          "teaches": ["py.print"],
+          "axis": "Fundamentals",
+          "blocks": [
+            { "type": "text", "md": "# Hello, Python\nPython uses **print()** to show output.\n\n```python\nprint('hi')\n```" },
+            { "type": "video", "provider": "youtube", "videoId": "kqtD5dpn9C8", "title": "Python in 100 seconds", "completeAtPercent": 80 },
+            { "type": "practice", "language": "python", "prompt": "Print exactly: hello", "starter": "print('hello')", "expectedOutput": "hello", "solution": "print('hello')" },
+            { "type": "quiz", "question": "Which function prints output in Python?", "options": ["echo()", "print()", "puts()"], "correct": 1, "explanation": "print() writes to stdout." }
+          ]
+        },
+        {
+          "id": "m1t2",
+          "title": "Variables",
+          "teaches": ["py.variables"],
+          "axis": "Fundamentals",
+          "blocks": [
+            { "type": "text", "md": "Variables store values: `x = 5`." },
+            { "type": "practice", "language": "python", "prompt": "Set x to 7 and print it.", "starter": "x = 7\nprint(x)", "expectedOutput": "7" }
+          ]
+        }
+      ]
+    }
+  ]
+}

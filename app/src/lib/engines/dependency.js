@@ -133,13 +133,13 @@ export function generateDailyPuzzle(conceptStrengths, completedUnits) {
  * @param {string} unitId
  * @returns {string[]} Concept IDs that this unit reinforces
  */
-export function getReinforcedConcepts(unitId) {
-  const teaches = findConceptsForUnit(unitId);
+export function getReinforcedConcepts(unitId, conceptMap = conceptsData.concepts) {
+  const teaches = findConceptsForUnit(unitId, conceptMap);
   const reinforces = new Set(teaches);
 
   // Also include prerequisites (using them = reinforcing them)
   for (const conceptId of teaches) {
-    const def = conceptsData.concepts[conceptId];
+    const def = conceptMap[conceptId];
     if (def && def.prereqs) {
       def.prereqs.forEach(p => reinforces.add(p));
     }
@@ -174,9 +174,9 @@ export function getReinforcementBoost(conceptState, directPractice = false) {
 /**
  * Find all concept IDs taught by a given unit.
  */
-function findConceptsForUnit(unitId) {
+function findConceptsForUnit(unitId, conceptMap = conceptsData.concepts) {
   const results = [];
-  for (const [id, def] of Object.entries(conceptsData.concepts)) {
+  for (const [id, def] of Object.entries(conceptMap)) {
     if (def.unit === unitId) {
       results.push(id);
     }

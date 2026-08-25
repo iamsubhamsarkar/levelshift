@@ -7,6 +7,7 @@
   import Onboarding from './lib/components/Onboarding.svelte';
   import ReadinessReport from './lib/components/ReadinessReport.svelte';
   import CourseMap from './lib/components/CourseMap.svelte';
+  import CoursesTab from './lib/components/CoursesTab.svelte';
   import InstallPrompt from './lib/components/InstallPrompt.svelte';
   import { initializeApp, userSettings, streak } from './lib/stores/progress.js';
   import { initializeGamification } from './lib/engines/gamification.js';
@@ -113,6 +114,8 @@
     <ReadinessReport {navigate} />
   {:else if currentRoute === 'course'}
     <CourseMap {navigate} />
+  {:else if currentRoute === 'courses'}
+    <CoursesTab {navigate} />
   {:else}
     <div class="flex items-center justify-center min-h-screen">
       <div class="card text-center">

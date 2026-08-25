@@ -3,27 +3,42 @@
   import { calculateDecay } from '../engines/decay.js';
 
   export let size = 200;
+  /**
+   * Optional: custom-course mode. When `axes` is provided, the radar renders
+   * those axes and scores concepts by their `axis` field in `conceptData`.
+   * When omitted, it renders the base course's fixed 6 skill categories.
+   */
+  export let axes = null;              // string[] | null
+  export let conceptData = null;       // Record<id,{strength,lastPracticed,axis,...}> | null
 
-  const categories = [
+  const baseCategories = [
     { id: 'java', label: 'Java', prefixes: ['basics.', 'oop.', 'collections.', 'exceptions.', 'java8.'] },
     { id: 'dsa', label: 'DSA', prefixes: ['dsa.'] },
     { id: 'restassured', label: 'REST Assured', prefixes: ['restassured.'] },
     { id: 'api', label: 'APIs', prefixes: ['http.', 'rest.', 'apistrategy.'] },
     { id: 'selenium', label: 'Selenium', prefixes: ['selenium.'] },
     { id: 'agentic', label: 'Agentic AI', prefixes: ['agentic.'] }
-  ].map((cat, i, arr) => ({
-    // Distribute axes evenly around the circle, starting from the top (-90deg).
+  ];
+
+  // Build the category list: custom axes (by exact `axis` match) or base prefixes.
+  $: categories = (axes && axes.length > 0
+    ? axes.map((label) => ({ id: label, label, axisMatch: label }))
+    : baseCategories
+  ).map((cat, i, arr) => ({
     ...cat,
     angle: -90 + (360 / arr.length) * i
   }));
 
-  $: scores = calculateCategoryScores($concepts);
+  // Which concept map to score: injected (custom) or the global base store.
+  $: activeConceptData = conceptData || $concepts;
+  $: scores = calculateCategoryScores(activeConceptData, categories);
 
-  function calculateCategoryScores(conceptData) {
-    return categories.map(cat => {
-      const matching = Object.entries(conceptData).filter(([id]) =>
-        cat.prefixes.some(prefix => id.startsWith(prefix))
-      );
+  function calculateCategoryScores(conceptDataMap, cats) {
+    return cats.map(cat => {
+      const matching = Object.entries(conceptDataMap).filter(([id, data]) => {
+        if (cat.axisMatch) return data && data.axis === cat.axisMatch;
+        return cat.prefixes.some(prefix => id.startsWith(prefix));
+      });
 
       if (matching.length === 0) return { ...cat, score: 0 };
 
