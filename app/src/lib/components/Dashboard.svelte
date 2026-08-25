@@ -9,6 +9,7 @@
   import DecayLog from './DecayLog.svelte';
   import WeeklyReport from './WeeklyReport.svelte';
   import { theme, toggleTheme } from '../utils/theme.js';
+  import { customCourses } from '../stores/courses.js';
 
   export let navigate;
 
@@ -199,6 +200,15 @@
       <span class="text-xl mb-1 block">📚</span>
       <span class="text-xs text-text-secondary">Course Map</span>
       <span class="text-[10px] text-text-muted block mt-0.5">{$progress.completedUnits.length}/47 units</span>
+    </button>
+
+    <button 
+      class="card text-center hover:border-accent-purple/50 transition-colors cursor-pointer"
+      on:click={() => navigate('courses')}
+    >
+      <span class="text-xl mb-1 block">🧭</span>
+      <span class="text-xs text-text-secondary">Your Courses</span>
+      <span class="text-[10px] text-text-muted block mt-0.5">{$customCourses.length} custom</span>
     </button>
 
     <button 

@@ -10,17 +10,67 @@ const JAVA_COMPILER = 'openjdk-jdk-22+36';
 const TIMEOUT_MS = 20000; // 20 second timeout
 const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
 
+/**
+ * Language → Wandbox compiler id. IDs verified against wandbox.org/api/list.json.
+ * Only languages we expose in custom-course practice blocks (schema.js
+ * PRACTICE_LANGUAGES) are listed here.
+ */
+export const LANGUAGE_COMPILERS = {
+  java: JAVA_COMPILER,
+  python: 'cpython-3.13.8',
+  javascript: 'nodejs-20.17.0',
+  typescript: 'typescript-5.6.2',
+  cpp: 'gcc-13.2.0',
+  c: 'gcc-13.2.0-c',
+  csharp: 'mono-6.12.0.199',
+  go: 'go-1.23.2',
+  rust: 'rust-1.82.0',
+  ruby: 'ruby-4.0.2',
+  php: 'php-8.3.12',
+  bash: 'bash'
+};
+
+/** Languages we can execute, for UI dropdowns. */
+export function getSupportedLanguages() {
+  return Object.keys(LANGUAGE_COMPILERS);
+}
+
 let lastRequestTime = 0;
 
 /**
- * Execute Java code via Wandbox API.
+ * Execute code in an arbitrary supported language via Wandbox.
+ * @param {string} language - key of LANGUAGE_COMPILERS
+ * @param {string} code
+ * @param {string} [stdin]
+ * @returns {Promise<{success: boolean, output: string, error: string, time: number}>}
+ */
+export async function executeCode(language, code, stdin = '') {
+  const lang = String(language || '').toLowerCase();
+  const compiler = LANGUAGE_COMPILERS[lang];
+  if (!compiler) {
+    return { success: false, output: '', error: `Unsupported language: ${language}`, time: 0 };
+  }
+
+  // Java (and C#) need a Main-class harness if the user pasted a bare snippet.
+  const finalCode = lang === 'java' ? wrapInMainClass(code) : code;
+
+  const payload = { compiler, code: finalCode, stdin, save: false };
+  return runWandbox(payload);
+}
+
+/**
+ * Execute Java code via Wandbox API. (Kept for the base course's FailFirst card.)
  * @param {string} code - User's Java code
  * @param {string} [stdin] - Optional standard input
  * @returns {Promise<{success: boolean, output: string, error: string, time: number}>}
  */
 export async function executeJava(code, stdin = '') {
   const wrappedCode = wrapInMainClass(code);
+  return runWandbox({ compiler: JAVA_COMPILER, code: wrappedCode, stdin, save: false });
+}
 
+/** Shared Wandbox POST with rate-limit, timeout, and response normalization. */
+async function runWandbox(payload) {
   // Rate limiting: wait if too soon since last request
   const now = Date.now();
   const elapsed = now - lastRequestTime;
@@ -39,12 +89,7 @@ export async function executeJava(code, stdin = '') {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
-      body: JSON.stringify({
-        compiler: JAVA_COMPILER,
-        code: wrappedCode,
-        stdin: stdin,
-        save: false
-      })
+      body: JSON.stringify(payload)
     });
 
     clearTimeout(timeout);
@@ -56,11 +101,6 @@ export async function executeJava(code, stdin = '') {
 
     const result = await response.json();
 
-    // Wandbox response structure:
-    // status: "0" = success, non-zero = error
-    // program_output: stdout from execution
-    // program_error: stderr from execution
-    // compiler_error: compilation errors
     const compileError = (result.compiler_error || '').trim();
     const programOutput = (result.program_output || '').trim();
     const programError = (result.program_error || '').trim();
