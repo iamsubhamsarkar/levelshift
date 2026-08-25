@@ -34,6 +34,13 @@
     dailyMode = mode;
     userSettings.update(s => ({ ...s, dailyMode: mode }));
   }
+
+  // Floating "Enable AI" nudge — only until the user turns AI on.
+  $: aiEnabled = $userSettings.aiEnabled === true;
+  function goToAiSettings() {
+    try { sessionStorage.setItem('ls_focus_ai', '1'); } catch { /* ignore */ }
+    navigate('settings');
+  }
 </script>
 
 <div class="max-w-6xl mx-auto px-4 py-6 space-y-5">
@@ -265,3 +272,16 @@
     </div>
   {/if}
 </div>
+
+<!-- Floating "Enable AI" discovery button — hidden once AI is on -->
+{#if !aiEnabled}
+  <button
+    class="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full shadow-lg
+           bg-accent-purple/90 text-surface-0 px-4 py-3 font-semibold text-sm
+           hover:brightness-110 active:scale-95 transition animate-slide-up"
+    on:click={goToAiSettings}
+    title="Enable the Ask Atlas AI tutor"
+  >
+    ✨ <span>Enable AI</span>
+  </button>
+{/if}

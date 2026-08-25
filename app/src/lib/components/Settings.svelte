@@ -5,8 +5,27 @@
   import { today, addDays } from '../utils/dates.js';
   import { hasApiKey, setApiKey, clearApiKey, testApiKey } from '../utils/ai.js';
   import { reminderSettings, notificationPermission, requestNotificationPermission } from '../utils/reminders.js';
+  import { onMount } from 'svelte';
 
   export let navigate;
+
+  let aiSection; // bound to the AI settings card for scroll-into-view
+  let highlightAi = false;
+
+  onMount(() => {
+    // If the user arrived here via the "Enable AI" button, scroll to and
+    // briefly highlight the AI section.
+    try {
+      if (sessionStorage.getItem('ls_focus_ai') === '1') {
+        sessionStorage.removeItem('ls_focus_ai');
+        setTimeout(() => {
+          aiSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          highlightAi = true;
+          setTimeout(() => { highlightAi = false; }, 2200);
+        }, 100);
+      }
+    } catch { /* ignore */ }
+  });
 
   let interviewDate = $userSettings.interviewDate;
   let weekendRest = $userSettings.weekendRest;
@@ -157,7 +176,10 @@
     </div>
   </div>
   <!-- AI Assistant (Ask Atlas) — Bring Your Own Key -->
-  <div class="card space-y-3">
+  <div class="card space-y-3 scroll-mt-6 transition-shadow duration-500"
+       class:ring-2={highlightAi}
+       class:ring-accent-purple={highlightAi}
+       bind:this={aiSection}>
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-semibold text-text-muted uppercase">🛰️ Ask Atlas (AI Help)</h3>
       <span class="text-[10px] px-2 py-0.5 rounded-full bg-accent-purple/15 text-accent-purple">Optional</span>
