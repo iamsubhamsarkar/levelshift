@@ -8,7 +8,7 @@
 | **Live URL** | Netlify (connected to GitHub repo) |
 | **Repo** | git@github.com:iamsubhamsarkar/levelshift.git (private) |
 | **Last Updated** | 2026-08-24 |
-| **Content Totals** | 97 units, 777 cards across 12 phases |
+| **Content Totals** | 97 units, 780 cards across 12 phases |
 | **Tests** | 90 passing (6 files) · `npm run build` green |
 
 ---
@@ -37,7 +37,7 @@ The Agentic AI track pairs an in-app **18-chapter theory book** (Phase 9) with a
 ## What's Built (Everything)
 
 ### Content
-- **97 units across 12 phases, 777 cards total**
+- **97 units across 12 phases, 780 cards total**
 - Phase 1: Java Core (8 units) — OOP from variables to integration
 - Phase 2: Collections & Generics (5 units)
 - Phase 3: Exceptions + Java 8 (5 units)
@@ -206,11 +206,11 @@ cd app && npm run build
 ## Potential Future Work
 
 - [ ] More content (practice problems, mock interviews)
-- [ ] Dark/light theme toggle
-- [ ] AI-powered hints (free LLM API)
-- [ ] Notification reminders (Push API)
-- [ ] PWA install prompt
-- [ ] Analytics (anonymous usage tracking)
+- [x] Dark/light theme toggle — *done (feature/ai-theme-pwa)*
+- [x] AI-powered hints (free LLM API) — *done: "Ask Atlas" BYOK Gemini (feature/ai-theme-pwa)*
+- [x] PWA install prompt — *done (feature/ai-theme-pwa)*
+- [~] Notification reminders — *local/in-app reminder done; true background Push deferred to backend phase*
+- [ ] Analytics (anonymous usage tracking) — *deferred to backend phase*
 - [ ] Community features (if ever multi-user)
 
 ---
@@ -271,10 +271,44 @@ All Phase 10–12 build units advance ONE continuous project, **ATLAS** (an Agen
 - `concepts.json`: added agentic concepts (**104 total** `agentic.*`) with `category: "agentic"` and a full prereq dependency graph mirroring the learning/build order — feeds the existing spaced-rep, decay, timeline, and Radar engines unchanged. The Radar "Agentic AI" axis and the Settings `osPreference` toggle were already wired.
 
 **Verification (all green):**
-- `node build-content.js` → 97 units, 777 cards, exit 0.
+- `node build-content.js` → 97 units, 780 cards, exit 0.
 - `npm test` → 90/90 passing (6 files).
 - `npm run build` → succeeds; all 39 agentic unit chunks bundle (dynamic imports resolve).
 - Concept graph checked: no cycles (DFS), all prereqs resolve, every agentic concept's unit exists in `phases.json`.
 - Parser pitfall found & fixed: prose after a fenced snippet must live in `snippetExplanation`, not a stray field (a `body2:` mistake was corrected in p9u5/p9u6/p9u7/p9u16).
 
 **Known pre-existing (not from this session):** 12 `apistrategy.*` teaches in Phase 6 reference unregistered concepts — left untouched (out of scope, avoids risking existing Phase 6).
+
+### Session 5 — 2026-08-25 — AI help, theme toggle, PWA + reminders (branch: `feature/ai-theme-pwa`)
+
+Implemented four of the "Potential Future Work" items on a dedicated branch to protect `main`. All additive; no engine or content rewrites.
+
+**1. Light/dark theme toggle**
+- Converted the Tailwind palette to CSS variables. `tailwind.config.js` colors now resolve to `rgb(var(--token) / <alpha-value>)`, so every existing `surface-*` / `text-*` / `accent-*` class works in both themes without touching components.
+- `app.css`: dark tokens on `:root`, light (GitHub-light) palette under `html.light`. Scrollbar + selection colors are now theme-aware vars.
+- `index.html` runs an inline pre-paint script that reads `localStorage['levelshift_theme']` and applies `.light` before mount (no flash).
+- New `src/lib/utils/theme.js` (`theme` store, `toggleTheme`, `setTheme`, `initTheme`; own storage key; keeps `theme-color` meta in sync). Toggle button (☀️/🌙) sits next to the gear in the Dashboard header.
+
+**2. AI help — "Ask Atlas" (Bring Your Own Key, Google Gemini)**
+- Opt-in only. Off by default. New `src/lib/utils/ai.js`:
+  - Key stored in its OWN key `levelshift_ai_key`, deliberately **excluded from the Export/Import backup** so users never leak it.
+  - Uses `gemini-2.5-flash-lite` on the free tier (best free RPD/RPM; Pro has ~0 free quota after Dec-2025 cuts).
+  - Builds tutor context **locally** from the current card's JSON (`describeCard`, per card type) plus brief sibling-card context — no extra "summarize" AI call.
+  - `buildSystemInstruction` grounds Atlas as a tutor and **injects the current date/time** (the model is stateless), and instructs it to guide rather than dump quiz answers.
+  - `testApiKey` validates a pasted key with a tiny call; human-readable errors for 400/403/429/5xx.
+- `Settings.svelte`: "Ask Atlas" card — enable toggle (`userSettings.aiEnabled`), step-by-step guide to get a free key at aistudio.google.com/app/apikey, key input with show/hide, Save&Test, remove.
+- New `AskAtlas.svelte`: floating 🛰️ button + slide-up panel, rendered only when `aiEnabled && hasApiKey`. Wired into `LearnView` for both the card-deck and theory one-pager branches, so it appears on every card. Ctrl/⌘+Enter to send.
+
+**3. PWA install**
+- New `public/manifest.webmanifest` (standalone, SVG icon), linked in `index.html`, cached by `sw.js` (bumped to `levelshift-v2`, `.webmanifest` added to the static matcher).
+- New `src/lib/utils/pwa.js` captures `beforeinstallprompt` and exposes `canInstall`/`isInstalled` stores + `promptInstall`/`dismissInstall` (remembers "not now"). New `InstallPrompt.svelte` banner, mounted in `App.svelte`; `initPwa()` runs on boot.
+
+**4. Daily reminder (local)**
+- New `src/lib/utils/reminders.js` (`reminderSettings` in own key `levelshift_reminder`; permission helpers; `shouldNudgeToday`; `maybeFireLocalReminder`).
+- `App.svelte` shows an in-app nudge on the dashboard when the user hasn't studied today, and fires a tab-open local `Notification` if enabled + permitted. `Settings.svelte` has a Daily Reminder card (toggle, time picker, permission-aware messaging).
+- **True background push (app closed) is intentionally deferred** to the backend phase — a static site cannot deliver it reliably.
+
+**Verification (all green):**
+- `node build-content.js` → 97 units, 780 cards.
+- `npm test` → 90/90 passing.
+- `npm run build` → success; `manifest.webmanifest` present + linked in `dist`, theme boot script present. Dev server boots (HTTP 200), serves manifest. Only warning is the pre-existing `Card.svelte` unused `index` export (not from this work).

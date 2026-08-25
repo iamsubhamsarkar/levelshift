@@ -1,9 +1,10 @@
-const CACHE_NAME = 'levelshift-v1';
+const CACHE_NAME = 'levelshift-v2';
 
 const APP_SHELL = [
   '/',
   '/index.html',
-  '/favicon.svg'
+  '/favicon.svg',
+  '/manifest.webmanifest'
 ];
 
 // Install — pre-cache app shell
@@ -61,6 +62,7 @@ function isStaticAsset(pathname) {
     pathname.endsWith('.json') ||
     pathname.endsWith('.svg') ||
     pathname.endsWith('.woff2') ||
+    pathname.endsWith('.webmanifest') ||
     pathname === '/'
   );
 }

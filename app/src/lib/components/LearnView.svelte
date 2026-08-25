@@ -4,6 +4,7 @@
   import CardRenderer from './CardRenderer.svelte';
   import TheoryPage from './TheoryPage.svelte';
   import GhostReplay from './GhostReplay.svelte';
+  import AskAtlas from './AskAtlas.svelte';
   import { session, currentCard, sessionProgress, startSession, nextCard, prevCard, endSession, recordAnswer, completeCard } from '../stores/session.js';
   import { progress, completeUnit, recordActivity, updateConceptStrength, ghostRecords, persistAll } from '../stores/progress.js';
   import { calculateNextReview, labelToRating } from '../engines/spaced-rep.js';
@@ -241,6 +242,7 @@
       on:complete={handleTheoryComplete}
       on:exit={handleExit}
     />
+    <AskAtlas card={null} {unitData} phase={$progress.currentPhase} />
   {:else}
     <!-- Active Learning Session (card deck) -->
     <CardDeck
@@ -259,6 +261,7 @@
         />
       {/key}
     </CardDeck>
+    <AskAtlas card={$currentCard} {unitData} phase={$progress.currentPhase} />
   {/if}
 {:else}
   <div class="min-h-screen bg-surface-0 flex items-center justify-center">

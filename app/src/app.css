@@ -3,20 +3,65 @@
 @tailwind utilities;
 
 @layer base {
-  /* Scrollbar styling for dark theme */
+  /* ───────── Theme tokens (RGB channels, consumed by tailwind.config.js) ─────────
+     Dark is the default (:root). The .light class on <html> overrides them.
+     Kept as "R G B" so Tailwind opacity modifiers (/20, /10, ...) still work. */
+  :root {
+    --surface-0: 13 17 23;      /* #0d1117 */
+    --surface-1: 22 27 34;      /* #161b22 */
+    --surface-2: 28 33 40;      /* #1c2128 */
+    --surface-3: 45 51 59;      /* #2d333b */
+    --accent-blue: 88 166 255;  /* #58a6ff */
+    --accent-green: 63 185 80;  /* #3fb950 */
+    --accent-red: 248 81 73;    /* #f85149 */
+    --accent-yellow: 210 153 34;/* #d29922 */
+    --accent-purple: 188 140 255;/* #bc8cff */
+    --text-primary: 230 237 243;/* #e6edf3 */
+    --text-secondary: 139 148 158;/* #8b949e */
+    --text-muted: 72 79 88;     /* #484f58 */
+
+    --scrollbar-track: #0d1117;
+    --scrollbar-thumb: #2d333b;
+    --scrollbar-thumb-hover: #484f58;
+    --selection-bg: rgba(88, 166, 255, 0.3);
+    --selection-fg: #e6edf3;
+  }
+
+  html.light {
+    --surface-0: 255 255 255;   /* page background */
+    --surface-1: 246 248 250;   /* card background */
+    --surface-2: 238 241 244;   /* elevated surface */
+    --surface-3: 208 215 222;   /* borders, dividers */
+    --accent-blue: 9 105 218;   /* #0969da — darker for contrast on light */
+    --accent-green: 26 127 55;  /* #1a7f37 */
+    --accent-red: 207 34 46;    /* #cf222e */
+    --accent-yellow: 154 103 0; /* #9a6700 */
+    --accent-purple: 130 80 223;/* #8250df */
+    --text-primary: 31 35 40;   /* #1f2328 */
+    --text-secondary: 87 96 106;/* #57606a */
+    --text-muted: 110 119 129;  /* #6e7781 */
+
+    --scrollbar-track: #f6f8fa;
+    --scrollbar-thumb: #d0d7de;
+    --scrollbar-thumb-hover: #afb8c1;
+    --selection-bg: rgba(9, 105, 218, 0.2);
+    --selection-fg: #1f2328;
+  }
+
+  /* Scrollbar styling (theme-aware) */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #0d1117;
+    background: var(--scrollbar-track);
   }
   ::-webkit-scrollbar-thumb {
-    background: #2d333b;
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #484f58;
+    background: var(--scrollbar-thumb-hover);
   }
 
   /* Code block base styling */
@@ -24,10 +69,10 @@
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
   }
 
-  /* Selection colors */
+  /* Selection colors (theme-aware) */
   ::selection {
-    background: rgba(88, 166, 255, 0.3);
-    color: #e6edf3;
+    background: var(--selection-bg);
+    color: var(--selection-fg);
   }
 }
 

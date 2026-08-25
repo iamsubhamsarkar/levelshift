@@ -8,6 +8,7 @@
   import Timeline from './Timeline.svelte';
   import DecayLog from './DecayLog.svelte';
   import WeeklyReport from './WeeklyReport.svelte';
+  import { theme, toggleTheme } from '../utils/theme.js';
 
   export let navigate;
 
@@ -88,6 +89,15 @@
         ></span>
         <span class="text-text-primary font-mono text-xs">{$readinessScore}%</span>
       </div>
+      <!-- Theme toggle -->
+      <button
+        class="text-text-muted hover:text-text-secondary transition-colors"
+        title="Toggle light / dark theme"
+        aria-label="Toggle theme"
+        on:click={toggleTheme}
+      >
+        {$theme === 'dark' ? '☀️' : '🌙'}
+      </button>
       <!-- Settings -->
       <button class="text-text-muted hover:text-text-secondary transition-colors" on:click={() => navigate('settings')}>
         ⚙
