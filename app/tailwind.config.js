@@ -5,24 +5,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        // LevelShift dark theme palette
+        // LevelShift palette — driven by CSS variables (see app.css) so the
+        // same class names work for both dark (default) and light themes.
+        // Values are stored as space-separated RGB channels so Tailwind's
+        // opacity modifiers (e.g. bg-accent-blue/20) keep working.
         surface: {
-          0: '#0d1117',   // deepest background
-          1: '#161b22',   // card background
-          2: '#1c2128',   // elevated surface
-          3: '#2d333b',   // borders, dividers
+          0: 'rgb(var(--surface-0) / <alpha-value>)',   // deepest background
+          1: 'rgb(var(--surface-1) / <alpha-value>)',   // card background
+          2: 'rgb(var(--surface-2) / <alpha-value>)',   // elevated surface
+          3: 'rgb(var(--surface-3) / <alpha-value>)',   // borders, dividers
         },
         accent: {
-          blue: '#58a6ff',
-          green: '#3fb950',
-          red: '#f85149',
-          yellow: '#d29922',
-          purple: '#bc8cff',
+          blue: 'rgb(var(--accent-blue) / <alpha-value>)',
+          green: 'rgb(var(--accent-green) / <alpha-value>)',
+          red: 'rgb(var(--accent-red) / <alpha-value>)',
+          yellow: 'rgb(var(--accent-yellow) / <alpha-value>)',
+          purple: 'rgb(var(--accent-purple) / <alpha-value>)',
         },
         text: {
-          primary: '#e6edf3',
-          secondary: '#8b949e',
-          muted: '#484f58',
+          primary: 'rgb(var(--text-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--text-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--text-muted) / <alpha-value>)',
         }
       },
       fontFamily: {

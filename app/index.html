@@ -8,6 +8,22 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+    <!-- Apply saved theme before first paint to avoid a flash of the wrong theme. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('levelshift_theme');
+          var root = document.documentElement;
+          if (t === 'light') {
+            root.classList.remove('dark');
+            root.classList.add('light');
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', '#ffffff');
+          }
+        } catch (e) { /* storage disabled — fall back to dark */ }
+      })();
+    </script>
+
     <!-- Open Graph -->
     <meta property="og:title" content="LevelShift — SDET-1 Prep Platform" />
     <meta property="og:description" content="Gamified interview prep for SDET-1. 15 minutes a day. No excuses." />
@@ -17,6 +33,9 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

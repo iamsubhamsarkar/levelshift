@@ -7,13 +7,17 @@
   import Onboarding from './lib/components/Onboarding.svelte';
   import ReadinessReport from './lib/components/ReadinessReport.svelte';
   import CourseMap from './lib/components/CourseMap.svelte';
-  import { initializeApp, userSettings } from './lib/stores/progress.js';
+  import InstallPrompt from './lib/components/InstallPrompt.svelte';
+  import { initializeApp, userSettings, streak } from './lib/stores/progress.js';
   import { initializeGamification } from './lib/engines/gamification.js';
+  import { initPwa } from './lib/utils/pwa.js';
+  import { shouldNudgeToday, maybeFireLocalReminder } from './lib/utils/reminders.js';
 
   let currentRoute = 'dashboard';
   let notifications = null;
   let showNotification = false;
   let needsOnboarding = false;
+  let showReminderNudge = false;
 
   function handleRouteChange() {
     const hash = window.location.hash.slice(1) || 'dashboard';
@@ -35,6 +39,7 @@
 
   onMount(() => {
     initializeApp();
+    initPwa();
 
     // Check if first-time user
     const unsub = userSettings.subscribe(s => {
@@ -47,6 +52,14 @@
       if (notifications && notifications.length > 0) {
         showNotification = true;
       }
+
+      // Local reminder: in-app nudge if not studied today, plus a tab-open
+      // notification if the user enabled reminders and granted permission.
+      let lastActive = null;
+      const unsubStreak = streak.subscribe(s => { lastActive = s.lastActiveDate; });
+      unsubStreak();
+      showReminderNudge = shouldNudgeToday(lastActive);
+      maybeFireLocalReminder(lastActive);
     }
 
     handleRouteChange();
@@ -81,6 +94,14 @@
   {#if needsOnboarding}
     <Onboarding onComplete={completeOnboarding} />
   {:else if currentRoute === 'dashboard'}
+    {#if showReminderNudge}
+      <div class="max-w-6xl mx-auto px-4 pt-4">
+        <div class="bg-accent-blue/10 border border-accent-blue/30 rounded-lg p-3 flex items-center justify-between gap-3">
+          <p class="text-sm text-text-primary">👋 You haven't studied today — 15 minutes keeps your streak alive.</p>
+          <button class="text-text-muted hover:text-text-primary text-lg leading-none" on:click={() => showReminderNudge = false}>×</button>
+        </div>
+      </div>
+    {/if}
     <Dashboard {navigate} />
   {:else if currentRoute.startsWith('learn')}
     <LearnView {navigate} />
@@ -102,3 +123,6 @@
     </div>
   {/if}
 </main>
+
+<!-- PWA install prompt (shows only when the browser offers it) -->
+<InstallPrompt />
