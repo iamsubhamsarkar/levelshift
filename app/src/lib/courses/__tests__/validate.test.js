@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateCourse, parseAndValidate, extractJson, sanitizeText } from '../validate.js';
+import { validateCourse, parseAndValidate, extractJson, sanitizeText, sanitizePastedJson, formatJson } from '../validate.js';
 import { EXAMPLE_COURSE } from '../schema.js';
 
 describe('validateCourse', () => {
@@ -145,5 +145,68 @@ describe('extractJson / parseAndValidate', () => {
     const r = parseAndValidate('{ "title": "Hi", "modules": [ ');
     expect(r.ok).toBe(false);
     expect(r.errors.join(' ')).toMatch(/cut off|truncat|not closed/i);
+  });
+});
+
+describe('sanitizePastedJson (chat-paste corruption)', () => {
+  it('strips BOM and zero-width characters', () => {
+    const dirty = '\uFEFF{\u200B"a"\u200C:\u200D1\u2060}';
+    expect(sanitizePastedJson(dirty)).toBe('{"a":1}');
+  });
+
+  it('converts non-breaking / narrow spaces to regular spaces', () => {
+    const dirty = '{\u00A0"a":\u202F1,\u2007"b":2}';
+    expect(sanitizePastedJson(dirty)).toBe('{ "a": 1, "b":2}');
+  });
+
+  it('straightens smart double and single quotes', () => {
+    const dirty = '{\u201Ca\u201D:\u20181\u2019}';
+    expect(sanitizePastedJson(dirty)).toBe('{"a":\'1\'}');
+  });
+
+  it('lets extractJson recover JSON corrupted by smart quotes (the real bug)', () => {
+    // Emulate a chat UI that replaced straight quotes with curly ones and
+    // inserted a non-breaking space + zero-width char.
+    const dirty = '\uFEFF{\u201Ctitle\u201D:\u00A0\u201CHi\u201D,\u200B\u201Cn\u201D:1}';
+    const extracted = extractJson(dirty);
+    expect(JSON.parse(extracted)).toEqual({ title: 'Hi', n: 1 });
+  });
+
+  it('parseAndValidate now imports a smart-quote-corrupted course', () => {
+    const clean = JSON.stringify(EXAMPLE_COURSE);
+    const dirty = '\uFEFF' + clean
+      .replace(/"/g, '\u201D')      // all double quotes -> curly close quote
+      .replace(/ /g, '\u00A0');     // spaces -> NBSP
+    const r = parseAndValidate(dirty);
+    expect(r.ok).toBe(true);
+    expect(r.course.title).toBe('Example: Intro to X');
+  });
+});
+
+describe('formatJson (Format / clean button)', () => {
+  it('sanitizes then pretty-prints valid (but dirty) JSON', () => {
+    const dirty = '\uFEFF{"a":1,"b":[2,3]}';
+    const res = formatJson(dirty);
+    expect(res.ok).toBe(true);
+    expect(res.formatted).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
+  });
+
+  it('pretty-prints JSON extracted from a fenced block', () => {
+    const res = formatJson('```json\n{"a":1}\n```');
+    expect(res.ok).toBe(true);
+    expect(res.formatted).toBe('{\n  "a": 1\n}');
+  });
+
+  it('returns actionable errors for truly invalid JSON instead of throwing', () => {
+    const res = formatJson('{ "a": }');
+    expect(res.ok).toBe(false);
+    expect(Array.isArray(res.errors)).toBe(true);
+    expect(res.errors.length).toBeGreaterThan(0);
+  });
+
+  it('returns an error when there is nothing to format', () => {
+    const res = formatJson('just some prose, no json');
+    expect(res.ok).toBe(false);
+    expect(res.errors.join(' ')).toMatch(/nothing to format|paste the json/i);
   });
 });

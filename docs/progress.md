@@ -4,12 +4,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Overall Status** | ✅ COMPLETE — SDET track + Playwright + full Agentic AI track (Phases 9–12) |
+| **Overall Status** | ✅ COMPLETE — SDET + Playwright + Agentic AI (Phases 9–12) · AI tutor, theme toggle, PWA/reminders · Bring Your Own Course |
 | **Live URL** | Netlify (connected to GitHub repo) |
 | **Repo** | git@github.com:iamsubhamsarkar/levelshift.git (private) |
-| **Last Updated** | 2026-08-24 |
-| **Content Totals** | 97 units, 780 cards across 12 phases |
-| **Tests** | 90 passing (6 files) · `npm run build` green |
+| **Last Updated** | 2026-08-25 |
+| **Content Totals** | 97 units, 780 cards across 12 phases (+ user-imported custom courses) |
+| **Tests** | 118 passing (9 files) · `npm run build` green |
+| **Next Up** | Import robustness — clean-on-paste for chat-copied JSON (see Future Work) |
 
 ---
 
@@ -212,6 +213,7 @@ cd app && npm run build
 - [~] Notification reminders — *local/in-app reminder done; true background Push deferred to backend phase*
 - [ ] Analytics (anonymous usage tracking) — *deferred to backend phase*
 - [x] Bring Your Own Course (custom courses) — *done (feature/custom-courses)*
+- [ ] **Import robustness: clean-on-paste for chat-copied JSON** — *planned (next). Direct copy-paste from chat AIs sometimes fails while the same JSON works as a file/after a prettifier — strong sign the paste carries smart quotes / non-breaking / zero-width characters. Plan: an offline sanitize-on-paste (strip BOM/zero-width/nbsp, normalize smart quotes → straight quotes) + a "Format / clean JSON" button that pretty-prints valid JSON. NOT using AI repair (costs quota, can silently alter content). Awaiting confirmation of exact cause before building.*
 - [ ] Community features (if ever multi-user)
 
 ---
@@ -370,3 +372,21 @@ tracked with the same spaced-repetition / decay / skill-radar mechanics as the b
 
 **Needs human (browser) confirmation:** actual YouTube playback + watch-tracking, live code runs in
 the UI, and a real frontier-AI-generated JSON import. See the manual test script.
+
+### Session 7 — 2026-08-25 — Custom-course import fixes + planned paste hardening (branch: `feature/custom-courses` → merged to `main`)
+
+Follow-up after real-world testing of the import flow with actual chat-AI output.
+
+**Bugs found & fixed (both had regression tests added):**
+1. **Useless parse errors.** A malformed paste (e.g. an unterminated `md` string from the AI) produced the raw V8 message "Expected property name…at position 2". Replaced with `describeJsonError()` — reports **line/column**, shows a snippet around the error, and gives the likely cause (real line break inside a string → escape as `\n`; or truncated/cut-off output → regenerate). `parseAndValidate` also gives a truncation hint when no complete `{…}` is found.
+2. **Code fences inside string values broke extraction.** `extractJson` used a `` ```json `` fence regex that got hijacked by markdown ``` fences *inside* the course's own text blocks, so a perfectly valid course (the 5-module, 14-topic Playwright course) was wrongly reported as "truncated." Rewrote `extractJson` to take the **outer brace span** (first `{` → last `}`) first, with the fenced path only as a fallback. The Playwright course now imports with **0 errors / 0 warnings** (14 text, 13 video, 8 practice, 14 quiz blocks).
+
+**Generation prompt hardened** (`courses/prompt.js`): explicitly instructs the AI to output valid JSON only, escape every newline inside strings as `\n`, never leave a raw newline in a string, and not truncate.
+
+**Verification:** 118 tests pass (added: inner-code-fence extraction regression, real-newline error message, truncation hint), build green, dev server serving.
+
+**Planned next — import robustness (clean-on-paste):**
+Observed: copying JSON *directly from a chat bubble* (Gemini/Claude/GPT) into the import box often fails, but the **same JSON works when saved as a `.json` file or run through a prettifier**. Since the file path works, the JSON is valid — the paste is being corrupted by the chat UI (most likely **smart/curly quotes**, **non-breaking spaces**, or **zero-width characters**). Plan (pending confirmation of exact cause):
+- An **offline sanitize-on-paste**: strip BOM / zero-width / non-breaking chars, normalize smart quotes (`" " ' '`) → straight quotes, then run the existing extract → parse → validate.
+- A **"Format / clean JSON"** button that also pretty-prints valid JSON for eyeballing.
+- Deliberately **NOT** using Gemini-assisted JSON repair as the primary fix — it costs the user's quota, adds latency, and an LLM could silently alter course content; a small deterministic sanitizer addresses the real cause.

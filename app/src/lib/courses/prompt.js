@@ -52,3 +52,29 @@ ${JSON.stringify(EXAMPLE_COURSE, null, 2)}
 
 NOW CREATE THE COURSE FOR THIS REQUEST:
 <<< describe your course here — topic, level, language, and any specific YouTube videos or a long video you want included, e.g. "an Agentic AI beginner course in Hindi, include good Hindi YouTube tutorials" >>>`;
+
+/**
+ * The placeholder line in GENERATION_PROMPT where the user's course request
+ * goes. buildFullPrompt swaps this out for what the user typed in-app.
+ */
+const REQUEST_PLACEHOLDER =
+  '<<< describe your course here — topic, level, language, and any specific YouTube videos or a long video you want included, e.g. "an Agentic AI beginner course in Hindi, include good Hindi YouTube tutorials" >>>';
+
+/**
+ * Build ONE ready-to-paste prompt = the full generation prompt (schema + rules
+ * + example) with the user's own course request substituted into the request
+ * slot. This lets the user type WHAT they want inside LevelShift and copy a
+ * single combined prompt, instead of copying the prompt and hand-appending
+ * their request in the AI chat.
+ *
+ * If the request is empty, we fall back to the placeholder so the copied prompt
+ * still makes sense on its own.
+ *
+ * @param {string} userRequest - free-text course request typed by the user
+ * @returns {string}
+ */
+export function buildFullPrompt(userRequest) {
+  const req = String(userRequest || '').trim();
+  if (!req) return GENERATION_PROMPT;
+  return GENERATION_PROMPT.replace(REQUEST_PLACEHOLDER, req);
+}

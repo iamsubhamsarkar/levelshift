@@ -362,10 +362,84 @@ export function describeJsonError(err, src) {
   return errors;
 }
 
+/**
+ * Deterministically clean text pasted from a chat UI before parsing.
+ *
+ * WHY: Copying JSON directly out of a chat bubble (Gemini/Claude/GPT) often
+ * fails to import even though the SAME JSON works when saved as a .json file
+ * or run through a prettifier. That means the JSON is valid — the chat UI is
+ * corrupting the paste with invisible/typographic characters. This strips the
+ * usual culprits so JSON.parse can succeed. No AI, no dependencies — all native
+ * String operations.
+ *
+ * Handled:
+ *  - BOM (U+FEFF) and zero-width chars (U+200B..U+200D, U+2060, U+FEFF)
+ *  - Non-breaking / narrow-no-break spaces (U+00A0, U+202F, U+2007) -> ' '
+ *  - Smart/curly double quotes (U+201C/U+201D, and low/prime variants) -> "
+ *  - Smart/curly single quotes (U+2018/U+2019/U+201B) -> '
+ *  - Unicode NFC normalization
+ *
+ * NOTE: quote replacement is intended for the JSON *structure* the AI emits.
+ * A genuine curly quote inside a text value will also be straightened, which is
+ * a harmless, acceptable trade for making the paste importable. Course content
+ * is markdown/plain text, not typography-sensitive.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function sanitizePastedJson(text) {
+  let s = String(text || '');
+
+  // 1) Strip BOM + zero-width characters entirely.
+  s = s.replace(/[\uFEFF\u200B\u200C\u200D\u2060]/g, '');
+
+  // 2) Normalize exotic spaces to a regular space.
+  s = s.replace(/[\u00A0\u2007\u202F]/g, ' ');
+
+  // 3) Straighten smart double quotes -> "
+  s = s.replace(/[\u201C\u201D\u201E\u201F\u2033\u2036\u00AB\u00BB]/g, '"');
+
+  // 4) Straighten smart single quotes -> '
+  s = s.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+
+  // 5) Unicode NFC normalization (composes accents, etc.).
+  try { s = s.normalize('NFC'); } catch { /* older engines: skip */ }
+
+  return s;
+}
+
+/**
+ * Sanitize + parse + pretty-print JSON found in arbitrary pasted text.
+ * Used by the "Format / clean JSON" button so the user sees clean, valid,
+ * indented JSON (and any remaining REAL error is easy to spot).
+ *
+ * @param {string} text
+ * @returns {{ ok: boolean, formatted?: string, errors?: string[] }}
+ */
+export function formatJson(text) {
+  const extracted = extractJson(text);
+  if (extracted == null) {
+    const hasOpen = String(text || '').includes('{');
+    return {
+      ok: false,
+      errors: hasOpen
+        ? ['Could not find a complete JSON object to format — it looks cut off (no matching closing "}").']
+        : ['Nothing to format — paste the JSON the AI produced (it should start with "{").'],
+    };
+  }
+  try {
+    const obj = JSON.parse(extracted);
+    return { ok: true, formatted: JSON.stringify(obj, null, 2) };
+  } catch (e) {
+    return { ok: false, errors: describeJsonError(e, extracted) };
+  }
+}
+
 /** Pull the JSON object out of arbitrary text. Robust against ```json fences
- *  AND against markdown code fences that appear INSIDE string values. */
+ *  AND against markdown code fences that appear INSIDE string values.
+ *  Sanitizes chat-UI paste corruption (smart quotes / NBSP / zero-width) first. */
 export function extractJson(text) {
-  const s = String(text || '');
+  const s = sanitizePastedJson(text);
 
   // Strategy: find the outer-most {...} by brace span in the raw text first.
   // This is correct even when the JSON contains ``` fences inside its strings.

@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  import { parseAndValidate } from '../courses/validate.js';
-  import { GENERATION_PROMPT } from '../courses/prompt.js';
+  import { parseAndValidate, formatJson } from '../courses/validate.js';
+  import { buildFullPrompt } from '../courses/prompt.js';
   import { addCourse, setActiveCourse, countTopics } from '../stores/courses.js';
 
   const dispatch = createEventDispatcher();
@@ -10,10 +10,15 @@
   let pasted = '';
   let result = null;          // validation result
   let copied = false;
+  let userRequest = '';       // what course the user wants (point 2)
+  let formatMsg = '';         // feedback for the Format/clean button (point 1)
+
+  // Combined, ready-to-paste prompt = generation prompt + the user's request.
+  $: fullPrompt = buildFullPrompt(userRequest);
 
   async function copyPrompt() {
     try {
-      await navigator.clipboard.writeText(GENERATION_PROMPT);
+      await navigator.clipboard.writeText(fullPrompt);
       copied = true;
       setTimeout(() => (copied = false), 2000);
     } catch {
@@ -24,6 +29,20 @@
   function validate() {
     result = parseAndValidate(pasted);
     if (result.ok) step = 3;
+  }
+
+  // Deterministic clean + pretty-print (no AI). Fixes chat-paste corruption
+  // (smart quotes / non-breaking / zero-width chars) and indents valid JSON.
+  function cleanJson() {
+    const res = formatJson(pasted);
+    if (res.ok) {
+      pasted = res.formatted;
+      formatMsg = '✓ Cleaned & formatted';
+      setTimeout(() => (formatMsg = ''), 2500);
+    } else {
+      result = { ok: false, errors: res.errors, warnings: [] };
+      formatMsg = '';
+    }
   }
 
   function importFile(e) {
@@ -68,18 +87,35 @@
         LevelShift builds courses using any powerful AI you already have. Here's how:
       </p>
       <ol class="text-sm text-text-secondary space-y-1.5 list-decimal list-inside">
-        <li>Copy the prompt below.</li>
-        <li>Open a capable AI with web search (ChatGPT, Claude, Gemini, etc.).</li>
-        <li>Paste the prompt, then describe the course you want at the bottom — topic, level, language, and any YouTube videos to include (e.g. <span class="text-text-primary">"Agentic AI course in Hindi, include good Hindi tutorials"</span>).</li>
+        <li>Describe the course you want below.</li>
+        <li>Copy the combined prompt (your request is baked in).</li>
+        <li>Open a capable AI with web search (ChatGPT, Claude, Gemini, etc.) and paste it.</li>
         <li>The AI returns a big JSON. Copy all of it.</li>
         <li>Come back and paste it in the next step.</li>
       </ol>
+
+      <label class="block text-sm text-text-primary font-medium" for="course-request">
+        What course do you want?
+      </label>
+      <textarea
+        id="course-request"
+        bind:value={userRequest}
+        rows="3"
+        placeholder={'e.g. "an Agentic AI beginner course in Hindi, include good Hindi YouTube tutorials"'}
+        class="w-full bg-surface-0 border border-surface-3 rounded-lg p-3 text-sm
+               text-text-primary resize-y focus:outline-none focus:border-accent-blue"
+      ></textarea>
+
       <button class="btn-primary text-sm" on:click={copyPrompt}>
-        {copied ? '✓ Copied!' : '📋 Copy the generation prompt'}
+        {copied ? '✓ Copied!' : (userRequest.trim() ? '📋 Copy prompt + my request' : '📋 Copy the generation prompt')}
       </button>
+      {#if !userRequest.trim()}
+        <p class="text-xs text-text-muted">Tip: type your request above and it'll be combined into the copied prompt — no need to add it in the AI chat yourself.</p>
+      {/if}
+
       <details class="text-xs text-text-muted">
-        <summary class="cursor-pointer">Preview the prompt</summary>
-        <pre class="code-block whitespace-pre-wrap mt-2 max-h-60 overflow-y-auto">{GENERATION_PROMPT}</pre>
+        <summary class="cursor-pointer">Preview the full prompt</summary>
+        <pre class="code-block whitespace-pre-wrap mt-2 max-h-60 overflow-y-auto">{fullPrompt}</pre>
       </details>
       <button class="btn-secondary text-sm w-full" on:click={() => step = 2}>I have my JSON → Next</button>
     </div>
@@ -93,14 +129,19 @@
         class="w-full bg-surface-0 border border-surface-3 rounded-lg p-3 font-mono text-xs
                text-text-primary resize-y focus:outline-none focus:border-accent-blue"
       ></textarea>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center flex-wrap gap-2">
         <button class="btn-primary text-sm" on:click={validate} disabled={!pasted.trim()}>Validate</button>
+        <button class="btn-secondary text-sm" on:click={cleanJson} disabled={!pasted.trim()}>🧹 Format / clean JSON</button>
         <label class="btn-secondary text-sm cursor-pointer">
           📤 Import .json file
           <input type="file" accept=".json,application/json" class="hidden" on:change={importFile} />
         </label>
         <button class="btn-secondary text-sm" on:click={() => step = 1}>← Back</button>
       </div>
+      {#if formatMsg}
+        <p class="text-xs text-accent-green">{formatMsg}</p>
+      {/if}
+      <p class="text-xs text-text-muted">Pasting straight from a chat and it won't import? Hit <span class="text-text-secondary">Format / clean JSON</span> — it strips hidden characters (smart quotes, non-breaking spaces) that chat apps add.</p>
       {#if result && !result.ok}
         <div class="text-xs text-accent-red bg-accent-red/10 border border-accent-red/30 rounded-lg p-3 space-y-1">
           <p class="font-semibold">Couldn't import:</p>
