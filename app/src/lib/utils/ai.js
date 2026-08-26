@@ -72,6 +72,8 @@ export function hasApiKey() {
  * @param {string} userPrompt
  * @param {object} [opts]
  * @param {string} [opts.model]
+ * @param {number} [opts.maxOutputTokens]
+ * @param {number} [opts.temperature]
  * @returns {Promise<{ok: boolean, text: string, error?: string}>}
  */
 export async function callGemini(systemInstruction, userPrompt, opts = {}) {
@@ -82,8 +84,8 @@ export async function callGemini(systemInstruction, userPrompt, opts = {}) {
     systemInstruction: { parts: [{ text: systemInstruction }] },
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     generationConfig: {
-      temperature: 0.4,
-      maxOutputTokens: 1024
+      temperature: opts.temperature ?? 0.4,
+      maxOutputTokens: opts.maxOutputTokens ?? 1024
     }
   };
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateCourse, parseAndValidate, extractJson, sanitizeText, sanitizePastedJson, formatJson } from '../validate.js';
+import { validateCourse, parseAndValidate, extractJson, sanitizeText, sanitizePastedJson, formatJson, repairStructure } from '../validate.js';
 import { EXAMPLE_COURSE } from '../schema.js';
 
 describe('validateCourse', () => {
@@ -131,14 +131,12 @@ describe('extractJson / parseAndValidate', () => {
     expect(r.ok).toBe(false);
   });
 
-  it('gives a helpful message + line for a real newline inside a string', () => {
-    // Unescaped newline in a string value (the classic AI mistake).
+  it('auto-recovers from a real newline inside a string (was the classic error)', () => {
+    // A raw newline inside a string value used to fail with "Bad control
+    // character". We now escape it deterministically, so parsing succeeds.
     const bad = '{ "title": "Hi", "md": "line one\nline two" }';
-    const r = parseAndValidate(bad);
-    expect(r.ok).toBe(false);
-    const joined = r.errors.join(' ');
-    expect(joined).toMatch(/line \d+/i);
-    expect(joined).toMatch(/line break|control/i);
+    const cleaned = sanitizePastedJson(bad);
+    expect(JSON.parse(cleaned)).toEqual({ title: 'Hi', md: 'line one\nline two' });
   });
 
   it('hints at truncation for an unterminated object', () => {
@@ -180,6 +178,111 @@ describe('sanitizePastedJson (chat-paste corruption)', () => {
     const r = parseAndValidate(dirty);
     expect(r.ok).toBe(true);
     expect(r.course.title).toBe('Example: Intro to X');
+  });
+
+  it('escapes RAW newlines that sit inside string values (the chat-wrap bug)', () => {
+    // A literal newline inside a string value is invalid JSON ("Bad control
+    // character"). Chat UIs inject these when long strings wrap on copy.
+    const dirty = '{"title":"Pattern-Based DSA for MAANG\n Interviews"}';
+    const cleaned = sanitizePastedJson(dirty);
+    expect(() => JSON.parse(dirty)).toThrow();          // baseline: raw is invalid
+    expect(JSON.parse(cleaned)).toEqual({ title: 'Pattern-Based DSA for MAANG\n Interviews' });
+  });
+
+  it('escapes raw tabs/CR inside strings but leaves structural whitespace alone', () => {
+    const dirty = '{\n  "a": "x\ty",\r\n  "b": 1\n}';
+    const cleaned = sanitizePastedJson(dirty);
+    const obj = JSON.parse(cleaned);
+    expect(obj).toEqual({ a: 'x\ty', b: 1 });
+  });
+
+  it('does NOT corrupt already-escaped sequences inside strings', () => {
+    // Already-valid \n must survive as a single newline, and \" must not end
+    // the string early.
+    const good = '{"md":"line1\\nline2 with a \\" quote"}';
+    const cleaned = sanitizePastedJson(good);
+    expect(JSON.parse(cleaned)).toEqual({ md: 'line1\nline2 with a " quote' });
+  });
+
+  it('parseAndValidate imports a course whose text blocks have raw newlines', () => {
+    const clean = JSON.stringify(EXAMPLE_COURSE);
+    // Inject raw newlines inside every string value (simulate chat wrapping).
+    const dirty = clean.replace(/"([^"]{10,})"/g, (_m, inner) => '"' + inner.replace(/ /g, '\n') + '"');
+    const r = parseAndValidate(dirty);
+    expect(r.ok).toBe(true);
+  });
+
+  it('escapes UNESCAPED double quotes inside a string value (the AI-quote bug)', () => {
+    // The AI wrote inner quotes without escaping them; the raw string ends the
+    // value early at the first inner quote. We repair it to \".
+    const bad = '{"md":"ask: "What\'s this?" now"}';
+    expect(() => JSON.parse(bad)).toThrow();
+    const cleaned = sanitizePastedJson(bad);
+    expect(JSON.parse(cleaned)).toEqual({ md: 'ask: "What\'s this?" now' });
+  });
+
+  it('repairs multiple unescaped quotes across several values', () => {
+    const bad = '{"a":"say "hi" ok","b":"and "bye" too"}';
+    const cleaned = sanitizePastedJson(bad);
+    expect(JSON.parse(cleaned)).toEqual({ a: 'say "hi" ok', b: 'and "bye" too' });
+  });
+
+  it('does NOT corrupt valid JSON when repairing quotes (structural quotes preserved)', () => {
+    // Values that legitimately contain delimiters or a colon must survive.
+    const cases = [
+      { a: '', b: [1, 2] },
+      { a: 'hello, world}', b: [1, 2] },
+      { x: { y: [{ z: 'v' }] }, s: 'end' },
+      { md: 'He said \"hi\" to me.' },        // already escaped
+      { a: 'done.', b: 'next' },
+      { url: 'http://x.com', note: 'a:b' },
+    ];
+    for (const obj of cases) {
+      const json = JSON.stringify(obj);
+      const cleaned = sanitizePastedJson(json);
+      expect(JSON.parse(cleaned)).toEqual(obj);
+    }
+  });
+
+  it('parseAndValidate imports the real-world DSA-style course with unescaped quotes', () => {
+    const bad = JSON.stringify({
+      schemaVersion: 1, title: 'T', radarAxes: ['A'],
+      concepts: { 'c1': { prereqs: [], axis: 'A' } },
+      modules: [{ id: 'm1', title: 'M', topics: [{ id: 'm1t1', title: 'T1', teaches: ['c1'], axis: 'A', blocks: [
+        { type: 'text', md: 'PLACEHOLDER' }
+      ] }] }]
+    // Now break it the way the AI did: unescaped inner quotes in the md value.
+    }).replace('"PLACEHOLDER"', '"Interviewers ask: "What is the time complexity?" You must answer."');
+    expect(() => JSON.parse(bad)).toThrow();
+    const r = parseAndValidate(bad);
+    expect(r.ok).toBe(true);
+    expect(r.course.modules[0].topics[0].blocks[0].md).toBe('Interviewers ask: "What is the time complexity?" You must answer.');
+  });
+
+  it('deterministically repairs missing closing brackets (truncation)', () => {
+    const full = JSON.stringify({
+      schemaVersion: 1, title: 'T', radarAxes: ['A'],
+      concepts: { c1: { prereqs: [], axis: 'A' } },
+      modules: [{ id: 'm1', title: 'M', topics: [{ id: 'm1t1', title: 'T1', teaches: ['c1'], axis: 'A', blocks: [{ type: 'text', md: 'hello world content' }] }] }]
+    });
+    // Drop the trailing closers (simulate a truncated / one-bracket-off paste).
+    const truncated = full.replace(/\}+$/, '');
+    expect(() => JSON.parse(truncated)).toThrow();
+    const r = parseAndValidate(truncated);
+    expect(r.ok).toBe(true);
+    expect(r.course.modules[0].topics[0].blocks[0].md).toBe('hello world content');
+  });
+
+  it('repairStructure does not touch braces inside string values', () => {
+    // A value containing } must not confuse the balancer.
+    const s = '{"a":"text with } brace","b":[1,2';  // missing ] and }
+    const fixed = repairStructure(s);
+    expect(fixed).not.toBeNull();
+    expect(JSON.parse(fixed)).toEqual({ a: 'text with } brace', b: [1, 2] });
+  });
+
+  it('repairStructure refuses an unterminated string (unsafe to guess)', () => {
+    expect(repairStructure('{"a":"unterminated')).toBeNull();
   });
 });
 

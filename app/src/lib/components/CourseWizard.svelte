@@ -2,6 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { parseAndValidate, formatJson } from '../courses/validate.js';
   import { buildFullPrompt } from '../courses/prompt.js';
+  import { generateCourse, GENERATION_MODELS, DEFAULT_GENERATION_MODEL } from '../courses/generate.js';
+  import { hasApiKey } from '../utils/ai.js';
   import { addCourse, setActiveCourse, countTopics } from '../stores/courses.js';
 
   const dispatch = createEventDispatcher();
@@ -13,6 +15,12 @@
   let userRequest = '';       // what course the user wants (point 2)
   let formatMsg = '';         // feedback for the Format/clean button (point 1)
 
+  // In-app generation (seamless path — BYOK Gemini)
+  const aiAvailable = hasApiKey();
+  let genModel = DEFAULT_GENERATION_MODEL;
+  let generating = false;
+  let genStatus = '';         // progress/status text during generation
+
   // Combined, ready-to-paste prompt = generation prompt + the user's request.
   $: fullPrompt = buildFullPrompt(userRequest);
 
@@ -23,6 +31,34 @@
       setTimeout(() => (copied = false), 2000);
     } catch {
       copied = false;
+    }
+  }
+
+  // Seamless: generate the course in-app via the user's chosen model, with the
+  // deterministic + guardrailed-repair recovery chain built in.
+  async function generate() {
+    if (!userRequest.trim() || generating) return;
+    generating = true;
+    result = null;
+    genStatus = 'Asking the model to author your course…';
+    try {
+      const res = await generateCourse(userRequest, { model: genModel });
+      if (res.ok) {
+        result = res;
+        if (res.repaired) genStatus = 'Generated (auto-fixed formatting).';
+        step = 3;
+      } else {
+        result = { ok: false, errors: res.errors, warnings: [] };
+        // If we got raw text back, drop it into the paste box so the user can
+        // inspect / hand-fix / retry the deterministic tools on it.
+        if (res.raw) { pasted = res.raw; }
+        genStatus = '';
+      }
+    } catch (e) {
+      result = { ok: false, errors: [`Generation error: ${e?.message || e}`], warnings: [] };
+      genStatus = '';
+    } finally {
+      generating = false;
     }
   }
 
@@ -106,7 +142,37 @@
                text-text-primary resize-y focus:outline-none focus:border-accent-blue"
       ></textarea>
 
-      <button class="btn-primary text-sm" on:click={copyPrompt}>
+      {#if aiAvailable}
+        <!-- Seamless in-app generation via the user's BYOK key -->
+        <div class="rounded-lg border border-accent-blue/30 bg-accent-blue/5 p-3 space-y-2">
+          <p class="text-sm text-text-primary font-medium">✨ Generate it for me</p>
+          <p class="text-xs text-text-muted">Uses your own Gemini key. Pick a model — better models cost more of your free quota.</p>
+          <select
+            bind:value={genModel}
+            class="w-full bg-surface-0 border border-surface-3 rounded-lg p-2 text-xs text-text-primary focus:outline-none focus:border-accent-blue"
+          >
+            {#each GENERATION_MODELS as m}
+              <option value={m.id}>{m.label}</option>
+            {/each}
+          </select>
+          <button class="btn-primary text-sm w-full" on:click={generate} disabled={!userRequest.trim() || generating}>
+            {generating ? '⏳ Generating…' : '✨ Generate course'}
+          </button>
+          {#if genStatus}<p class="text-xs text-accent-blue">{genStatus}</p>{/if}
+          {#if result && !result.ok}
+            <div class="text-xs text-accent-red bg-accent-red/10 border border-accent-red/30 rounded-lg p-3 space-y-1">
+              <p class="font-semibold">Generation failed:</p>
+              {#each result.errors as err}<p>• {err}</p>{/each}
+              <p class="text-text-muted">The model's raw output (if any) was placed in the manual paste box (next step) so you can inspect or fix it.</p>
+            </div>
+          {/if}
+        </div>
+        <p class="text-xs text-text-muted text-center">— or do it manually —</p>
+      {:else}
+        <p class="text-xs text-text-muted">Tip: enable AI in Settings to generate courses in-app automatically (no copy-paste).</p>
+      {/if}
+
+      <button class="btn-secondary text-sm" on:click={copyPrompt}>
         {copied ? '✓ Copied!' : (userRequest.trim() ? '📋 Copy prompt + my request' : '📋 Copy the generation prompt')}
       </button>
       {#if !userRequest.trim()}
@@ -141,7 +207,10 @@
       {#if formatMsg}
         <p class="text-xs text-accent-green">{formatMsg}</p>
       {/if}
-      <p class="text-xs text-text-muted">Pasting straight from a chat and it won't import? Hit <span class="text-text-secondary">Format / clean JSON</span> — it strips hidden characters (smart quotes, non-breaking spaces) that chat apps add.</p>
+      {#if genStatus}
+        <p class="text-xs text-accent-blue">{genStatus}</p>
+      {/if}
+      <p class="text-xs text-text-muted">Pasting straight from a chat and it won't import? Hit <span class="text-text-secondary">Format / clean JSON</span> — it strips hidden characters (smart quotes, non-breaking spaces) that chat apps add and fixes common formatting issues.</p>
       {#if result && !result.ok}
         <div class="text-xs text-accent-red bg-accent-red/10 border border-accent-red/30 rounded-lg p-3 space-y-1">
           <p class="font-semibold">Couldn't import:</p>

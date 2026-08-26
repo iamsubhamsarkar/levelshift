@@ -321,9 +321,69 @@ export function parseAndValidate(text) {
   try {
     parsed = JSON.parse(extracted);
   } catch (e) {
+    // Deterministic structural repair (no AI): try to balance unclosed
+    // brackets/braces. This safely fixes the common "truncated"/"one bracket
+    // off" case without touching any content.
+    const repaired = repairStructure(extracted);
+    if (repaired != null) {
+      try {
+        parsed = JSON.parse(repaired);
+        return { ...validateCourse(parsed), structurallyRepaired: true };
+      } catch { /* fall through to error */ }
+    }
     return { ok: false, errors: describeJsonError(e, extracted), warnings: [] };
   }
   return validateCourse(parsed);
+}
+
+/**
+ * Deterministic, content-preserving structural repair. Scans the (already
+ * sanitized) text tracking string state, and:
+ *  - appends missing closing brackets/braces in the correct order, and/or
+ *  - trims a small number of excess trailing closers,
+ * then returns the candidate. Returns null if it can't produce something that
+ * even plausibly balances. Never edits characters inside string values, so it
+ * cannot change course content.
+ *
+ * @param {string} text - a brace-spanned JSON candidate
+ * @returns {string|null}
+ */
+export function repairStructure(text) {
+  const s = String(text || '');
+  const stack = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inString) {
+      if (escaped) { escaped = false; continue; }
+      if (ch === '\\') { escaped = true; continue; }
+      if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') { inString = true; continue; }
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') {
+      // Pop matching opener; a mismatch means we can't safely repair.
+      if (stack.length === 0) return null;
+      stack.pop();
+    }
+  }
+
+  if (inString) return null;      // unterminated string — can't safely fix
+  if (stack.length === 0) return null; // already balanced (parse failed for another reason)
+
+  // Append the missing closers in reverse (LIFO) order.
+  let closers = '';
+  for (let i = stack.length - 1; i >= 0; i--) closers += stack[i];
+
+  // Guard against absurd repairs (dozens of missing brackets suggests deeper
+  // corruption we shouldn't paper over).
+  if (stack.length > 40) return null;
+
+  return s + closers;
 }
 
 /**
@@ -405,7 +465,106 @@ export function sanitizePastedJson(text) {
   // 5) Unicode NFC normalization (composes accents, etc.).
   try { s = s.normalize('NFC'); } catch { /* older engines: skip */ }
 
+  // 6) Escape RAW line breaks / tabs that sit INSIDE string values. Chat UIs
+  //    (and word-wrap on copy) frequently inject literal newlines inside long
+  //    string values, which is invalid JSON (JSON strings may not contain
+  //    unescaped control characters). We convert only the ones inside strings;
+  //    structural whitespace between tokens is left untouched.
+  s = repairJsonStrings(s);
+
   return s;
+}
+
+/**
+ * Single-pass scanner that repairs the two most common ways AI-generated JSON
+ * strings are malformed, WITHOUT touching valid structure:
+ *
+ *  1. Raw control characters (newline/CR/tab) inside a string -> \n \r \t.
+ *  2. Unescaped double quotes inside a string value -> \".
+ *
+ * Deterministic, no AI. Respects backslash escaping so an already-escaped \"
+ * doesn't end a string early and \\ isn't miscounted.
+ *
+ * DISAMBIGUATION (the hard part): when we're inside a string and hit a `"`,
+ * we must decide if it CLOSES the string (structural) or is CONTENT the AI
+ * forgot to escape. Heuristic: a structural closing quote is followed — after
+ * optional whitespace — by one of  ,  }  ]  :  or end-of-input. If instead the
+ * next non-space char is anything else (a letter, etc.), the quote is almost
+ * certainly content, so we escape it and stay inside the string.
+ *
+ * This resolves the common case (e.g.  ask: "What's this?" You need…) while
+ * leaving normal  "key": "value"  structures untouched. It's best-effort: truly
+ * pathological content could still fool it, in which case parsing fails and the
+ * user gets the actionable error message.
+ *
+ * @param {string} s
+ * @returns {string}
+ */
+function repairJsonStrings(s) {
+  let out = '';
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+
+    if (inString) {
+      if (escaped) {
+        out += ch;
+        escaped = false;
+        continue;
+      }
+      if (ch === '\\') {
+        out += ch;
+        escaped = true;
+        continue;
+      }
+      if (ch === '"') {
+        if (isStructuralClosingQuote(s, i)) {
+          out += ch;
+          inString = false;
+        } else {
+          // Unescaped content quote the AI forgot to escape.
+          out += '\\"';
+        }
+        continue;
+      }
+      // Raw control characters inside a string -> escape them.
+      if (ch === '\n') { out += '\\n'; continue; }
+      if (ch === '\r') { out += '\\r'; continue; }
+      if (ch === '\t') { out += '\\t'; continue; }
+      out += ch;
+    } else {
+      if (ch === '"') { inString = true; }
+      out += ch;
+    }
+  }
+
+  return out;
+}
+
+/**
+ * Decide whether the `"` at index `i` (while inside a string) is a STRUCTURAL
+ * closing quote. It is structural if the next non-whitespace character is a
+ * JSON delimiter that legitimately follows a string value/key:
+ *   ,  (next array element / object member)
+ *   }  (end of object)
+ *   ]  (end of array)
+ *   :  (this string was an object KEY)
+ * or the end of input. Otherwise the quote is treated as content.
+ *
+ * @param {string} s
+ * @param {number} i - index of the `"` in s
+ * @returns {boolean}
+ */
+function isStructuralClosingQuote(s, i) {
+  let j = i + 1;
+  while (j < s.length && (s[j] === ' ' || s[j] === '\t' || s[j] === '\n' || s[j] === '\r')) {
+    j++;
+  }
+  if (j >= s.length) return true; // trailing quote at EOF -> treat as closing
+  const next = s[j];
+  return next === ',' || next === '}' || next === ']' || next === ':';
 }
 
 /**

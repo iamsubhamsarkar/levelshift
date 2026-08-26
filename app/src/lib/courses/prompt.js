@@ -10,7 +10,7 @@
 
 import { EXAMPLE_COURSE, PRACTICE_LANGUAGES } from './schema.js';
 
-export const GENERATION_PROMPT = `You are creating a course for "LevelShift", a self-study app. Output ONLY a single valid JSON object (no prose, no markdown fences) that EXACTLY matches this schema.
+export const GENERATION_PROMPT = `You are creating a course for "LevelShift", a self-study app. Produce ONE JSON object that EXACTLY matches the schema below, and output it inside a single \`\`\`json code block so it is easy to copy. Put NOTHING before or after the code block.
 
 TOP LEVEL:
 {
@@ -38,14 +38,33 @@ BLOCK TYPES (use a rich mix):
 - { "type": "practice", "language": "<one of: ${PRACTICE_LANGUAGES.join(', ')}>", "prompt": "<task>", "starter": "<starter code>", "expectedOutput": "<exact stdout to match, optional>", "solution": "<full solution, optional>" }
 - { "type": "quiz", "question": "<q>", "options": ["a","b","c"], "correct": <0-based index>, "explanation": "<why>" }
 
-RULES:
-1. Output MUST be valid JSON and nothing else. Do NOT wrap it in markdown, and do NOT add commentary before or after.
-2. CRITICAL: inside any string value, escape every line break as \\n. Never put a raw/literal newline inside a JSON string. Prefer compact JSON. Make sure every string and bracket is closed — do not truncate.
-3. For every "video" block, find a REAL, currently-watchable YouTube video and use its true 11-character id (the part after v= or youtu.be/). Do NOT invent ids. If you cannot verify a video, omit the video block.
-4. Every conceptId in a topic's "teaches" must exist in top-level "concepts".
-5. Keep it focused: 2-5 modules, 3-8 topics each, 3-8 blocks per topic.
-6. Use the requested language for any video/text if the user asked (e.g. "in Hindi").
-7. Prefer a HOOK → EXPLAIN → WATCH → PRACTICE → QUIZ flow within a topic.
+OUTPUT FORMAT (follow exactly):
+- Output the WHOLE course as ONE JSON object inside a single \`\`\`json ... \`\`\` fenced code block.
+- The JSON must be strictly valid — it must parse with JSON.parse on the first try.
+- Do NOT change, invent, or omit any schema key names. Use ONLY the keys shown above.
+
+JSON VALIDITY RULES (these are the ones that usually break — follow them precisely):
+1. Escape EVERY double quote inside a string value as \\". A raw " inside a value ends the string early and breaks the whole file. Prefer single quotes ' when quoting words inside prose. Example — WRONG: "md": "ask: "what?" now"   RIGHT: "md": "ask: \\"what?\\" now"   (or)   "md": "ask: 'what?' now".
+2. Escape EVERY line break inside a string value as \\n. Never put a raw/literal newline inside a JSON string.
+3. Balance ALL brackets and braces. Every { has a matching }, every [ a matching ]. Do not truncate. Nothing may follow the final closing brace.
+4. No trailing commas. No comments in the actual output (the // notes above are just documentation).
+
+STRUCTURE RULES:
+5. Every "topic" object MUST live inside its module's "topics" array. NEVER place a topic at the "modules" level. Modules contain topics; topics contain blocks.
+6. Every conceptId in a topic's "teaches" MUST also appear as a key in top-level "concepts".
+7. Every "axis" value (on topics) and every concept "axis" MUST be one of the strings in "radarAxes".
+
+CONTENT RULES:
+8. For every "video" block, use a REAL, currently-watchable YouTube video's true 11-character id (the part after v= or youtu.be/). Do NOT invent ids. If you cannot verify a video, omit the video block.
+9. Keep it focused: 2-5 modules, 3-8 topics each, 3-8 blocks per topic.
+10. Use the requested language for any video/text if the user asked (e.g. "in Hindi").
+11. Prefer a HOOK → EXPLAIN → WATCH → PRACTICE → QUIZ flow within a topic.
+
+BEFORE YOU RESPOND — self-check (do this silently, then output only the code block):
+- Re-read your JSON and confirm it parses. Every inner " is \\", every newline is \\n.
+- Confirm brackets are balanced and nothing follows the last }.
+- Confirm every topic is inside a module's "topics" array, and every teaches/axis reference resolves.
+If anything fails, fix it, then output the final corrected JSON in the code block.
 
 Here is a tiny EXAMPLE of the exact shape (imitate the structure, not the content):
 ${JSON.stringify(EXAMPLE_COURSE, null, 2)}
